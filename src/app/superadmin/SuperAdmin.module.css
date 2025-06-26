@@ -1,0 +1,289 @@
+/* Header */
+.header {
+  background: #fff;
+  min-height: 66px;
+  box-shadow: none;
+  border-bottom: none;
+  z-index: 10;
+}
+.headerContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 66px;
+}
+.logo {
+  width: 160px;
+  height: 48px;
+}
+.adminInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.adminAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+.adminName {
+  font-weight: 500;
+  font-size: 16px;
+  color: #222;
+}
+
+/* Sidebar */
+.sidebar {
+  background: #fff;
+  border-radius: 20px;
+  padding: 24px 16px;
+  min-width: 180px;
+  margin-bottom: 24px;
+}
+.navLink {
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  color: #222;
+  font-weight: 600;
+  font-size: 16px;
+  border-radius: 12px;
+  padding: 10px 12px;
+  transition: background 0.2s, color 0.2s;
+}
+.navLink:hover {
+  background: #e0e2e0;
+  color: #03110a;
+}
+.activeTab {
+  background: #f1f4f1 !important;
+  color: #1b4d1a !important;
+}
+
+/* Dashboard & Tenants Cards */
+.statsRow {
+  display: flex;
+  gap: 32px;
+  margin-bottom: 32px;
+}
+.statsCard {
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid #e6e6e6;
+  padding: 32px 0 24px 0;
+  text-align: center;
+  flex: 1;
+  min-width: 220px;
+  box-shadow: none;
+}
+.statsLabel {
+  color: #6b6b6b;
+  font-size: 20px;
+  font-weight: 400;
+  margin-bottom: 8px;
+}
+.statsValueActive {
+  color: #4caf50;
+  font-size: 48px;
+  font-weight: 500;
+}
+.statsValue {
+  color: #222;
+  font-size: 48px;
+  font-weight: 500;
+}
+
+/* Tenants Table Card */
+.tenantsCard {
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid #e6e6e6;
+  padding: 32px 32px 16px 32px;
+  margin-bottom: 24px;
+}
+.tenantsHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 32px;
+  gap: 16px;
+}
+.addTenantBtn {
+  background: #4caf50;
+  color: #fff;
+  border-radius: 20px;
+  font-weight: 500;
+  font-size: 18px;
+  padding: 8px 28px;
+  border: none;
+  transition: background 0.2s;
+}
+.addTenantBtn:hover {
+  background: #388e3c;
+}
+.exportBtn {
+  background: #4caf50;
+  color: #fff;
+  border-radius: 20px;
+  font-weight: 500;
+  font-size: 16px;
+  padding: 8px 28px;
+  border: none;
+  transition: background 0.2s;
+}
+.exportBtn:hover {
+  background: #388e3c;
+}
+
+/* Search Input */
+.searchGroup {
+  display: flex;
+  align-items: center;
+  background: #f7f7f7;
+  border-radius: 24px;
+  padding: 0 12px;
+  height: 48px;
+  max-width: 320px;
+  flex: 1;
+}
+.searchInput {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 16px;
+  flex: 1;
+  padding: 0 8px;
+}
+.searchIcon, .filterIcon {
+  color: #bdbdbd;
+  font-size: 20px;
+}
+.filterBtn {
+  background: #f7f7f7;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+}
+
+/* Table */
+.tenantsTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 12px;
+  background: transparent;
+}
+.tenantsTable th {
+  color: #6b6b6b;
+  font-size: 16px;
+  font-weight: 400;
+  background: transparent;
+  border: none;
+  padding-bottom: 8px;
+}
+.tenantsTable td {
+  background: #f7f7f7;
+  border-radius: 20px;
+  border: none;
+  padding: 18px 16px;
+  vertical-align: middle;
+  font-size: 16px;
+  color: #222;
+}
+.tenantAvatar {
+  background: #f3f3f3;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #4caf50;
+}
+.tenantName {
+  font-weight: 600;
+  font-size: 16px;
+  color: #222;
+}
+.tenantEmail {
+  color: #bdbdbd;
+  font-size: 14px;
+}
+.statusBadge {
+  background: #eaffea;
+  color: #4caf50;
+  border-radius: 20px;
+  padding: 6px 18px;
+  font-size: 16px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Table Actions */
+.actionBtn {
+  background: #f7f7f7;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+  font-size: 20px;
+  color: #bdbdbd;
+  transition: background 0.2s, color 0.2s;
+}
+.actionBtn:last-child {
+  margin-right: 0;
+}
+.actionBtn:hover {
+  background: #ffeaea;
+  color: #f44336;
+}
+.deleteBtn {
+  color: #f44336;
+}
+
+/* Pagination */
+.paginationWrap {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 16px;
+  gap: 16px;
+}
+.pagination {
+  display: flex;
+  align-items: center;
+  background: #f7f7f7;
+  border-radius: 12px;
+  padding: 0 12px;
+  height: 40px;
+  gap: 4px;
+}
+.pageItem {
+  color: #bdbdbd;
+  font-size: 20px;
+  padding: 0 8px;
+  user-select: none;
+}
+.pageItem.active {
+  color: #222;
+  font-weight: 600;
+}
+.pageItem.disabled {
+  color: #e0e0e0;
+}
+.paginationInfo {
+  color: #bdbdbd;
+  font-size: 16px;
+  margin-left: 16px;
+} 

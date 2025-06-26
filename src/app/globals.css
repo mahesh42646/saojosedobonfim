@@ -1,0 +1,242 @@
+/* Import Poppins font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* Apply Poppins font to all relevant elements */
+body, p, span, h1, h2, h3, h4, h5, h6, div, nav, strong, button, a, input, textarea, select, label, li {
+  font-family: 'Inter', sans-serif !important;
+}
+
+
+.bg-lite-green {
+  background-color: #ddf8ef;
+}
+.primary-btn{
+  background: var(--primary-main, rgba(0, 167, 111, 1));
+
+}
+
+.form-control::placeholder {
+  color: #adb5bd !important;
+}
+
+.border-dark-gray {
+  border: 1px solid #c8c8c8 !important;
+}
+
+/* Lexical Editor Styles */
+.editor-container {
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.editor-inner {
+  position: relative;
+}
+
+.editor-input {
+  min-height: 150px;
+  resize: none;
+  font-size: 15px;
+  position: relative;
+  tab-size: 1;
+  outline: 0;
+  padding: 15px 10px;
+  caret-color: #444;
+}
+
+.editor-placeholder {
+  color: #999;
+  overflow: hidden;
+  position: absolute;
+  text-overflow: ellipsis;
+  top: 15px;
+  left: 10px;
+  font-size: 15px;
+  user-select: none;
+  display: inline-block;
+  pointer-events: none;
+}
+
+.editor-text-bold {
+  font-weight: bold;
+}
+
+.editor-text-italic {
+  font-style: italic;
+}
+
+.editor-text-underline {
+  text-decoration: underline;
+}
+
+.editor-text-strikethrough {
+  text-decoration: line-through;
+}
+
+.editor-text-underline-strikethrough {
+  text-decoration: underline line-through;
+}
+
+.editor-text-code {
+  background-color: rgb(240, 242, 245);
+  padding: 1px 0.25rem;
+  /* font-family: Menlo, Consolas, Monaco, monospace; */
+  font-size: 94%;
+}
+
+.editor-heading-h1 {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.editor-heading-h2 {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.editor-heading-h3 {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.editor-heading-h4 {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.editor-heading-h5 {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.editor-heading-h6 {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.editor-list-ul {
+  list-style-type: disc;
+  padding-left: 20px;
+}
+
+.editor-list-ol {
+  list-style-type: decimal;
+  padding-left: 20px;
+}
+
+.editor-listitem {
+  margin: 8px 32px;
+}
+
+.editor-paragraph {
+  margin: 0;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.editor-quote {
+  margin: 0;
+  margin-left: 20px;
+  margin-bottom: 10px;
+  font-size: 15px;
+  color: rgb(101, 103, 107);
+  border-left-color: rgb(206, 208, 212);
+  border-left-width: 4px;
+  border-left-style: solid;
+  padding-left: 16px;
+}
+
+.editor-code {
+  background-color: rgb(240, 242, 245);
+  /* font-family: Menlo, Consolas, Monaco, monospace; */
+  display: block;
+  padding: 8px 8px;
+  line-height: 1.53;
+  font-size: 13px;
+  margin: 8px 0;
+  tab-size: 2;
+  /* white-space: pre; */
+  overflow-x: auto;
+  position: relative;
+}
+
+.editor-code-highlight {
+  background-color: rgb(240, 242, 245);
+  border-radius: 3px;
+  padding: 1px 0.25rem;
+  /* font-family: Menlo, Consolas, Monaco, monospace; */
+  font-size: 94%;
+}
+
+/* TipTap Editor Styles */
+.ProseMirror {
+  min-height: 200px;
+  outline: none;
+}
+
+.ProseMirror p {
+  margin: 0;
+  margin-bottom: 0.5em;
+}
+
+.ProseMirror h1 { font-size: 2em; }
+.ProseMirror h2 { font-size: 1.5em; }
+.ProseMirror h3 { font-size: 1.17em; }
+.ProseMirror h4 { font-size: 1em; }
+.ProseMirror h5 { font-size: 0.83em; }
+.ProseMirror h6 { font-size: 0.67em; }
+
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-left: 1.5em;
+  margin: 0;
+  margin-bottom: 0.5em;
+}
+
+.ProseMirror ul {
+  list-style-type: disc;
+}
+
+.ProseMirror ol {
+  list-style-type: decimal;
+}
+
+/* Dropdown styles */
+.dropdown-menu {
+  min-width: 200px;
+}
+
+.dropdown-item {
+  padding: 0.5rem 1rem;
+}
+
+.dropdown-item.active {
+  background-color: #8BC34A;
+  color: white;
+}
+
+/* Color picker styles */
+.color-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.5rem;
+}
+
+.color-option {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+}
+
+.color-option:hover {
+  transform: scale(1.1);
+}
+
+
+.border-dark{
+  border: 0.01px solid #afafaf !important;
+}
