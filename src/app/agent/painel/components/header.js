@@ -5,6 +5,8 @@ import { Container, Navbar, Dropdown } from 'react-bootstrap';
 import { useAccountType } from '../accountTypeContext';
 import { FaChevronDown } from 'react-icons/fa';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://teste.mapadacultura.com/api';
+
 const TYPE_DISPLAY = {
     personal: {
         name: (profile) => profile.fullname || 'Personal Account',
@@ -38,7 +40,7 @@ function Header() {
                 if (!userData || !token) return;
 
                 const user = JSON.parse(userData);
-                const response = await fetch(`https://teste.mapadacultura.com/api/agent/profile/${user.cpf}`, {
+                const response = await fetch(`${API_BASE_URL}/agent/profile/${user.cpf}`, {
                 // const response = await fetch(`http://localhost:4000/api/agent/profile/${user.cpf}`, {
                     headers: { 'Authorization': token }
                 });

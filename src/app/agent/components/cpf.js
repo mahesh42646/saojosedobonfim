@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Form, Button, Row, Col, Modal } from 'react-bootstrap';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://teste.mapadacultura.com/api';
+
 // CPF validation function (works on unformatted CPF)
 function validateCPF(cpf) {
   cpf = cpf.replace(/[^\d]+/g, '');
@@ -43,26 +45,26 @@ function CPFExistsModal({ show, onHide, cpf, fullName, accountType, isSameType }
   return (
     <Modal show={show} onHide={onHide}>
       <Modal.Header closeButton>
-        <Modal.Title>Account Already Exists</Modal.Title>
+        <Modal.Title>Conta Já Existe</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <div className="p-2">
           {isSameType ? (
             <>
               <p className="mb-2"><strong>CPF:</strong> {cpf}</p>
-              <p className="mb-2"><strong>Type:</strong> {accountType}</p>
-              <p className="mb-2">Account already exists for this type</p>
+              <p className="mb-2"><strong>Tipo:</strong> {accountType}</p>
+              <p className="mb-2">Conta já existe para este tipo</p>
             </>
           ) : (
             <>
-              <p className="mb-2"><strong>CPF:</strong> {cpf} <strong> Name:</strong> {fullName}</p>
-              <p className="mb-2"><strong>Type:</strong> {accountType} . Login to apply for other type.</p>
+              <p className="mb-2"><strong>CPF:</strong> {cpf} <strong> Nome:</strong> {fullName}</p>
+              <p className="mb-2"><strong>Tipo:</strong> {accountType} . Faça login para solicitar outro tipo.</p>
             </>
           )}
         </div>
         <div className="d-flex gap-2 p-2 justify-content-between">
-          <Button className="btn btn-secondary text-white" onClick={onHide}>Cancel</Button>
-          <Button className="text-dark border-0 px-3" onClick={handleLogin} style={{ background: '#A8EB7D' }}>Login</Button>
+          <Button className="btn btn-secondary text-white" onClick={onHide}>Cancelar</Button>
+          <Button className="text-dark border-0 px-3" onClick={handleLogin} style={{ background: '#A8EB7D' }}>Entrar</Button>
         </div>
       </Modal.Body>
     </Modal>
@@ -135,13 +137,13 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
   const getHeaderText = () => {
     switch (selectedType) {
       case 'personal':
-        return 'Provide more information about yourself (PESSOA FÍSICA)';
+        return 'Forneça mais informações sobre você (PESSOA FÍSICA)';
       case 'business':
-        return 'Provide more information about yourself (PESSOA JURÍDICA)';
+        return 'Forneça mais informações sobre você (PESSOA JURÍDICA)';
       case 'collective':
-        return 'Provide more information about yourself (GRUPO COLETIVO)';
+        return 'Forneça mais informações sobre você (GRUPO COLETIVO)';
       default:
-        return 'Provide more information about yourself';
+        return 'Forneça mais informações sobre você';
     }
   };
 
@@ -221,7 +223,7 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
         };
 
         // Submit to backend
-        const response = await fetch('https://teste.mapadacultura.com/api/agent/profile', {
+        const response = await fetch(`${API_BASE_URL}/agent/profile`, {
           // const response = await fetch('http://localhost:4000/api/agent/profile', {
           method: 'POST',
           headers: {
@@ -347,33 +349,33 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
         <Row>
           <Col md={6}>
             <Form.Group className="mb-3" controlId="lgbtq">
-              <Form.Label>Are you LGBTQIAPN+? *</Form.Label>
+              <Form.Label>Você é LGBTQIAPN+? *</Form.Label>
               <Form.Select
                 className="border-dark-gray"
-                value={formData.lgbtq || 'Select'}
+                value={formData.lgbtq || 'Selecione'}
                 isInvalid={!!errors.lgbtq}
                 onChange={(e) => handleFieldChange('lgbtq', e.target.value)}
               >
-                <option>Select</option>
-                <option>Yes</option>
-                <option>No</option>
+                <option>Selecione</option>
+                <option>Sim</option>
+                <option>Não</option>
               </Form.Select>
               <Form.Control.Feedback type="invalid">{errors.lgbtq}</Form.Control.Feedback>
             </Form.Group>
           </Col>
           <Col md={6}>
             <Form.Group className="mb-3" controlId="education">
-              <Form.Label>Education *</Form.Label>
+              <Form.Label>Escolaridade *</Form.Label>
               <Form.Select
                 className="border-dark-gray"
-                value={formData.education || 'Select'}
+                value={formData.education || 'Selecione'}
                 isInvalid={!!errors.education}
                 onChange={(e) => handleFieldChange('education', e.target.value)}
               >
-                <option>Select</option>
-                <option>High School</option>
-                <option>Bachelor&apos;s</option>
-                <option>Master&apos;s</option>
+                <option>Selecione</option>
+                <option>Ensino Médio</option>
+                <option>Graduação</option>
+                <option>Mestrado</option>
               </Form.Select>
               <Form.Control.Feedback type="invalid">{errors.education}</Form.Control.Feedback>
             </Form.Group>
@@ -419,30 +421,30 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
         <Row>
           <Col md={6}>
             <Form.Group className="mb-3" controlId="otherActivity">
-              <Form.Label>Other areas of activity</Form.Label>
+              <Form.Label>Outras áreas de atuação</Form.Label>
               <Form.Select
                 className="border-dark-gray"
-                value={formData.otherActivity || 'Select'}
+                value={formData.otherActivity || 'Selecione'}
                 onChange={(e) => handleFieldChange('otherActivity', e.target.value)}
               >
-                <option>Select</option>
-                <option>Activity 1</option>
-                <option>Activity 2</option>
+                <option>Selecione</option>
+                <option>Atividade 1</option>
+                <option>Atividade 2</option>
               </Form.Select>
             </Form.Group>
           </Col>
           <Col md={6}>
             <Form.Group className="mb-3" controlId="traditionalCommunities">
-              <Form.Label>Traditional communities *</Form.Label>
+              <Form.Label>Comunidades tradicionais *</Form.Label>
               <Form.Select
                 className="border-dark-gray"
-                value={formData.traditionalCommunities || 'Select'}
+                value={formData.traditionalCommunities || 'Selecione'}
                 isInvalid={!!errors.traditionalCommunities}
                 onChange={(e) => handleFieldChange('traditionalCommunities', e.target.value)}
               >
-                <option>Select</option>
-                <option>Community 1</option>
-                <option>Community 2</option>
+                <option>Selecione</option>
+                <option>Comunidade 1</option>
+                <option>Comunidade 2</option>
               </Form.Select>
               <Form.Control.Feedback type="invalid">{errors.traditionalCommunities}</Form.Control.Feedback>
             </Form.Group>
@@ -552,7 +554,7 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
         <Row>
           <Col md={6}>
             <Form.Group className="mb-3" controlId="telephone">
-              <Form.Label>Telephone *</Form.Label>
+              <Form.Label>Telefone *</Form.Label>
               <Form.Control
                 className="border-dark-gray"
                 type="text"
@@ -565,7 +567,7 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
           </Col>
           <Col md={6}>
             <Form.Group className="mb-3" controlId="responsible">
-              <Form.Label>Responsible for registration *</Form.Label>
+              <Form.Label>Responsável pelo cadastro *</Form.Label>
               <Form.Control
                 className="border-dark-gray"
                 type="text"
@@ -609,20 +611,20 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
         {/* Type-specific additional fields */}
         {(selectedType === 'business' || selectedType === 'collective') && (
           <>
-            <h4 className="py-4 text-center">Enter the organization&apos;s additional data</h4>
+            <h4 className="py-4 text-center">Insira os dados adicionais da organização</h4>
 
             {/* Business-specific fields */}
             {selectedType === 'business' && (
               <>
                 <Form.Group className="mb-3" controlId="cnpjType">
-                  <Form.Label>CNPJ Type *</Form.Label>
+                  <Form.Label>Tipo de CNPJ *</Form.Label>
                   <Form.Select
                     className="border-dark-gray"
-                    value={formData.cnpjType || 'Select'}
+                    value={formData.cnpjType || 'Selecione'}
                     isInvalid={!!errors.cnpjType}
                     onChange={(e) => handleFieldChange('cnpjType', e.target.value)}
                   >
-                    <option>Select</option>
+                    <option>Selecione</option>
                     {/* Add options here */}
                   </Form.Select>
                   <Form.Control.Feedback type="invalid">{errors.cnpjType}</Form.Control.Feedback>
@@ -749,7 +751,7 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
         <Form.Group className="mb-4" controlId="acceptTerms">
           <Form.Check
             type="checkbox"
-            label="I accept the terms of use and privacy policy:"
+            label="Aceito os termos de uso e política de privacidade:"
             checked={accepted}
             onChange={e => setAccepted(e.target.checked)}
             isInvalid={!!errors.acceptTerms}
@@ -771,7 +773,7 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
             color: '#222',
           }}
         >
-          Create account
+          Criar conta
         </Button>
       </Form>
     </Container>
@@ -804,7 +806,7 @@ export default function CPF({ selectedType, onContinue }) {
   // Function to check if CPF exists in agent profiles
   const checkCPFExists = async (cpfToCheck) => {
     try {
-      const response = await fetch(`https://teste.mapadacultura.com/api/agent/profile/${cpfToCheck}`, {
+      const response = await fetch(`${API_BASE_URL}/agent/profile/${cpfToCheck}`, {
         // const response = await fetch(`http://localhost:4000/api/agent/profile/${cpfToCheck}`, {
         method: 'GET',
         headers: {
@@ -925,7 +927,7 @@ export default function CPF({ selectedType, onContinue }) {
       <Container className="d-flex flex-column align-items-center justify-content-center" style={{ minHeight: '60vh', maxWidth: 700 }}>
         <div className="position-relative w-100">
           <h2 className="fw-bold text-center mb-4" style={{ fontSize: '1.6rem' }}>
-            Enter your CPF number
+            Digite seu número de CPF
           </h2>
           <hr />
         </div>
@@ -962,7 +964,7 @@ export default function CPF({ selectedType, onContinue }) {
             }}
             disabled={isLoading}
           >
-            {isLoading ? 'Checking...' : 'Continue'}
+            {isLoading ? 'Verificando...' : 'Continuar'}
           </Button>
         </Form>
       </Container>

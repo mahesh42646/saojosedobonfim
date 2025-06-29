@@ -34,7 +34,7 @@ const HeaderM = () => {
                 style={{ borderRadius: "50%" }}
                 priority
               />
-              <span className="fw-semibold fs-16 text-dark">MUNICIPAL ADMINISTRATION</span>
+              <span className="fw-semibold fs-16 text-dark">ADMINISTRAÇÃO MUNICIPAL</span>
               <span className="ms-3" style={{ fontSize: 20, color: "#888" }}>&#8250;</span>
             </div>
            

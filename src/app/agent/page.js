@@ -130,7 +130,7 @@ function AgentPageContent() {
 // Main page component with Suspense boundary
 export default function AgentPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div>Carregando...</div>}>
       <AgentPageContent />
     </Suspense>
   );

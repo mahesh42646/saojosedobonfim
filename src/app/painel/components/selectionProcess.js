@@ -4,8 +4,8 @@ import React from 'react';
 const SelectionProcess = () => {
   return (
     <div className="container-fluid">
-      <h2>Selection Process</h2>
-      <p>This section is under development.</p>
+      <h2>Processo de Seleção</h2>
+      <p>Esta seção está em desenvolvimento.</p>
     </div>
   );
 };

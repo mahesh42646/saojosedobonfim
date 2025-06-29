@@ -28,14 +28,14 @@ const MenuBar = ({ editor }) => {
               active={editor.isActive('heading', { level })}
               onClick={() => editor.chain().focus().toggleHeading({ level }).run()}
             >
-              Heading {level}
+              Título {level}
             </Dropdown.Item>
           ))}
           <Dropdown.Item
             active={editor.isActive('paragraph')}
             onClick={() => editor.chain().focus().setParagraph().run()}
           >
-            Normal text
+            Texto normal
           </Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown>
@@ -46,9 +46,9 @@ const MenuBar = ({ editor }) => {
           <FaAlignLeft />
         </Dropdown.Toggle>
         <Dropdown.Menu>
-          <Dropdown.Item onClick={() => editor.chain().focus().setTextAlign('left').run()}><FaAlignLeft /> Left</Dropdown.Item>
-          <Dropdown.Item onClick={() => editor.chain().focus().setTextAlign('center').run()}><FaAlignCenter /> Center</Dropdown.Item>
-          <Dropdown.Item onClick={() => editor.chain().focus().setTextAlign('right').run()}><FaAlignRight /> Right</Dropdown.Item>
+          <Dropdown.Item onClick={() => editor.chain().focus().setTextAlign('left').run()}><FaAlignLeft /> Esquerda</Dropdown.Item>
+          <Dropdown.Item onClick={() => editor.chain().focus().setTextAlign('center').run()}><FaAlignCenter /> Centro</Dropdown.Item>
+          <Dropdown.Item onClick={() => editor.chain().focus().setTextAlign('right').run()}><FaAlignRight /> Direita</Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown>
 

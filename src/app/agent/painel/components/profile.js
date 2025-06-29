@@ -4,6 +4,8 @@ import Image from "next/image";
 import { FaCamera, FaChevronRight, FaUser, FaLock, FaSignOutAlt, FaPlus, FaUsers, FaShieldAlt, FaTimesCircle, FaArrowRight } from "react-icons/fa";
 import { useAccountType } from '../accountTypeContext';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://teste.mapadacultura.com/api';
+
 const TYPE_DISPLAY = {
   personal: {
     label: "Conta pessoa física",
@@ -43,7 +45,7 @@ export default function Profile() {
 
         const user = JSON.parse(userData);
         const response = await fetch(
-          `https://teste.mapadacultura.com/api/agent/profile/${user.cpf}`,
+          `${API_BASE_URL}/agent/profile/${user.cpf}`,
           // `http://localhost:4000/api/agent/profile/${user.cpf}`,
 
           {

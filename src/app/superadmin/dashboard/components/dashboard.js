@@ -18,7 +18,8 @@
 //                   minWidth: 320,
 //                   minHeight: 400,
 //                   padding: '10px 16px 0px 16px',
-//                   position: 'relative',
+//                   position: 'relative',git push -u origin main --force
+
 //                   boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
 //                 }}
 //               >

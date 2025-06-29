@@ -5,17 +5,31 @@ import { FaCamera, FaInstagram, FaYoutube, FaFacebook, FaTimes, FaChevronDown, F
 import RichTextEditor from './RichTextEditor';
 import Dropdown from 'react-bootstrap/Dropdown'
 import Image from 'next/image';
+import { buildApiUrl } from '../../../config/api';
 
-function NewSpaceForm({ onClose }) {
+function NewSpaceForm({ onClose, onSuccess }) {
+  const [formData, setFormData] = useState({
+    type: '',
+    title: '',
+    description: '',
+    capacity: '',
+    operatingHours: '',
+    operatingDays: '',
+  });
+
   const [socialLinks, setSocialLinks] = useState({
     instagram: { enabled: false, url: '' },
     youtube: { enabled: false, url: '' },
     facebook: { enabled: false, url: '' }
   });
 
-  const [coverPhoto, setCoverPhoto] = useState(null);
-  const [photos, setPhotos] = useState([]);
+  const [coverPhotoFile, setCoverPhotoFile] = useState(null);
+  const [coverPhotoPreview, setCoverPhotoPreview] = useState(null);
+  const [photoFiles, setPhotoFiles] = useState([]);
+  const [photosPreviews, setPhotosPreviews] = useState([]);
   const [accessibilityOpen, setAccessibilityOpen] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const [description, setDescription] = useState("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry&apos;s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.");
   const [tempDescription, setTempDescription] = useState(description);
@@ -35,6 +49,15 @@ function NewSpaceForm({ onClose }) {
     adaptedElevator: false,
   });
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    // Clear error when user types
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
   const handleAccessibilityChange = (e) => {
     const { name, checked } = e.target;
     setPhysicalAccessibility(prev => ({ ...prev, [name]: checked }));
@@ -50,9 +73,10 @@ function NewSpaceForm({ onClose }) {
   const handleCoverPhotoAdd = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setCoverPhotoFile(file);
       const reader = new FileReader();
       reader.onload = (e) => {
-        setCoverPhoto(e.target.result);
+        setCoverPhotoPreview(e.target.result);
       };
       reader.readAsDataURL(file);
     }
@@ -61,9 +85,10 @@ function NewSpaceForm({ onClose }) {
   const handlePhotoAdd = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setPhotoFiles(prev => [...prev, file]);
       const reader = new FileReader();
       reader.onload = (e) => {
-        setPhotos(prev => [...prev, e.target.result]);
+        setPhotosPreviews(prev => [...prev, e.target.result]);
       };
       reader.readAsDataURL(file);
     }
@@ -108,79 +133,216 @@ function NewSpaceForm({ onClose }) {
     }
   };
 
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!formData.type) newErrors.type = 'Type is required';
+    if (!formData.title) newErrors.title = 'Name is required';
+    if (!description) newErrors.description = 'Description is required';
+    if (!formData.capacity) newErrors.capacity = 'Capacity is required';
+    if (!formData.operatingHours) newErrors.operatingHours = 'Operating hours are required';
+    if (!formData.operatingDays) newErrors.operatingDays = 'Operating days are required';
+    if (!coverPhotoFile) newErrors.coverPhoto = 'Cover photo is required';
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Prepare form data
+      const submitData = new FormData();
+      submitData.append('type', formData.type);
+      submitData.append('title', formData.title);
+      submitData.append('description', description);
+      submitData.append('capacity', formData.capacity);
+      submitData.append('operatingHours', formData.operatingHours);
+      submitData.append('operatingDays', formData.operatingDays);
+
+      // Add cover photo
+      submitData.append('coverPhoto', coverPhotoFile);
+
+      // Add gallery photos
+      photoFiles.forEach(file => {
+        submitData.append('photos', file);
+      });
+
+      // Add social links
+      const socialLinksData = {};
+      Object.entries(socialLinks).forEach(([platform, { enabled, url }]) => {
+        if (enabled && url) {
+          socialLinksData[platform] = url;
+        }
+      });
+      submitData.append('socialLinks', JSON.stringify(socialLinksData));
+
+      // Add accessibility
+      submitData.append('accessibility', JSON.stringify(physicalAccessibility));
+
+      // Add location
+      submitData.append('location', JSON.stringify({
+        address: 'Brejo do Cruz/PB',
+        city: 'Brejo do Cruz',
+        state: 'PB',
+        cep: '58890000',
+        mapLink: mapLink
+      }));
+
+      // Submit to API
+      const response = await fetch(buildApiUrl('/space/addnew'), {
+        method: 'POST',
+        headers: {
+          'Authorization': 'dummy-token-for-testing'
+        },
+        body: submitData
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create space');
+      }
+
+      onSuccess();
+    } catch (error) {
+      console.error('Error creating space:', error);
+      alert('Failed to create space. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Container className="col-lg-8">
       <h2 className="fs-5 fw-bold mb-4">Create new cultural space</h2>
       
-      <Form>
+      <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3">
-          <Form.Label className="fs-6">Project type *</Form.Label>
-          <Form.Select className="rounded-3 py-2 border-dark" >
-            <option>Select</option>
-            <option>MOSTRA</option>
-            <option>FESTIVAL</option>
+          <Form.Label className="fs-6">Tipo de projeto *</Form.Label>
+          <Form.Select 
+            name="type"
+            className={`rounded-3 py-2 border-dark ${errors.type ? 'is-invalid' : ''}`}
+            value={formData.type}
+            onChange={handleInputChange}
+          >
+            <option value="">Selecione</option>
+            <option value="MOSTRA">MOSTRA</option>
+            <option value="FESTIVAL">FESTIVAL</option>
+            <option value="ATELIÊ">ATELIÊ</option>
+            <option value="BIBLIOTECA">BIBLIOTECA</option>
+            <option value="TEATRO">TEATRO</option>
+            <option value="CINEMA">CINEMA</option>
+            <option value="MUSEU">MUSEU</option>
+            <option value="CENTRO_CULTURAL">CENTRO CULTURAL</option>
           </Form.Select>
+          {errors.type && <div className="invalid-feedback">{errors.type}</div>}
         </Form.Group>
 
         <Form.Group className="mb-3">
-          <Form.Label className="fs-6">Project name *</Form.Label>
-          <Form.Control type="text" className="rounded-3 py-2 border-dark"  />
+          <Form.Label className="fs-6">Nome do projeto *</Form.Label>
+          <Form.Control 
+            type="text" 
+            name="title"
+            className={`rounded-3 py-2 border-dark ${errors.title ? 'is-invalid' : ''}`}
+            value={formData.title}
+            onChange={handleInputChange}
+          />
+          {errors.title && <div className="invalid-feedback">{errors.title}</div>}
         </Form.Group>
 
         <div className="rounded-3 p-3 mb-3" style={{ backgroundColor: 'rgba(22, 51, 0, 0.08)' }}>
           <Form.Group>
             <Form.Label className="d-flex align-items-center gap-2 fs-6">
               <FaRegListAlt />
-              <span >Description *</span>
+              <span>Descrição *</span>
             </Form.Label>
             <div
-              className="border-1  rounded-3 p-3"
+              className={`border-1 rounded-3 p-3 ${errors.description ? 'border border-danger' : ''}`}
               style={{ borderColor: '#ced4da', minHeight: '100px' }}
               dangerouslySetInnerHTML={{ __html: description }}
             />
+            {errors.description && <div className="text-danger small mt-1">{errors.description}</div>}
           </Form.Group>
-          <Button className="w-100 text-dark rounded-5 mt-2" style={{ backgroundColor: '#fff', borderColor: '#8BC34A' }} onClick={() => {
+          <Button 
+            className="w-100 text-dark rounded-5 mt-2" 
+            style={{ backgroundColor: '#fff', borderColor: '#8BC34A' }} 
+            onClick={() => {
               setTempDescription(description);
               setShowDescriptionModal(true);
-          }}>Edit</Button>
+            }}
+          >
+            Editar
+          </Button>
         </div>
 
         <Form.Group className="mb-3">
-          <Form.Label className="fs-6">Capacity of people in space *</Form.Label>
-          <Form.Control type="text" className="rounded-3 py-2 border-dark"  />
-        </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label className="fs-6">Opening and closing hours *</Form.Label>
-          <Form.Control type="text" className="rounded-3 py-2 border-dark"  />
-        </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label className="fs-6">Operating days *</Form.Label>
-          <Form.Control type="text" className="rounded-3 py-2 border-dark"  />
+          <Form.Label className="fs-6">Capacidade de pessoas no espaço *</Form.Label>
+          <Form.Control 
+            type="text" 
+            name="capacity"
+            className={`rounded-3 py-2 border-dark ${errors.capacity ? 'is-invalid' : ''}`}
+            value={formData.capacity}
+            onChange={handleInputChange}
+          />
+          {errors.capacity && <div className="invalid-feedback">{errors.capacity}</div>}
         </Form.Group>
 
-        <div className=" rounded-3  p-2 my-3" style={{ backgroundColor: 'rgba(22, 51, 0, 0.08)' }}>
+        <Form.Group className="mb-3">
+          <Form.Label className="fs-6">Horário de funcionamento *</Form.Label>
+          <Form.Control 
+            type="text" 
+            name="operatingHours"
+            className={`rounded-3 py-2 border-dark ${errors.operatingHours ? 'is-invalid' : ''}`}
+            value={formData.operatingHours}
+            onChange={handleInputChange}
+          />
+          {errors.operatingHours && <div className="invalid-feedback">{errors.operatingHours}</div>}
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label className="fs-6">Dias de funcionamento *</Form.Label>
+          <Form.Control 
+            type="text" 
+            name="operatingDays"
+            className={`rounded-3 py-2 border-dark ${errors.operatingDays ? 'is-invalid' : ''}`}
+            value={formData.operatingDays}
+            onChange={handleInputChange}
+          />
+          {errors.operatingDays && <div className="invalid-feedback">{errors.operatingDays}</div>}
+        </Form.Group>
+
+        <div className={`rounded-3 p-2 my-3 ${errors.coverPhoto ? 'border border-danger' : ''}`} style={{ backgroundColor: 'rgba(22, 51, 0, 0.08)' }}>
           <Form.Label className="d-flex align-items-center gap-2 mb-3">
             <FaCamera className="text-secondary" />
-            <span>Cover</span>
+            <span>Cover *</span>
           </Form.Label>
-          <div className="d-flex gap-2 p-3  flex-wrap  rounded-3">
-            {coverPhoto ? (
+          <div className="d-flex gap-2 p-3 flex-wrap rounded-3">
+            {coverPhotoPreview ? (
               <div className="position-relative" style={{ width: "100%", height: 200 }}>
-                <Image src={coverPhoto} alt="Cover" className="w-100 h-100 rounded-3 object-fit-cover" width={500} height={200} />
+                <Image src={coverPhotoPreview} alt="Cover" className="w-100 h-100 rounded-3 object-fit-cover" width={500} height={200} />
                 <Button
                   variant="link"
                   className="position-absolute top-0 end-0 p-1 text-dark"
-                  onClick={() => setCoverPhoto(null)}
+                  onClick={() => {
+                    setCoverPhotoFile(null);
+                    setCoverPhotoPreview(null);
+                  }}
                 >
                   <FaTimes />
                 </Button>
               </div>
             ) : (
-              <label className="  d-flex align-items-center  w-100 justify-content-center  rounded-3"
+              <label className="d-flex align-items-center w-100 justify-content-center rounded-3"
                 style={{ height: "200px", cursor: 'pointer', backgroundColor: 'rgba(22, 51, 0, 0.08)', color: '#fff' }}>
                 <input type="file" hidden onChange={handleCoverPhotoAdd} accept="image/*" />
-                <div className="text-center text-dark ">
-                  <div className="rounded-circle border  bg-white p-2 mx-auto mb-1" style={{ width: 'fit-content', height: '44px', width: '44px' }}>
+                <div className="text-center text-dark">
+                  <div className="rounded-circle border bg-white p-2 mx-auto mb-1" style={{ width: '44px', height: '44px' }}>
                     <span>+</span>
                   </div>
                   <small>Novo</small>
@@ -188,6 +350,7 @@ function NewSpaceForm({ onClose }) {
               </label>
             )}
           </div>
+          {errors.coverPhoto && <div className="text-danger small">{errors.coverPhoto}</div>}
         </div>
 
         <div className="rounded-3 p-3 mb-3" >
@@ -251,13 +414,13 @@ function NewSpaceForm({ onClose }) {
             <span>Photo gallery</span>
           </Form.Label>
           <div className="d-flex gap-2 flex-wrap">
-            {photos.map((photo, index) => (
+            {photosPreviews.map((photo, index) => (
               <div key={index} className="position-relative" style={{ width: 100, height: 100 }}>
                 <Image src={photo} alt="" width={100} height={100} className="w-100 h-100 rounded-3 object-fit-cover" />
                 <Button
                   variant="link"
                   className="position-absolute top-0 end-0 p-1"
-                  onClick={() => setPhotos(prev => prev.filter((_, i) => i !== index))}
+                  onClick={() => setPhotosPreviews(prev => prev.filter((_, i) => i !== index))}
                 >
                   <FaTimes />
                 </Button>
@@ -309,8 +472,14 @@ function NewSpaceForm({ onClose }) {
           )}
         </div>
 
-        <Button variant="success" className="w-100 py-2 rounded-3" style={{ backgroundColor: '#8BC34A', borderColor: '#8BC34A' }}>
-          Create Space
+        <Button 
+          variant="success" 
+          type="submit"
+          className="w-100 py-2 rounded-3" 
+          style={{ backgroundColor: '#8BC34A', borderColor: '#8BC34A' }}
+          disabled={loading}
+        >
+          {loading ? 'Creating Space...' : 'Create Space'}
         </Button>
       </Form>
 

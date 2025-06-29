@@ -9,8 +9,17 @@ const superAdminSchema = new mongoose.Schema({
 // Admin Schema
 const adminSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true }
-}, { collection: 'admins' });
+  password: { type: String, required: true },
+  name: { type: String, required: true },
+  title: { type: String },
+  description: { type: String },
+  profilePhoto: { type: String },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+}, { 
+  collection: 'admins',
+  timestamps: true 
+});
 
 // Agent Schema
 const agentSchema = new mongoose.Schema({
@@ -147,11 +156,237 @@ const tenantSchema = new mongoose.Schema({
   timestamps: true 
 });
 
+// Staff Schema
+const staffSchema = new mongoose.Schema({
+  employeeType: { 
+    type: String, 
+    required: true,
+    enum: ['Evaluator', 'Manager', 'Other']
+  },
+  cpf: { 
+    type: String, 
+    required: true, 
+    unique: true 
+  },
+  fullName: { 
+    type: String, 
+    required: true 
+  },
+  email: { 
+    type: String, 
+    required: true, 
+    unique: true 
+  },
+  password: { 
+    type: String, 
+    required: true 
+  },
+  status: {
+    type: String,
+    enum: ['pending', 'active', 'inactive', 'deleted', 'rejected'],
+    default: 'pending'
+  },
+  addedAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  }
+}, { 
+  collection: 'staff',
+  timestamps: true 
+});
+
+// Space Schema
+const spaceSchema = new mongoose.Schema({
+  // Link to agent who created the space
+  agentId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Agent', 
+    required: true 
+  },
+  
+  // Basic Information
+  type: { 
+    type: String, 
+    required: true,
+    enum: ['MOSTRA', 'FESTIVAL', 'ATELIÊ', 'BIBLIOTECA', 'TEATRO', 'CINEMA', 'MUSEU', 'CENTRO_CULTURAL']
+  },
+  title: { 
+    type: String, 
+    required: true 
+  },
+  description: { 
+    type: String, 
+    required: true 
+  },
+  capacity: { 
+    type: String, 
+    required: true 
+  },
+  operatingHours: { 
+    type: String, 
+    required: true 
+  },
+  operatingDays: { 
+    type: String, 
+    required: true 
+  },
+
+  // Media
+  coverPhoto: { 
+    type: String, 
+    required: true 
+  },
+  photos: [{ 
+    type: String 
+  }],
+
+  // Social Links
+  socialLinks: {
+    instagram: { type: String },
+    youtube: { type: String },
+    facebook: { type: String }
+  },
+
+  // Physical Accessibility
+  accessibility: {
+    adaptedToilets: { type: Boolean, default: false },
+    accessRamp: { type: Boolean, default: false },
+    elevator: { type: Boolean, default: false },
+    tactileSignaling: { type: Boolean, default: false },
+    adaptedDrinkingFountain: { type: Boolean, default: false },
+    handrail: { type: Boolean, default: false },
+    adaptedElevator: { type: Boolean, default: false }
+  },
+
+  // Location
+  location: {
+    address: { type: String, required: true },
+    city: { type: String, required: true },
+    state: { type: String, required: true },
+    cep: { type: String, required: true },
+    mapLink: { type: String }
+  },
+
+  // Status
+  status: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected', 'inactive'],
+    default: 'pending'
+  },
+
+  // Status History
+  statusHistory: [{
+    status: {
+      type: String,
+      enum: ['pending', 'approved', 'rejected', 'inactive'],
+      required: true
+    },
+    changedAt: {
+      type: Date,
+      required: true
+    }
+  }],
+
+  // Timestamps
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+}, { 
+  collection: 'spaces',
+  timestamps: true 
+});
+
+// Project Schema
+const projectSchema = new mongoose.Schema({
+  // Link to agent who created the project
+  agentId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Agent', 
+    required: true 
+  },
+  
+  // Basic Information
+  type: { 
+    type: String, 
+    required: true,
+    enum: ['MOSTRA', 'FESTIVAL']
+  },
+  title: { 
+    type: String, 
+    required: true 
+  },
+  description: { 
+    type: String, 
+    required: true 
+  },
+  period: {
+    start: { type: Date, required: true },
+    end: { type: Date }
+  },
+
+  // Media
+  coverPhoto: { 
+    type: String, 
+    required: true 
+  },
+  photos: [{ 
+    type: String 
+  }],
+
+  // Social Links
+  socialLinks: {
+    instagram: { type: String },
+    youtube: { type: String },
+    facebook: { type: String }
+  },
+
+  // Status
+  status: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected', 'inactive'],
+    default: 'pending'
+  },
+
+  // Status History
+  statusHistory: [{
+    status: {
+      type: String,
+      enum: ['pending', 'approved', 'rejected', 'inactive']
+    },
+    changedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+
+  // Timestamps
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+}, { 
+  collection: 'projects',
+  timestamps: true 
+});
+
 // Models
 const SuperAdmin = mongoose.model('SuperAdmin', superAdminSchema);
 const Admin = mongoose.model('Admin', adminSchema);
 const Agent = mongoose.model('Agent', agentSchema);
 const AgentProfile = mongoose.model('AgentProfile', agentProfileSchema);
 const Tenant = mongoose.model('Tenant', tenantSchema);
+const Space = mongoose.model('Space', spaceSchema);
+const Project = mongoose.model('Project', projectSchema);
+const Staff = mongoose.model('Staff', staffSchema);
 
-module.exports = { SuperAdmin, Admin, Agent, AgentProfile, Tenant };
+module.exports = {
+    SuperAdmin: mongoose.model('SuperAdmin', superAdminSchema),
+    Admin: mongoose.model('Admin', adminSchema),
+    Agent: mongoose.model('Agent', agentSchema),
+    AgentProfile: mongoose.model('AgentProfile', agentProfileSchema),
+    Tenant: mongoose.model('Tenant', tenantSchema),
+    Space: mongoose.model('Space', spaceSchema),
+    Project: mongoose.model('Project', projectSchema),
+    Staff: mongoose.model('Staff', staffSchema)
+};

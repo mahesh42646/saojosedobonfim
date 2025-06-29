@@ -50,9 +50,9 @@ export default function Sidebar() {
   return (
     <>
       <Header />
-      <div className="d-flex  px-lg-4 p-2 " style={{ minHeight: "80vh" }}>
+      <div className="d-flex  px-lg-5 p-2 " style={{ minHeight: "94vh" }}>
         <aside
-          className={`sidebar col-lg-2 border ${collapsed ? "col-2" : "col-6"}  py-3 pe-2 d-flex flex-column align-items-stretch`}
+          className={`sidebar col-lg-2  ${collapsed ? "col-2" : "col-6"}  py-3 pe-2 d-flex flex-column align-items-stretch`}
           style={{ background: "#fff", minWidth: collapsed ? 60 : undefined, transition: "min-width 0.2s" }}  >
           {/* Toggle button for mobile */}
           <button
@@ -68,7 +68,7 @@ export default function Sidebar() {
               {menuItems.map((item) => (
                 <li key={item.key} className="nav-item mb-2">
                   <button
-                    className={`nav-link d-flex align-items-center gap-2 p-2 rounded-pill ${activeTab === item.key ? "active bg-light border border-secondary" : ""}`}
+                    className={`nav-link d-flex align-items-center gap-2 p-3 rounded-pill ${activeTab === item.key ? "active bg-secondary-lite" : ""}`}
                     style={{
                       fontSize: 16,
                       color: "#1a3300",
@@ -98,7 +98,7 @@ export default function Sidebar() {
           className={
             `col-lg-10 ${collapsed ? "col-10" : "col-6"} p-lg-5 p-2`
           }
-          style={{ background: "#f8f9fa" }}
+      
         >
           {tabComponents[activeTab]}
         </main>

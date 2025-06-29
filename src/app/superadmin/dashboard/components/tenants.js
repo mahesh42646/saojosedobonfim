@@ -1,6 +1,9 @@
 "use client";
 import React, { useState, useEffect, useCallback } from 'react';
-import Image from 'next/image';
+// import Image from 'next/image';
+// import { Modal, Button, Form, Row, Col } from 'react-bootstrap';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000/api';
 
 const AddTenantModal = ({ show, onClose, onSave }) => {
   const [tenantName, setTenantName] = useState('');
@@ -276,13 +279,11 @@ const TenantsPage = () => {
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // API Base URL
-  // const API_BASE_URL = 'http://localhost:4000/api';
-  const API_BASE_URL = 'https://teste.mapadacultura.com/api';
+  
 
   // Helper function to get auth headers
   const getAuthHeaders = () => {
-    const token = localStorage.getItem('authToken') || '426468_mapa'; // Use a dummy token for testing
+    const token = localStorage.getItem('authToken') || 'dummy-token-for-testing'; // Use the correct dummy token for testing
     return {
       'Content-Type': 'application/json',
       'Authorization': token

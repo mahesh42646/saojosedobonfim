@@ -1,15 +1,14 @@
 'use client';
 import { createContext, useContext, useState, useEffect } from 'react';
 
-// const API_BASE_URL = 'http://localhost:4000/api';
-const API_BASE_URL = 'https://teste.mapadacultura.com/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://teste.mapadacultura.com/api';
 
 const AuthContext = createContext({});
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth deve ser usado dentro de um AuthProvider');
   }
   return context;
 };
@@ -57,7 +56,7 @@ export const AuthProvider = ({ children }) => {
         console.log('❌ Error response:', errorText);
         return { 
           success: false, 
-          error: errorText || 'Wrong email or password' 
+          error: errorText || 'Email ou senha incorretos' 
         };
       }
 
@@ -69,7 +68,7 @@ export const AuthProvider = ({ children }) => {
         console.log('❌ No token in response');
         return { 
           success: false, 
-          error: 'Invalid server response - no token' 
+          error: 'Resposta do servidor inválida - sem token' 
         };
       }
 
@@ -96,13 +95,13 @@ export const AuthProvider = ({ children }) => {
       if (error.name === 'TypeError' || error.message.includes('fetch')) {
         return { 
           success: false, 
-          error: 'Cannot connect to server. Make sure backend is running on port 4000.' 
+          error: 'Não foi possível conectar ao servidor. Verifique se o backend está rodando na porta 4000.' 
         };
       }
       
       return { 
         success: false, 
-        error: 'Something went wrong. Please try again.' 
+        error: 'Algo deu errado. Por favor, tente novamente.' 
       };
     } finally {
       setLoading(false);

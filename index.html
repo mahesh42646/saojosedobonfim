@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>AI Chat Assistant</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Highlight.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <!-- Add Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #9f7aea;
+            --bg-color: #0a0514;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0514 0%, #1a1025 50%, #2d1b4d 100%);
+            min-height: 100vh;
+            color: white;
+        }
+
+        .chat-container {
+            background: rgba(20, 15, 30, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chat-header {
+            background: rgba(159, 122, 234, 0.15);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chat-header::before {
+            content: "🤖";
+            font-size: 1.5rem;
+            margin-right: 10px;
+        }
+
+        .message {
+            background: rgba(25, 20, 35, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .user-message {
+            background: rgba(159, 122, 234, 0.2);
+        }
+
+        .code-block {
+            background: rgba(15, 10, 25, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #prompt {
+            background: transparent;
+            color: white;
+            border: none;
+        }
+
+        #prompt::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Minimal scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 10, 25, 0.8);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        .btn-outline-light {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-outline-light:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .form-select {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .form-select option {
+            background-color: #1a1025;
+        }
+        
+        #imagePreview {
+            display: flex;
+            align-items: center;
+        }
+        
+        .image-upload-preview {
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-4 h-100">
+        <div class="chat-container h-100 rounded-4 d-flex flex-column shadow">
+            <div class="chat-header p-4 d-flex align-items-center">
+                <h4 class="mb-0">AI Chat Assistant</h4>
+            </div>
+            <div id="chat-messages" class="flex-grow-1 overflow-auto p-4"></div>
+            <div id="typing-indicator" class="d-none p-3 fst-italic text-white-50">AI is thinking...</div>
+            <div class="p-4 border-top">
+                <div class="bg-dark bg-opacity-50 rounded-4 p-3">
+                    <div class="d-flex flex-column gap-3">
+                        <div class="d-flex gap-2">
+                    <textarea 
+                        id="prompt" 
+                                class="form-control bg-transparent"
+                        rows="1" 
+                        placeholder="Type your message here... (Press Enter to send)"
+                    ></textarea>
+                            <button onclick="sendPrompt()" class="btn btn-primary px-4">Send</button>
+                        </div>
+                        <div class="d-flex gap-2 align-items-center">
+                            <div class="btn-group" role="group">
+                                <input type="file" class="d-none" id="imageUpload" accept="image/*" onchange="handleImageUpload(event)">
+                                <button onclick="document.getElementById('imageUpload').click()" class="btn btn-outline-light btn-sm">
+                                    <i class="fas fa-image"></i> Upload Image
+                                </button>
+                                <button onclick="toggleImageGeneration()" class="btn btn-outline-light btn-sm" id="imageGenBtn">
+                                    <i class="fas fa-magic"></i> Generate Image
+                                </button>
+                                <button onclick="toggleCodeGeneration()" class="btn btn-outline-light btn-sm" id="codeGenBtn">
+                                    <i class="fas fa-code"></i> Image to Code
+                                </button>
+                                <button onclick="toggleFigmaToCode()" class="btn btn-outline-light btn-sm" id="figmaBtn">
+                                    <i class="fas fa-vector-square"></i> Figma to Code
+                                </button>
+                            </div>
+                            <div id="imageProcessingSection" class="mt-3">
+                                <div id="imagePreview" class="d-none">
+                                    <img id="previewImg" class="rounded" style="max-height: 40px; max-width: 40px;">
+                                    <button class="btn btn-sm btn-danger ms-2" onclick="clearImagePreview()">×</button>
+                                </div>
+                                <div id="imageGenOptions" class="d-none">
+                                    <div class="row g-2">
+                                        <div class="col-md-4">
+                                            <select class="form-select bg-dark text-light" id="imageSize">
+                                                <option value="1024x1024">1024×1024 (Square)</option>
+                                                <option value="1792x1024">1792×1024 (Landscape)</option>
+                                                <option value="1024x1792">1024×1792 (Portrait)</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <select class="form-select bg-dark text-light" id="imageStyle">
+                                                <option value="vivid">Vivid</option>
+                                                <option value="natural">Natural</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <select class="form-select bg-dark text-light" id="imageQuality">
+                                                <option value="standard">Standard Quality</option>
+                                                <option value="hd">HD Quality</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row g-2 mt-2">
+                                        <div class="col-md-6">
+                                            <select class="form-select bg-dark text-light" id="artStyle">
+                                                <option value="">Art Style (Optional)</option>
+                                                <option value="photorealistic">Photorealistic</option>
+                                                <option value="digital art">Digital Art</option>
+                                                <option value="oil painting">Oil Painting</option>
+                                                <option value="watercolor">Watercolor</option>
+                                                <option value="sketch">Sketch</option>
+                                                <option value="anime">Anime Style</option>
+                                                <option value="3d render">3D Render</option>
+                                                <option value="minimalist">Minimalist</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <select class="form-select bg-dark text-light" id="imageMood">
+                                                <option value="">Mood/Lighting (Optional)</option>
+                                                <option value="bright">Bright</option>
+                                                <option value="dark">Dark</option>
+                                                <option value="warm">Warm</option>
+                                                <option value="cool">Cool</option>
+                                                <option value="dramatic">Dramatic</option>
+                                                <option value="soft">Soft</option>
+                                                <option value="high contrast">High Contrast</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="imageProcessOptions" class="d-none">
+                                    <div class="row g-2">
+                                        <div class="col-md-4">
+                                            <select class="form-select bg-dark text-light" id="processType">
+                                                <option value="analyze">Analyze Image</option>
+                                                <option value="enhance">Enhance Quality</option>
+                                                <option value="style">Apply Style</option>
+                                                <option value="variations">Generate Variations</option>
+                                                <option value="to-code">Convert to Code</option>
+                                                <option value="figma-to-code">Figma to Code</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <select class="form-select bg-dark text-light" id="outputType">
+                                                <option value="image">Generate New Image</option>
+                                                <option value="text">Text Explanation Only</option>
+                                                <option value="code">Generate Code</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <select class="form-select bg-dark text-light" id="processStyle" disabled>
+                                                <option value="">Style Transfer</option>
+                                                <option value="cartoon">Cartoon</option>
+                                                <option value="artistic">Artistic</option>
+                                                <option value="vintage">Vintage</option>
+                                                <option value="noir">Film Noir</option>
+                                                <option value="cyberpunk">Cyberpunk</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <select class="form-select bg-dark text-light" id="processQuality" disabled>
+                                                <option value="auto">Auto Enhance</option>
+                                                <option value="sharp">Sharpen</option>
+                                                <option value="smooth">Smooth</option>
+                                                <option value="hdr">HDR Effect</option>
+                                                <option value="denoise">Reduce Noise</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="codeGenSection" class="d-none mt-3">
+                                <div class="image-upload-preview mb-3 p-3 border border-light rounded">
+                                    <input type="file" class="d-none" id="codeImageUpload" accept="image/*" onchange="handleCodeImageUpload(event)">
+                                    <div id="codeImagePreview" class="text-center">
+                                        <button onclick="document.getElementById('codeImageUpload').click()" class="btn btn-outline-light">
+                                            <i class="fas fa-upload"></i> Upload UI Image
+                                        </button>
+                                        <div id="selectedCodeImage" class="mt-2 d-none">
+                                            <img id="codePreviewImg" class="rounded mb-2" style="max-height: 150px;">
+                                            <button class="btn btn-sm btn-danger ms-2" onclick="clearCodeImagePreview()">Remove</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <select class="form-select bg-dark text-light" id="codeFramework">
+                                            <optgroup label="Frontend Frameworks">
+                                                <option value="react">React</option>
+                                                <option value="nextjs">Next.js</option>
+                                                <option value="vue">Vue.js</option>
+                                                <option value="angular">Angular</option>
+                                            </optgroup>
+                                            <optgroup label="Styling">
+                                                <option value="css">Pure CSS</option>
+                                                <option value="bootstrap">Bootstrap</option>
+                                                <option value="tailwind">Tailwind CSS</option>
+                                                <option value="materialui">Material UI</option>
+                                            </optgroup>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <select class="form-select bg-dark text-light" id="componentType">
+                                            <option value="functional">Functional Components</option>
+                                            <option value="class">Class Components</option>
+                                            <option value="hooks">React Hooks</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row g-2 mt-2">
+                                    <div class="col-md-6">
+                                        <select class="form-select bg-dark text-light" id="codeFeatures">
+                                            <option value="basic">Basic Implementation</option>
+                                            <option value="responsive">Responsive Design</option>
+                                            <option value="interactive">Interactive Elements</option>
+                                            <option value="animated">With Animations</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch mt-2">
+                                            <input class="form-check-input" type="checkbox" id="typescript">
+                                            <label class="form-check-label text-light" for="typescript">Use TypeScript</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="figmaSection" class="d-none mt-3">
+                                <div class="mb-3">
+                                    <input type="text" class="form-control bg-dark text-light" id="figmaUrl" placeholder="Paste Figma file URL">
+                                </div>
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <select class="form-select bg-dark text-light" id="figmaFramework">
+                                            <option value="react">React</option>
+                                            <option value="nextjs">Next.js</option>
+                                            <option value="html">HTML/CSS</option>
+                                            <option value="bootstrap">Bootstrap</option>
+                                            <option value="tailwind">Tailwind CSS</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <select class="form-select bg-dark text-light" id="figmaExport">
+                                            <option value="components">Individual Components</option>
+                                            <option value="page">Complete Page</option>
+                                            <option value="responsive">Responsive Layout</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row g-2 mt-2">
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="figmaTypescript">
+                                            <label class="form-check-label text-light" for="figmaTypescript">Use TypeScript</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="figmaStorybook">
+                                            <label class="form-check-label text-light" for="figmaStorybook">Generate Storybook</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Handle textarea auto-resize
+        const textarea = document.getElementById('prompt');
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+
+        // Handle Enter key press
+        textarea.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendPrompt();
+            }
+        });
+
+        // Helper function to detect image generation commands
+        function isImageGenerationPrompt(text) {
+            const generationKeywords = [
+                'generate image',
+                'create image',
+                'generate picture',
+                'create picture',
+                'draw',
+                'generate art',
+                'create art',
+                'make image',
+                'make picture',
+                'dall-e',
+                'dalle'
+            ];
+            const lowercaseText = text.toLowerCase();
+            return generationKeywords.some(keyword => lowercaseText.includes(keyword));
+        }
+
+        let uploadedImage = null;
+        let isImageGenerationMode = false;
+
+        function toggleImageGeneration() {
+            const imageProcessingSection = document.getElementById('imageProcessingSection');
+            const imageGenOptions = document.getElementById('imageGenOptions');
+            const codeGenSection = document.getElementById('codeGenSection');
+            const figmaSection = document.getElementById('figmaSection');
+            const imageGenBtn = document.getElementById('imageGenBtn');
+            const codeGenBtn = document.getElementById('codeGenBtn');
+            const figmaBtn = document.getElementById('figmaBtn');
+
+            imageProcessingSection.classList.remove('d-none');
+            imageGenOptions.classList.toggle('d-none');
+            codeGenSection.classList.add('d-none');
+            figmaSection.classList.add('d-none');
+            
+            imageGenBtn.classList.toggle('active');
+            codeGenBtn.classList.remove('active');
+            figmaBtn.classList.remove('active');
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                // Check file type and size
+                if (!file.type.match('image.*')) {
+                    appendMessage("Please upload an image file (JPG, PNG, etc.)", false);
+                    return;
+                }
+                if (file.size > 4 * 1024 * 1024) {
+                    appendMessage("Please upload an image smaller than 4MB", false);
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedImage = e.target.result;
+                    document.getElementById('previewImg').src = uploadedImage;
+                    document.getElementById('imagePreview').classList.remove('d-none');
+                    document.getElementById('imageProcessOptions').classList.remove('d-none');
+                    document.getElementById('imageGenOptions').classList.add('d-none');
+                    document.getElementById('codeGenSection').classList.add('d-none');
+                    document.getElementById('figmaSection').classList.add('d-none');
+                    document.getElementById('prompt').placeholder = "Ask a question about the uploaded image or describe desired changes...";
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function updateProcessingOptions() {
+            const processType = document.getElementById('processType').value;
+            const styleSelect = document.getElementById('processStyle');
+            const qualitySelect = document.getElementById('processQuality');
+            const outputTypeSelect = document.getElementById('outputType');
+            
+            styleSelect.disabled = processType !== 'style';
+            qualitySelect.disabled = processType !== 'enhance';
+            
+            // For certain process types, force image output
+            if (processType === 'enhance' || processType === 'style' || processType === 'variations') {
+                outputTypeSelect.value = 'image';
+                outputTypeSelect.disabled = true;
+            } else {
+                outputTypeSelect.disabled = false;
+            }
+        }
+
+        function clearImagePreview() {
+            uploadedImage = null;
+            document.getElementById('imagePreview').classList.add('d-none');
+            document.getElementById('imageProcessOptions').classList.add('d-none');
+            document.getElementById('imageUpload').value = '';
+            document.getElementById('prompt').placeholder = "Type your message here... (Press Enter to send)";
+        }
+
+        async function generateImage(prompt) {
+            const size = document.getElementById('imageSize').value;
+            const style = document.getElementById('imageStyle').value;
+            const quality = document.getElementById('imageQuality').value;
+            const artStyle = document.getElementById('artStyle').value;
+            const mood = document.getElementById('imageMood').value;
+            
+            // Build enhanced prompt with selected options
+            let enhancedPrompt = prompt;
+            if (artStyle) enhancedPrompt += `, ${artStyle} style`;
+            if (mood) enhancedPrompt += `, ${mood} lighting and mood`;
+            if (quality === 'hd') enhancedPrompt += ', highly detailed, sharp focus, ultra HD quality';
+            
+            try {
+                const response = await fetch("https://openai.super2brain.com/v1/images/generations", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": "Bearer sk-OSqhqCm1DoE24Kf0E2796eAeE75b484d9f08CbD779E7870a",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model: "dall-e-3",
+                        prompt: enhancedPrompt,
+                        n: 1,
+                        size: size,
+                        style: style,
+                        quality: quality === 'hd' ? 'hd' : 'standard'
+                    })
+                });
+
+                const data = await response.json();
+                if (data.data && data.data[0] && data.data[0].url) {
+                    return {
+                        url: data.data[0].url,
+                        size: size,
+                        style: style,
+                        quality: quality,
+                        artStyle: artStyle || 'none',
+                        mood: mood || 'natural'
+                    };
+                } else {
+                    throw new Error("No image URL in response");
+                }
+            } catch (error) {
+                console.error('Image generation error:', error);
+                throw error;
+            }
+        }
+
+        async function processImage(imageUrl, prompt) {
+            const processType = document.getElementById('processType')?.value || 'analyze';
+            const outputType = document.getElementById('outputType')?.value || 'image';
+            const codeFramework = document.getElementById('codeFramework')?.value || 'react';
+            const componentType = document.getElementById('componentType')?.value || 'functional';
+            const codeFeatures = document.getElementById('codeFeatures')?.value || 'basic';
+            const useTypescript = document.getElementById('typescript')?.checked || false;
+            const figmaUrl = document.getElementById('figmaUrl')?.value || '';
+
+            try {
+                // Handle image generation mode
+                if (isImageGenerationMode) {
+                    const result = await generateImage(prompt);
+                    return {
+                        type: 'generated',
+                        url: result.url,
+                        details: result
+                    };
+                }
+
+                // Handle image to code conversion
+                if (processType === 'to-code') {
+                    const codePreviewImg = document.getElementById('codePreviewImg');
+                    if (!codePreviewImg || !codePreviewImg.src) {
+                        throw new Error('Please upload an image first');
+                    }
+
+                    const codeResult = await generateCodeFromImage(codePreviewImg.src, {
+                        framework: codeFramework,
+                        componentType: componentType,
+                        features: codeFeatures,
+                        typescript: useTypescript
+                    });
+
+                    return {
+                        type: 'code',
+                        code: codeResult.code,
+                        framework: codeFramework
+                    };
+                }
+
+                // Handle Figma to code conversion
+                if (processType === 'figma-to-code') {
+                    if (!figmaUrl) {
+                        throw new Error('Please provide a Figma URL');
+                    }
+
+                    const figmaResult = await generateCodeFromFigma(figmaUrl, {
+                        framework: codeFramework,
+                        typescript: useTypescript
+                    });
+
+                    return {
+                        type: 'code',
+                        code: figmaResult.code,
+                        framework: codeFramework
+                    };
+                }
+
+                // Handle image processing (enhance, analyze, etc.)
+                const visionResponse = await fetch("https://openai.super2brain.com/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": "Bearer sk-OSqhqCm1DoE24Kf0E2796eAeE75b484d9f08CbD779E7870a",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model: "gpt-4-vision-preview",
+                        messages: [{
+                            role: "user",
+                            content: [
+                                { 
+                                    type: "text", 
+                                    text: getPromptForProcessType(processType, prompt)
+                                },
+                                { type: "image_url", image_url: { url: imageUrl } }
+                            ]
+                        }]
+                    })
+                });
+
+                if (!visionResponse.ok) {
+                    throw new Error(`Vision API error: ${visionResponse.status}`);
+                }
+
+                const visionData = await visionResponse.json();
+                return {
+                    type: outputType,
+                    content: visionData.choices[0].message.content
+                };
+            } catch (error) {
+                console.error('Processing error:', error);
+                throw error;
+            }
+        }
+
+        // Helper function to generate appropriate prompts
+        function getPromptForProcessType(processType, userPrompt) {
+            switch (processType) {
+                case 'analyze':
+                    return `Analyze this image and describe its contents, layout, and key features. ${userPrompt || ''}`;
+                case 'enhance':
+                    return `Describe how this image could be enhanced in terms of quality, clarity, and visual appeal. ${userPrompt || ''}`;
+                case 'style':
+                    return `Analyze this image's style and suggest artistic transformations. ${userPrompt || ''}`;
+                default:
+                    return userPrompt || 'Describe this image';
+            }
+        }
+
+        // Function to generate code from image
+        async function generateCodeFromImage(imageUrl, options) {
+            const prompt = `Convert this UI design into ${options.framework} code.
+                Requirements:
+                - Use ${options.componentType} components
+                - Include ${options.features} implementation
+                - ${options.typescript ? 'Use TypeScript' : 'Use JavaScript'}
+                - Make it production-ready with proper imports
+                - Include responsive design
+                - Add proper comments and documentation
+                - Match the exact layout and styling from the image`;
+
+            const response = await fetch("https://openai.super2brain.com/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Authorization": "Bearer sk-OSqhqCm1DoE24Kf0E2796eAeE75b484d9f08CbD779E7870a",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    model: "gpt-4-vision-preview",
+                    messages: [
+                        {
+                            role: "user",
+                            content: [
+                                { type: "text", text: prompt },
+                                { type: "image_url", image_url: { url: imageUrl } }
+                            ]
+                        }
+                    ]
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to generate code from image');
+            }
+
+            const data = await response.json();
+            return {
+                code: data.choices[0].message.content
+            };
+        }
+
+        // Function to generate code from Figma
+        async function generateCodeFromFigma(figmaUrl, options) {
+            const prompt = `Convert this Figma design into ${options.framework} code.
+                Figma URL: ${figmaUrl}
+                Requirements:
+                - ${options.typescript ? 'Use TypeScript' : 'Use JavaScript'}
+                - Create reusable components
+                - Match exact measurements and styles from Figma
+                - Include responsive design
+                - Add proper documentation
+                - Include all necessary dependencies`;
+
+            const response = await fetch("https://openai.super2brain.com/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Authorization": "Bearer sk-OSqhqCm1DoE24Kf0E2796eAeE75b484d9f08CbD779E7870a",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    model: "gpt-4",
+                    messages: [
+                        {
+                            role: "user",
+                            content: prompt
+                        }
+                    ]
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to generate code from Figma');
+            }
+
+            const data = await response.json();
+            return {
+                code: data.choices[0].message.content
+            };
+        }
+
+        function appendMessage(content, isUser = false, isTyping = false, isGeneratedImage = false, imageDetails = null) {
+            const messagesContainer = document.getElementById('chat-messages');
+            
+            if (isTyping) {
+                const existingTyping = messagesContainer.querySelector('.typing-message');
+                if (existingTyping) {
+                    const contentDiv = existingTyping.querySelector('.message-content');
+                    contentDiv.textContent = content;
+                    return;
+                }
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message rounded-4 p-4 mb-3 ${isUser ? 'user-message ms-auto' : ''} position-relative ${isTyping ? 'typing-message' : ''}`;
+            messageDiv.style.maxWidth = isGeneratedImage ? '90%' : '80%';
+            
+            if (!isTyping) {
+            const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'position-absolute top-0 end-0 p-2 d-flex gap-2 opacity-0';
+                actionsDiv.style.transition = 'opacity 0.2s';
+            actionsDiv.innerHTML = `
+                    <button class="btn btn-sm btn-primary" onclick="editMessage(this)">Edit</button>
+                    <button class="btn btn-sm btn-primary" onclick="copyMessage(this)">Copy</button>
+            `;
+            messageDiv.appendChild(actionsDiv);
+            
+                messageDiv.addEventListener('mouseenter', () => actionsDiv.style.opacity = '1');
+                messageDiv.addEventListener('mouseleave', () => actionsDiv.style.opacity = '0');
+            }
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+
+            if (typeof content === 'object' && content.type === 'code') {
+                contentDiv.innerHTML = `
+                    <div class="code-block rounded-3 position-relative my-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-primary">${content.framework}</span>
+                            <button class="btn btn-sm btn-primary" onclick="copyCode(this)">Copy Code</button>
+                        </div>
+                        <pre class="mb-0"><code class="language-${content.framework === 'nodejs' ? 'javascript' : content.framework}">${escapeHtml(content.code)}</code></pre>
+                    </div>
+                `;
+            } else if (isGeneratedImage) {
+                let imageTitle = "Generated Image";
+                let imageDescription = "Generated using DALL-E 3";
+                
+                if (imageDetails?.style === 'enhanced') {
+                    imageTitle = "Enhanced Image";
+                    imageDescription = `Enhanced using AI (${imageDetails.quality} quality)`;
+                } else if (imageDetails?.style === 'variation') {
+                    imageTitle = "Variation";
+                    imageDescription = "Generated variation maintaining original layout";
+                }
+                
+                contentDiv.innerHTML = `
+                    <div class="generated-image-container text-center">
+                        <p class="mb-2">${imageTitle}:</p>
+                        <img src="${content}" alt="AI Processed Image" class="img-fluid rounded" style="max-height: 512px;">
+                        <p class="mt-2 text-muted small">${imageDescription}</p>
+                    </div>
+                `;
+            } else if (isUser && uploadedImage) {
+                contentDiv.innerHTML = `
+                    <div class="mb-2">${content || "Analyzing this image:"}</div>
+                    <img src="${uploadedImage}" alt="Uploaded image" class="img-fluid rounded" style="max-height: 300px;">
+                `;
+            } else {
+                processContentWithCodeBlocks(content, contentDiv);
+            }
+
+            messageDiv.appendChild(contentDiv);
+            messagesContainer.appendChild(messageDiv);
+            
+            messageDiv.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightElement(block);
+            });
+            
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Helper function to process content with code blocks
+        function processContentWithCodeBlocks(content, contentDiv) {
+            const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
+            let lastIndex = 0;
+            let match;
+            let processedContent = '';
+
+            while ((match = codeBlockRegex.exec(content)) !== null) {
+                processedContent += content.slice(lastIndex, match.index);
+                
+                const language = match[1] || 'plaintext';
+                const code = match[2];
+                processedContent += `
+                    <div class="code-block rounded-3 position-relative my-3">
+                        <pre class="mb-0"><code class="language-${language}">${escapeHtml(code)}</code></pre>
+                        <button class="btn btn-sm btn-primary position-absolute top-0 end-0 m-2" onclick="copyCode(this)">Copy</button>
+                    </div>
+                `;
+                
+                lastIndex = match.index + match[0].length;
+            }
+            
+            processedContent += content.slice(lastIndex);
+            contentDiv.innerHTML = processedContent;
+        }
+
+        // Helper function to detect image URLs
+        function extractImageUrl(text) {
+            const urlRegex = /(https?:\/\/[^\s]+\.(?:jpg|jpeg|png|gif|webp))/i;
+            const match = text.match(urlRegex);
+            return match ? match[0] : null;
+        }
+
+        function editMessage(button) {
+            const messageDiv = button.closest('.message');
+            const contentDiv = messageDiv.querySelector('.message-content');
+            const currentContent = contentDiv.textContent;
+            
+            const textarea = document.createElement('textarea');
+            textarea.value = currentContent;
+            textarea.className = 'form-control bg-dark text-white';
+            textarea.style.minHeight = '100px';
+            
+            contentDiv.replaceWith(textarea);
+            
+            const saveButton = document.createElement('button');
+            saveButton.textContent = 'Save';
+            saveButton.className = 'btn btn-primary mt-2';
+            
+            saveButton.onclick = () => {
+                const newContent = textarea.value;
+                contentDiv.textContent = newContent;
+                textarea.replaceWith(contentDiv);
+                saveButton.remove();
+            };
+            
+            textarea.after(saveButton);
+        }
+
+        function copyMessage(button) {
+            const messageDiv = button.closest('.message');
+            const content = messageDiv.querySelector('.message-content').textContent;
+            
+            navigator.clipboard.writeText(content).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                setTimeout(() => {
+                    button.textContent = originalText;
+                }, 2000);
+            });
+        }
+
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function copyCode(button) {
+            const codeBlock = button.parentElement.querySelector('code');
+            const text = codeBlock.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                setTimeout(() => {
+                    button.textContent = originalText;
+                }, 2000);
+            });
+        }
+
+        async function sendPrompt() {
+            const promptInput = document.getElementById('prompt');
+            const prompt = promptInput?.value?.trim() || '';
+            
+            if (!prompt && !uploadedImage && !document.getElementById('codePreviewImg')?.src) {
+                return;
+            }
+            
+            promptInput.value = '';
+            promptInput.style.height = 'auto';
+            
+            appendMessage(prompt || "Processing...", true);
+            
+            const typingIndicator = document.getElementById('typing-indicator');
+            typingIndicator.classList.remove('d-none');
+            typingIndicator.classList.add('d-block');
+
+            try {
+                let result;
+                
+                if (isImageGenerationMode) {
+                    // Handle image generation
+                    result = await generateImage(prompt);
+                    appendMessage(result.url, false, false, true, {
+                        style: 'generated',
+                        ...result
+                    });
+                } else if (uploadedImage || document.getElementById('codePreviewImg')?.src) {
+                    // Handle image processing or code generation
+                    const imageToProcess = uploadedImage || document.getElementById('codePreviewImg')?.src;
+                    result = await processImage(imageToProcess, prompt);
+                    
+                    if (result.type === 'code') {
+                        appendMessage({
+                            type: 'code',
+                            code: result.code,
+                            framework: result.framework
+                        }, false);
+                    } else if (result.type === 'image') {
+                        appendMessage(result.content, false, false, true, result.details);
+                    } else {
+                        appendMessage(result.content, false);
+                    }
+                } else if (document.getElementById('figmaUrl')?.value) {
+                    // Handle Figma to code
+                    result = await generateCodeFromFigma(
+                        document.getElementById('figmaUrl').value,
+                        {
+                            framework: document.getElementById('figmaFramework')?.value || 'react',
+                            typescript: document.getElementById('figmaTypescript')?.checked || false
+                        }
+                    );
+                    appendMessage({
+                        type: 'code',
+                        code: result.code,
+                        framework: document.getElementById('figmaFramework')?.value || 'react'
+                    }, false);
+                } else {
+                    // Handle regular chat
+                    await handleChatCompletion([{ role: "user", content: prompt }], "gpt-4");
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                appendMessage(
+                    `Error: ${error.message}\n\nPlease try:\n1. Checking your input\n2. Making sure all required fields are filled\n3. Trying again in a moment`,
+                    false
+                );
+            } finally {
+                typingIndicator.classList.remove('d-block');
+                typingIndicator.classList.add('d-none');
+                
+                // Reset states
+                uploadedImage = null;
+                isImageGenerationMode = false;
+                
+                // Clear previews
+                clearImagePreview();
+                clearCodeImagePreview();
+            }
+        }
+
+        async function handleChatCompletion(messages, model) {
+                const result = await fetch("https://openai.super2brain.com/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": "Bearer sk-OSqhqCm1DoE24Kf0E2796eAeE75b484d9f08CbD779E7870a",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                    model: model,
+                    messages: messages,
+                        temperature: 0.7,
+                        stream: true
+                    })
+                });
+
+                const reader = result.body.getReader();
+            let fullResponse = '';
+            let displayedResponse = '';
+            let typingTimeout;
+
+            const typeNextChar = () => {
+                if (displayedResponse.length < fullResponse.length) {
+                    displayedResponse = fullResponse.substring(0, displayedResponse.length + 1);
+                    appendMessage(displayedResponse, false, true);
+                    typingTimeout = setTimeout(typeNextChar, 3);
+                } else {
+                    const typingMessage = document.querySelector('.typing-message');
+                    if (typingMessage) {
+                        typingMessage.remove();
+                    }
+                    appendMessage(fullResponse, false);
+                }
+            };
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = new TextDecoder().decode(value);
+                    const lines = chunk.split('\n');
+                    
+                    for (const line of lines) {
+                    if (line.trim() === '' || line.trim() === 'data: [DONE]') continue;
+                        
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+                            if (data.choices?.[0]?.delta?.content) {
+                                fullResponse += data.choices[0].delta.content;
+                                clearTimeout(typingTimeout);
+                                typeNextChar();
+                                }
+                            } catch (parseError) {
+                                console.warn('Failed to parse streaming response line:', parseError);
+                                continue;
+                            }
+                        }
+                    }
+                }
+        }
+
+        // Update the processType change handler
+        document.getElementById('processType').addEventListener('change', function() {
+            const processType = this.value;
+            const codeOptions = document.getElementById('codeOptions');
+            const codeGenOptions = document.getElementById('codeGenOptions');
+            const outputType = document.getElementById('outputType');
+            const processQuality = document.getElementById('processQuality');
+            const processStyle = document.getElementById('processStyle');
+
+            // Reset and hide all option panels
+            codeOptions.disabled = true;
+            codeGenOptions.classList.add('d-none');
+            processQuality.disabled = true;
+            processStyle.disabled = true;
+
+            // Show relevant options based on process type
+            if (processType === 'to-code' || processType === 'figma-to-code') {
+                codeOptions.disabled = false;
+                codeGenOptions.classList.remove('d-none');
+                outputType.value = 'code';
+                outputType.disabled = true;
+            } else if (processType === 'enhance') {
+                processQuality.disabled = false;
+                outputType.value = 'image';
+                outputType.disabled = true;
+            } else if (processType === 'style') {
+                processStyle.disabled = false;
+                outputType.disabled = false;
+            } else {
+                outputType.disabled = false;
+            }
+        });
+
+        function toggleCodeGeneration() {
+            const codeGenSection = document.getElementById('codeGenSection');
+            const imageProcessingSection = document.getElementById('imageProcessingSection');
+            const figmaSection = document.getElementById('figmaSection');
+            const codeGenBtn = document.getElementById('codeGenBtn');
+            const imageGenBtn = document.getElementById('imageGenBtn');
+            const figmaBtn = document.getElementById('figmaBtn');
+
+            codeGenSection.classList.toggle('d-none');
+            imageProcessingSection.classList.add('d-none');
+            figmaSection.classList.add('d-none');
+            
+            if (!codeGenSection.classList.contains('d-none')) {
+                clearCodeImagePreview(); // Reset image preview when opening
+            }
+            
+            codeGenBtn.classList.toggle('active');
+            imageGenBtn.classList.remove('active');
+            figmaBtn.classList.remove('active');
+        }
+
+        function toggleFigmaToCode() {
+            const figmaSection = document.getElementById('figmaSection');
+            const imageProcessingSection = document.getElementById('imageProcessingSection');
+            const codeGenSection = document.getElementById('codeGenSection');
+            const figmaBtn = document.getElementById('figmaBtn');
+            const imageGenBtn = document.getElementById('imageGenBtn');
+            const codeGenBtn = document.getElementById('codeGenBtn');
+
+            figmaSection.classList.toggle('d-none');
+            imageProcessingSection.classList.add('d-none');
+            codeGenSection.classList.add('d-none');
+            
+            if (!figmaSection.classList.contains('d-none')) {
+                document.getElementById('figmaUrl').value = ''; // Reset Figma URL when opening
+            }
+            
+            figmaBtn.classList.toggle('active');
+            imageGenBtn.classList.remove('active');
+            codeGenBtn.classList.remove('active');
+        }
+
+        function handleCodeImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                if (!file.type.match('image.*')) {
+                    appendMessage("Please upload an image file (JPG, PNG, etc.)", false);
+                    return;
+                }
+                if (file.size > 4 * 1024 * 1024) {
+                    appendMessage("Please upload an image smaller than 4MB", false);
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('codePreviewImg').src = e.target.result;
+                    document.getElementById('selectedCodeImage').classList.remove('d-none');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function clearCodeImagePreview() {
+            document.getElementById('codeImageUpload').value = '';
+            document.getElementById('selectedCodeImage').classList.add('d-none');
+            document.getElementById('codePreviewImg').src = '';
+        }
+    </script>
+</body>
+</html>

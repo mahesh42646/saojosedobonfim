@@ -2,23 +2,25 @@ import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Spinner } from 'react-bootstrap';
 import { FaChevronRight } from 'react-icons/fa';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://teste.mapadacultura.com/api';
+
 const TYPE_DISPLAY = {
   personal: {
-    name: (profile) => profile.fullname || 'Personal Account',
-    description: 'Your personal account',
+    name: (profile) => profile.fullname || 'Conta Pessoal',
+    description: 'Sua conta pessoal',
     initials: (profile) => profile.fullname ? profile.fullname.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'P',
   },
   business: {
-    name: (profile) => profile.businessData?.razaoSocial || 'Business Account',
-    description: 'Your legal entity account',
+    name: (profile) => profile.businessData?.razaoSocial || 'Conta Empresarial',
+    description: 'Sua conta de pessoa jurídica',
     initials: (profile) => {
       const name = profile.businessData?.razaoSocial || 'B';
       return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
     },
   },
   collective: {
-    name: (profile) => profile.collectiveData?.collectiveName || 'Collective Account',
-    description: 'Your collective account',
+    name: (profile) => profile.collectiveData?.collectiveName || 'Conta Coletiva',
+    description: 'Sua conta coletiva',
     initials: (profile) => {
       const name = profile.collectiveData?.collectiveName || 'C';
       return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -45,7 +47,7 @@ function AccountSelector({ onAccountSelect }) {
         }
         const user = JSON.parse(userData);
         const cpf = user.cpf;
-        const response = await fetch(`https://teste.mapadacultura.com/api/agent/profile/${cpf}`, {
+        const response = await fetch(`${API_BASE_URL}/agent/profile/${cpf}`, {
         // const response = await fetch(`http://localhost:4000/api/agent/profile/${cpf}`, {
           method: 'GET',  
           headers: {
@@ -74,8 +76,10 @@ function AccountSelector({ onAccountSelect }) {
     }
   };
 
-  if (loading) return <div className="text-center py-5"><Spinner animation="border" size="sm" /> Loading...</div>;
-  if (error) return <div className="text-danger text-center py-5">{error}</div>;
+  if (loading) return <div className="text-center py-5"><Spinner animation="border" size="sm" /> Carregando...</div>;
+  if (error) return <div className="text-danger text-center py-5">{error === 'Not authenticated' ? 'Não autenticado' : 
+                                                                error === 'Failed to fetch profile' ? 'Falha ao carregar perfil' : 
+                                                                'Erro ao carregar perfil'}</div>;
   if (!profile || !profile.typeStatus) return null;
 
   return (
@@ -129,7 +133,7 @@ function AccountSelector({ onAccountSelect }) {
                   {display.name(profile)}
                 </div>
                 <div style={{ color: isComplete ? '#444' : '#bbb', fontSize: 16 }}>
-                  {isComplete ? display.description : 'Incomplete'}
+                  {isComplete ? display.description : 'Incompleto'}
                 </div>
               </Col>
               <Col xs="auto" className="d-flex align-items-center">

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import TenantsPage from './components/tenants';
-import AdminDashboardPage from './components/dashboard';
+// import AdminDashboardPage from './components/dashboard';
 import HeaderAdmin from './components/header';
 import Sidebar from './components/sidebar';
 import Login from './components/login';
@@ -38,14 +38,14 @@ function ProtectedSuperAdminContent() {
 
   // If authenticated, show the main dashboard
   return (
-    <div className="container py-3-">
+    <div className="container py-3">
       <HeaderAdmin />
       <div className="row">
         <div className="col-lg-3">
           <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
         </div>
         <div className="col-lg-9">
-          {activeTab === 'dashboard' ? <AdminDashboardPage /> : <TenantsPage />}
+          <TenantsPage />
         </div>
       </div>
     </div>

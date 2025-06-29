@@ -6,6 +6,9 @@ body, p, span, h1, h2, h3, h4, h5, h6, div, nav, strong, button, a, input, texta
   font-family: 'Inter', sans-serif !important;
 }
 
+.bg-secondary-lite {
+background-color:  #EAECEF !important;
+}
 
 .bg-lite-green {
   background-color: #ddf8ef;

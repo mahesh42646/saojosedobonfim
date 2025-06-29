@@ -5,20 +5,20 @@ import Image from 'next/image';
 const accountTypes = [
   {
     key: 'collective',
-    title: 'Collective Account',
-    subtitle: 'You can add another profile later',
+    title: 'Conta Coletiva',
+    subtitle: 'Você pode adicionar outro perfil depois',
     img: '/images/Collective.png', // Replace with your actual image path
   },
   {
     key: 'personal',
-    title: 'Personal Account',
-    subtitle: 'You can add another profile later',
+    title: 'Conta Pessoal',
+    subtitle: 'Você pode adicionar outro perfil depois',
     img: '/images/Personal.png', // Replace with your actual image path
   },
   {
     key: 'business',
-    title: 'Business Account',
-    subtitle: 'You can add another profile later',
+    title: 'Conta Empresarial',
+    subtitle: 'Você pode adicionar outro perfil depois',
     img: '/images/Business.png', // Replace with your actual image path
   },
 ];
@@ -27,10 +27,10 @@ export default function Type({ onSelectType }) {
   return (
     <Container className="p-lg-5">
       <h2 className="fw-bold text-center mb-2" style={{ fontSize: '2rem' }}>
-        What type of account would you like to open today?
+        Que tipo de conta você gostaria de abrir hoje?
       </h2>
       <p className="text-center mb-5" style={{ fontSize: '1.2rem', color: '#666' }}>
-        You can also add another account later.
+        Você também pode adicionar outra conta depois.
       </p>
       <Row className="justify-content-center p-5">
         {accountTypes.map((type) => (

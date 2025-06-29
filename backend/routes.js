@@ -2,7 +2,39 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
-const { SuperAdmin, Admin, Agent, AgentProfile, Tenant } = require('./schema');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const { SuperAdmin, Admin, Agent, AgentProfile, Tenant, Space, Project, Staff } = require('./schema');
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = './uploads';
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir);
+    }
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now();
+    cb(null, uniqueSuffix + '_' + file.originalname);
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  fileFilter: function (req, file, cb) {
+    const filetypes = /jpeg|jpg|png/;
+    const mimetype = filetypes.test(file.mimetype);
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+
+    if (mimetype && extname) {
+      return cb(null, true);
+    }
+    cb(new Error('Only .png, .jpg and .jpeg format allowed!'));
+  }
+});
 
 // middleware to check token - modified for testing
 function authMiddleware(req, res, next) {
@@ -40,11 +72,40 @@ router.post('/superadmin/login', async (req, res) => {
 });
 
 // Admin Signup/Login
-router.post('/admin/signup', async (req, res) => {
-  const { email, password } = req.body;
-  const admin = new Admin({ email, password });
-  await admin.save();
-  res.send('Admin account created');
+router.post('/admin/signup', upload.single('profilePhoto'), async (req, res) => {
+  try {
+    const { email, password, name, title, description } = req.body;
+    
+    // Check if admin with same email exists
+    const existingAdmin = await Admin.findOne({ email });
+    if (existingAdmin) {
+      return res.status(400).json({ error: 'Admin with this email already exists' });
+    }
+
+    // Create new admin with profile details
+    const admin = new Admin({
+      email,
+      password,
+      name,
+      title,
+      description,
+      profilePhoto: req.file ? req.file.filename : undefined
+    });
+
+    await admin.save();
+    
+    // Return admin data without password
+    const adminData = admin.toObject();
+    delete adminData.password;
+    
+    res.status(201).json({
+      message: 'Admin account created successfully',
+      admin: adminData
+    });
+  } catch (error) {
+    console.error('Signup error:', error);
+    res.status(500).json({ error: 'Failed to create admin account' });
+  }
 });
 
 router.post('/admin/login', async (req, res) => {
@@ -52,7 +113,81 @@ router.post('/admin/login', async (req, res) => {
   const admin = await Admin.findOne({ email, password });
   if (!admin) return res.status(400).send('Invalid credentials');
   const token = jwt.sign({ id: admin._id, role: 'admin' }, process.env.TOKEN_KEY);
-  res.json({ token });
+  res.json({ token, id: admin._id });
+});
+
+// Get current admin profile
+router.get('/admin/profile', authMiddleware, async (req, res) => {
+  try {
+    const admin = await Admin.findById(req.user.id).select('-password');
+    if (!admin) {
+      return res.status(404).json({ error: 'Admin not found' });
+    }
+    res.json(admin);
+  } catch (error) {
+    console.error('Get profile error:', error);
+    res.status(500).json({ error: 'Failed to fetch profile' });
+  }
+});
+
+// New route for updating admin profile
+router.put('/admin/profile/:id', [authMiddleware, upload.single('profilePhoto')], async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, title, description, currentPassword, newPassword } = req.body;
+
+    // Find admin and verify ownership
+    const admin = await Admin.findById(id);
+    if (!admin) {
+      return res.status(404).json({ error: 'Admin not found' });
+    }
+
+    // Verify current password if trying to change password
+    if (newPassword) {
+      if (!currentPassword) {
+        return res.status(400).json({ error: 'Current password is required to change password' });
+      }
+      if (currentPassword !== admin.password) {
+        return res.status(400).json({ error: 'Current password is incorrect' });
+      }
+    }
+
+    // Update fields
+    const updates = {
+      name: name || admin.name,
+      title: title || admin.title,
+      description: description || admin.description,
+      password: newPassword || admin.password,
+      updatedAt: new Date()
+    };
+
+    // Update profile photo if provided
+    if (req.file) {
+      // Delete old photo if exists
+      if (admin.profilePhoto) {
+        const oldPhotoPath = path.join('./uploads', admin.profilePhoto);
+        if (fs.existsSync(oldPhotoPath)) {
+          fs.unlinkSync(oldPhotoPath);
+        }
+      }
+      updates.profilePhoto = req.file.filename;
+    }
+
+    // Update admin
+    const updatedAdmin = await Admin.findByIdAndUpdate(
+      id,
+      updates,
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    res.json({
+      message: 'Profile updated successfully',
+      admin: updatedAdmin
+    });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
 });
 
 // Agent Signup/Login
@@ -663,6 +798,744 @@ router.patch('/tenants/:id/status', authMiddleware, async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// SPACE ROUTES
+
+// Create new space
+router.post('/space/addnew', [authMiddleware, upload.fields([
+  { name: 'coverPhoto', maxCount: 1 },
+  { name: 'photos', maxCount: 10 }
+])], async (req, res) => {
+  try {
+    const {
+      type,
+      title,
+      description,
+      capacity,
+      operatingHours,
+      operatingDays,
+      socialLinks,
+      accessibility,
+      location
+    } = req.body;
+
+    // Handle file uploads
+    let coverPhotoPath = '';
+    let photosPaths = [];
+
+    if (req.files) {
+      if (req.files.coverPhoto) {
+        coverPhotoPath = req.files.coverPhoto[0].filename;
+      }
+      if (req.files.photos) {
+        photosPaths = req.files.photos.map(file => file.filename);
+      }
+    }
+
+    // Parse JSON strings if they come as strings
+    const parsedSocialLinks = typeof socialLinks === 'string' ? JSON.parse(socialLinks) : socialLinks;
+    const parsedAccessibility = typeof accessibility === 'string' ? JSON.parse(accessibility) : accessibility;
+    const parsedLocation = typeof location === 'string' ? JSON.parse(location) : location;
+
+    const space = new Space({
+      agentId: req.user.id,
+      type,
+      title,
+      description,
+      capacity,
+      operatingHours,
+      operatingDays,
+      coverPhoto: coverPhotoPath,
+      photos: photosPaths,
+      socialLinks: parsedSocialLinks,
+      accessibility: parsedAccessibility,
+      location: parsedLocation,
+      status: 'pending'
+    });
+
+    await space.save();
+    
+    res.status(201).json({ 
+      message: 'Space created successfully', 
+      space 
+    });
+  } catch (error) {
+    console.error('Error creating space:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get all spaces (with optional filters)
+router.get('/spaces', authMiddleware, async (req, res) => {
+  try {
+    const { status, type, search } = req.query;
+    let query = {};
+
+    // Add filters if provided
+    if (status) {
+      query.status = status;
+    }
+    if (type) {
+      query.type = type;
+    }
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    // If user is an agent, only show their spaces
+    if (req.user.role === 'agent') {
+      query.agentId = req.user.id;
+    }
+
+    const spaces = await Space.find(query)
+      .populate('agentId', 'email')
+      .sort({ createdAt: -1 });
+
+    res.json(spaces);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get single space by ID
+router.get('/space/:id', authMiddleware, async (req, res) => {
+  try {
+    const space = await Space.findById(req.params.id)
+      .populate('agentId', 'email');
+    
+    if (!space) {
+      return res.status(404).json({ error: 'Space not found' });
+    }
+
+    // Check if user has access to this space
+    if (req.user.role === 'agent' && space.agentId.toString() !== req.user.id) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    res.json(space);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update space
+router.put('/space/:id', [authMiddleware, upload.fields([
+  { name: 'coverPhoto', maxCount: 1 },
+  { name: 'photos', maxCount: 10 }
+])], async (req, res) => {
+  try {
+    const space = await Space.findById(req.params.id);
+    
+    if (!space) {
+      return res.status(404).json({ error: 'Space not found' });
+    }
+
+    // Check if user has access to update this space
+    if (req.user.role === 'agent' && space.agentId.toString() !== req.user.id) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    // Handle file uploads
+    if (req.files) {
+      if (req.files.coverPhoto) {
+        // Delete old cover photo if exists
+        if (space.coverPhoto) {
+          const oldPath = path.join('./uploads', space.coverPhoto);
+          if (fs.existsSync(oldPath)) {
+            fs.unlinkSync(oldPath);
+          }
+        }
+        space.coverPhoto = req.files.coverPhoto[0].filename;
+      }
+      if (req.files.photos) {
+        // Delete old photos if exists
+        space.photos.forEach(photo => {
+          const oldPath = path.join('./uploads', photo);
+          if (fs.existsSync(oldPath)) {
+            fs.unlinkSync(oldPath);
+          }
+        });
+        space.photos = req.files.photos.map(file => file.filename);
+      }
+    }
+
+    // Update other fields
+    const updateFields = { ...req.body };
+    delete updateFields.agentId; // Don't allow agentId updates
+
+    // Parse JSON strings if they come as strings
+    if (updateFields.socialLinks) {
+      updateFields.socialLinks = typeof updateFields.socialLinks === 'string' 
+        ? JSON.parse(updateFields.socialLinks) 
+        : updateFields.socialLinks;
+    }
+    if (updateFields.accessibility) {
+      updateFields.accessibility = typeof updateFields.accessibility === 'string'
+        ? JSON.parse(updateFields.accessibility)
+        : updateFields.accessibility;
+    }
+    if (updateFields.location) {
+      updateFields.location = typeof updateFields.location === 'string'
+        ? JSON.parse(updateFields.location)
+        : updateFields.location;
+    }
+
+    Object.keys(updateFields).forEach(key => {
+      if (updateFields[key] !== undefined) {
+        space[key] = updateFields[key];
+      }
+    });
+
+    space.updatedAt = new Date();
+    await space.save();
+    
+    res.json({ 
+      message: 'Space updated successfully', 
+      space 
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete space
+router.delete('/space/:id', authMiddleware, async (req, res) => {
+  try {
+    const space = await Space.findById(req.params.id);
+    
+    if (!space) {
+      return res.status(404).json({ error: 'Space not found' });
+    }
+
+    // Check if user has access to delete this space
+    if (req.user.role === 'agent' && space.agentId.toString() !== req.user.id) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    // Delete associated files
+    if (space.coverPhoto) {
+      const coverPath = path.join('./uploads', space.coverPhoto);
+      if (fs.existsSync(coverPath)) {
+        fs.unlinkSync(coverPath);
+      }
+    }
+    
+    space.photos.forEach(photo => {
+      const photoPath = path.join('./uploads', photo);
+      if (fs.existsSync(photoPath)) {
+        fs.unlinkSync(photoPath);
+      }
+    });
+
+    await Space.findByIdAndDelete(req.params.id);
+    
+    res.json({ message: 'Space deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update space status (for admins)
+router.patch('/space/:id/status', authMiddleware, async (req, res) => {
+  try {
+    // Only allow admins and superadmins to update status
+    if (!['admin', 'superadmin'].includes(req.user.role)) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const { status } = req.body;
+    
+    if (!['pending', 'approved', 'rejected'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
+
+    const space = await Space.findByIdAndUpdate(
+      req.params.id,
+      { status, updatedAt: Date.now() },
+      { new: true }
+    );
+
+    if (!space) {
+      return res.status(404).json({ error: 'Space not found' });
+    }
+
+    res.json({ 
+      message: `Space ${status} successfully`, 
+      space 
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// PROJECT ROUTES
+
+// Create new project
+router.post('/project', [authMiddleware, upload.fields([
+  { name: 'coverPhoto', maxCount: 1 },
+  { name: 'photos', maxCount: 10 }
+])], async (req, res) => {
+  try {
+    const {
+      type,
+      title,
+      description,
+      period,
+      socialLinks
+    } = req.body;
+
+    // Handle file uploads
+    let coverPhotoPath = '';
+    let photosPaths = [];
+
+    if (req.files) {
+      if (req.files.coverPhoto) {
+        coverPhotoPath = req.files.coverPhoto[0].filename;
+      }
+      if (req.files.photos) {
+        photosPaths = req.files.photos.map(file => file.filename);
+      }
+    }
+
+    // Parse JSON strings if they come as strings
+    const parsedPeriod = typeof period === 'string' ? JSON.parse(period) : period;
+    const parsedSocialLinks = typeof socialLinks === 'string' ? JSON.parse(socialLinks) : socialLinks;
+
+    const project = new Project({
+      agentId: req.user.id,
+      type,
+      title,
+      description,
+      period: parsedPeriod,
+      coverPhoto: coverPhotoPath,
+      photos: photosPaths,
+      socialLinks: parsedSocialLinks,
+      status: 'pending'
+    });
+
+    await project.save();
+    
+    res.status(201).json({ 
+      message: 'Project created successfully', 
+      project 
+    });
+  } catch (error) {
+    console.error('Error creating project:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get all projects (with optional filters)
+router.get('/projects', authMiddleware, async (req, res) => {
+  try {
+    const { status, type, search } = req.query;
+    let query = {};
+
+    // Add filters if provided
+    if (status) {
+      query.status = status;
+    }
+    if (type) {
+      query.type = type;
+    }
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    // If user is an agent, only show their projects
+    if (req.user.role === 'agent') {
+      query.agentId = req.user.id;
+    }
+
+    const projects = await Project.find(query)
+      .populate('agentId', 'email')
+      .sort({ createdAt: -1 });
+
+    res.json(projects);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get single project by ID
+router.get('/project/:id', authMiddleware, async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id)
+      .populate('agentId', 'email');
+    
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    // Check if user has access to this project
+    if (req.user.role === 'agent' && project.agentId.toString() !== req.user.id) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    res.json(project);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete project
+router.delete('/project/:id', authMiddleware, async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+    
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    // Check if user has access to delete this project
+    if (req.user.role === 'agent' && project.agentId.toString() !== req.user.id) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    // Delete associated files
+    if (project.coverPhoto) {
+      const coverPath = path.join('./uploads', project.coverPhoto);
+      if (fs.existsSync(coverPath)) {
+        fs.unlinkSync(coverPath);
+      }
+    }
+    
+    project.photos.forEach(photo => {
+      const photoPath = path.join('./uploads', photo);
+      if (fs.existsSync(photoPath)) {
+        fs.unlinkSync(photoPath);
+      }
+    });
+
+    await Project.findByIdAndDelete(req.params.id);
+    
+    res.json({ message: 'Project deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ADMIN PROJECT ROUTES (No auth required)
+// Get all projects for admin
+router.get('/admin/projects', async (req, res) => {
+  try {
+    const { status, type, search } = req.query;
+    let query = {};
+
+    // Add filters if provided
+    if (status) {
+      query.status = status;
+    }
+    if (type) {
+      query.type = type;
+    }
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const projects = await Project.find(query)
+      .populate('agentId', 'email')
+      .sort({ createdAt: -1 });
+
+    res.json(projects);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get single project by ID for admin
+router.get('/admin/project/:id', async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id)
+      .populate('agentId', 'email');
+    
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    res.json(project);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update project status (approve/reject) for admin
+router.patch('/admin/project/:id/status', async (req, res) => {
+  try {
+    const { status } = req.body;
+    
+    if (!['pending', 'approved', 'rejected', 'inactive'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
+
+    const currentTime = new Date();
+    
+    const project = await Project.findByIdAndUpdate(
+      req.params.id,
+      { 
+        status,
+        updatedAt: currentTime,
+        $push: { 
+          statusHistory: {
+            status,
+            changedAt: currentTime
+          }
+        }
+      },
+      { new: true }
+    );
+
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    res.json({ 
+      message: `Project ${status} successfully`, 
+      project 
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ADMIN SPACE ROUTES (No auth required)
+// Get all spaces for admin
+router.get('/admin/spaces', async (req, res) => {
+  try {
+    const { status, type, search } = req.query;
+    let query = {};
+
+    // Add filters if provided
+    if (status) {
+      query.status = status;
+    }
+    if (type) {
+      query.type = type;
+    }
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const spaces = await Space.find(query)
+      .populate('agentId', 'email')
+      .sort({ createdAt: -1 });
+
+    res.json(spaces);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get single space by ID for admin
+router.get('/admin/space/:id', async (req, res) => {
+  try {
+    const space = await Space.findById(req.params.id)
+      .populate('agentId', 'email');
+    
+    if (!space) {
+      return res.status(404).json({ error: 'Space not found' });
+    }
+    
+    res.json(space);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update space status for admin
+router.patch('/admin/space/:id/status', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!['approved', 'rejected', 'inactive', 'pending'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status value' });
+    }
+
+    const space = await Space.findById(id);
+    if (!space) {
+      return res.status(404).json({ error: 'Space not found' });
+    }
+
+    // Add to status history
+    space.statusHistory = space.statusHistory || [];
+    space.statusHistory.push({
+      status,
+      changedAt: new Date()
+    });
+
+    // Update current status
+    space.status = status;
+    await space.save();
+
+    res.json({ 
+      message: `Space ${status === 'inactive' ? 'inactivated' : status === 'rejected' ? 'rejected' : 'approved'} successfully`,
+      space 
+    });
+  } catch (error) {
+    console.error('Error updating space status:', error);
+    res.status(500).json({ error: 'Failed to update space status' });
+  }
+});
+
+// Public endpoints (no auth required)
+// Public space details endpoint
+router.get('/public/space/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const space = await Space.findById(id);
+    
+    if (!space) {
+      return res.status(404).json({ error: 'Space not found' });
+    }
+
+    // Remove sensitive information for public view
+    const publicSpace = {
+      ...space.toObject(),
+      // Remove any sensitive fields here
+      __v: undefined,
+      updatedAt: undefined,
+      createdAt: undefined,
+    };
+
+    res.json(publicSpace);
+  } catch (error) {
+    console.error('Error fetching space details:', error);
+    res.status(500).json({ error: 'Failed to fetch space details' });
+  }
+});
+
+// Public project details endpoint
+router.get('/public/project/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const project = await Project.findById(id);
+    
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    // Remove sensitive information for public view
+    const publicProject = {
+      ...project.toObject(),
+      __v: undefined,
+      updatedAt: undefined,
+      createdAt: undefined,
+    };
+
+    res.json(publicProject);
+  } catch (error) {
+    console.error('Error fetching project details:', error);
+    res.status(500).json({ error: 'Failed to fetch project details' });
+  }
+});
+
+// STAFF ROUTES
+
+// Create new staff member
+router.post('/staff', authMiddleware, async (req, res) => {
+  try {
+    const { employeeType, cpf, fullName, email, password } = req.body;
+
+    // Validate required fields
+    if (!employeeType || !cpf || !fullName || !email || !password) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    // Check if staff with same email or CPF exists
+    const existingStaff = await Staff.findOne({ $or: [{ email }, { cpf }] });
+    if (existingStaff) {
+      return res.status(400).json({ error: 'Staff member with this email or CPF already exists' });
+    }
+
+    // Create new staff member
+    const staff = new Staff({
+      employeeType,
+      cpf,
+      fullName,
+      email,
+      password,
+      // Status will default to 'pending'
+    });
+
+    await staff.save();
+    res.status(201).json(staff);
+  } catch (error) {
+    console.error('Create staff error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get all staff members
+router.get('/staff', authMiddleware, async (req, res) => {
+  try {
+    const staff = await Staff.find().select('-password');
+    res.json(staff);
+  } catch (error) {
+    console.error('Get staff error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Update staff status
+router.patch('/staff/:id/status', authMiddleware, async (req, res) => {
+  try {
+    const { status } = req.body;
+    const { id } = req.params;
+
+    if (!['pending', 'active', 'inactive', 'deleted', 'rejected'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
+
+    const staff = await Staff.findByIdAndUpdate(
+      id,
+      { status, updatedAt: Date.now() },
+      { new: true }
+    ).select('-password');
+
+    if (!staff) {
+      return res.status(404).json({ error: 'Staff member not found' });
+    }
+
+    res.json(staff);
+  } catch (error) {
+    console.error('Update staff status error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Delete staff member
+router.delete('/staff/:id', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const staff = await Staff.findByIdAndUpdate(
+      id,
+      { status: 'deleted', updatedAt: Date.now() },
+      { new: true }
+    ).select('-password');
+
+    if (!staff) {
+      return res.status(404).json({ error: 'Staff member not found' });
+    }
+
+    res.json(staff);
+  } catch (error) {
+    console.error('Delete staff error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

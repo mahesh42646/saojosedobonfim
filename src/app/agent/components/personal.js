@@ -19,11 +19,11 @@ export default function Personal({ cpf }) {
           <Form.Control className="border-dark-gray" type="text" value={cpf} readOnly />
         </Form.Group>
         <Form.Group className="mb-3" controlId="dob">
-          <Form.Label>Date of birth *</Form.Label>
+          <Form.Label>Data de nascimento *</Form.Label>
           <Form.Control className="border-dark-gray" type="date" />
         </Form.Group>
         <Form.Group className="mb-3" controlId="fullname">
-          <Form.Label>Full name *</Form.Label>
+          <Form.Label>Nome completo *</Form.Label>
           <Form.Control className="border-dark-gray" type="text" />
         </Form.Group>
         <Form.Group className="mb-3" controlId="rg">
@@ -31,28 +31,28 @@ export default function Personal({ cpf }) {
           <Form.Control className="border-dark-gray" type="text" />
         </Form.Group>
         <Form.Group className="mb-3" controlId="socialname">
-          <Form.Label>Social name</Form.Label>
+          <Form.Label>Nome social</Form.Label>
           <Form.Control className="border-dark-gray" type="text" />
         </Form.Group>
         <Row>
           <Col md={6}>
             <Form.Group className="mb-3" controlId="gender">
-              <Form.Label>Gender *</Form.Label>
+              <Form.Label>Gênero *</Form.Label>
               <Form.Select className="border-dark-gray">
-                <option>Select</option>
-                <option>Male</option>
-                <option>Female</option>
-                <option>Other</option>
+                <option>Selecione</option>
+                <option>Masculino</option>
+                <option>Feminino</option>
+                <option>Outro</option>
               </Form.Select>
             </Form.Group>
           </Col>
           <Col md={6}>
             <Form.Group className="mb-3" controlId="breed">
-              <Form.Label>Breed *</Form.Label>
+              <Form.Label>Raça *</Form.Label>
               <Form.Select className="border-dark-gray">
-                <option>Select</option>
-                <option>Breed 1</option>
-                <option>Breed 2</option>
+                <option>Selecione</option>
+                <option>Raça 1</option>
+                <option>Raça 2</option>
               </Form.Select>
             </Form.Group>
           </Col>
@@ -60,22 +60,22 @@ export default function Personal({ cpf }) {
         <Row>
           <Col md={6}>
             <Form.Group className="mb-3" controlId="lgbtq">
-              <Form.Label>Are you LGBTQIAPN+? *</Form.Label>
+              <Form.Label>Você é LGBTQIAPN+? *</Form.Label>
               <Form.Select className="border-dark-gray">
-                <option>Select</option>
-                <option>Yes</option>
-                <option>No</option>
+                <option>Selecione</option>
+                <option>Sim</option>
+                <option>Não</option>
               </Form.Select>
             </Form.Group>
           </Col>
           <Col md={6}>
             <Form.Group className="mb-3" controlId="education">
-              <Form.Label>Education *</Form.Label>
+              <Form.Label>Escolaridade *</Form.Label>
               <Form.Select className="border-dark-gray">
-                <option>Select</option>
-                <option>High School</option>
-                <option>Bachelor&apos;s</option>
-                <option>Master&apos;s</option>
+                <option>Selecione</option>
+                <option>Ensino Médio</option>
+                <option>Graduação</option>
+                <option>Mestrado</option>
               </Form.Select>
             </Form.Group>
           </Col>
@@ -83,22 +83,22 @@ export default function Personal({ cpf }) {
         <Row>
           <Col md={6}>
             <Form.Group className="mb-3" controlId="income">
-              <Form.Label>Individual income *</Form.Label>
+              <Form.Label>Renda individual *</Form.Label>
               <Form.Select className="border-dark-gray">
-                <option>Select</option>
-                <option>Below $20,000</option>
+                <option>Selecione</option>
+                <option>Abaixo de $20,000</option>
                 <option>$20,000 - $50,000</option>
-                <option>Above $50,000</option>
+                <option>Acima de $50,000</option>
               </Form.Select>
             </Form.Group>
           </Col>
           <Col md={6}>
             <Form.Group className="mb-3" controlId="mainActivity">
-              <Form.Label>Main area of activity *</Form.Label>
+              <Form.Label>Área principal de atividade *</Form.Label>
               <Form.Select className="border-dark-gray">
-                <option>Select</option>
-                <option>Activity 1</option>
-                <option>Activity 2</option>
+                <option>Selecione</option>
+                <option>Atividade 1</option>
+                <option>Atividade 2</option>
               </Form.Select>
             </Form.Group>
           </Col>
@@ -106,21 +106,21 @@ export default function Personal({ cpf }) {
         <Row>
           <Col md={6}>
             <Form.Group className="mb-3" controlId="otherActivity">
-              <Form.Label>Other areas of activity</Form.Label>
+              <Form.Label>Outras áreas de atividade</Form.Label>
               <Form.Select className="border-dark-gray">
-                <option>Select</option>
-                <option>Activity 1</option>
-                <option>Activity 2</option>
+                <option>Selecione</option>
+                <option>Atividade 1</option>
+                <option>Atividade 2</option>
               </Form.Select>
             </Form.Group>
           </Col>
           <Col md={6}>
             <Form.Group className="mb-3" controlId="traditionalCommunities">
-              <Form.Label>Traditional communities *</Form.Label>
+              <Form.Label>Comunidades tradicionais *</Form.Label>
               <Form.Select className="border-dark-gray">
-                <option>Select</option>
-                <option>Community 1</option>
-                <option>Community 2</option>
+                <option>Selecione</option>
+                <option>Comunidade 1</option>
+                <option>Comunidade 2</option>
               </Form.Select>
             </Form.Group>
           </Col>
@@ -128,36 +128,36 @@ export default function Personal({ cpf }) {
         <Row>
           <Col md={6}>
             <Form.Group className="mb-3" controlId="pcd">
-              <Form.Label>Do you have a PCD disability? *</Form.Label>
+              <Form.Label>Você tem uma deficiência PCD? *</Form.Label>
               <Form.Select
                 className="border-dark-gray"
                 value={pcd}
                 onChange={e => setPcd(e.target.value)}
               >
-                <option>No</option>
-                <option>Yes</option>
+                <option>Não</option>
+                <option>Sim</option>
               </Form.Select>
             </Form.Group>
           </Col>
           {pcd === 'Yes' && (
             <Col md={6}>
               <Form.Group className="mb-3" controlId="withoutPcd">
-                <Form.Label>In case without PCD which one?</Form.Label>
+                <Form.Label>Caso sem PCD, qual?</Form.Label>
                 <Form.Control className="border-dark-gray" type="text" />
               </Form.Group>
             </Col>
           )}
         </Row>
         <Form.Group className="mb-3" controlId="socialProgramBeneficiary">
-          <Form.Label>Beneficiary of any social program?</Form.Label>
+          <Form.Label>Beneficiário de algum programa social?</Form.Label>
           <Form.Select className="border-dark-gray">
-            <option>Select</option>
-            <option>Yes</option>
-            <option>No</option>
+            <option>Selecione</option>
+            <option>Sim</option>
+            <option>Não</option>
           </Form.Select>
         </Form.Group>
         <Form.Group className="mb-3" controlId="socialProgramName">
-          <Form.Label>Name of the social program</Form.Label>
+          <Form.Label>Nome do programa social</Form.Label>
           <Form.Control className="border-dark-gray" type="text" />
         </Form.Group>
         <Row>
@@ -203,13 +203,13 @@ export default function Personal({ cpf }) {
         <Row>
           <Col md={6}>
             <Form.Group className="mb-3" controlId="email">
-              <Form.Label>Email to login *</Form.Label>
+              <Form.Label>Email para login *</Form.Label>
               <Form.Control className="border-dark-gray" type="email" />
             </Form.Group>
           </Col>
           <Col md={6}>
             <Form.Group className="mb-3" controlId="password">
-              <Form.Label>Password *</Form.Label>
+              <Form.Label>Senha *</Form.Label>
               <Form.Control className="border-dark-gray" type="password" />
             </Form.Group>
           </Col>
@@ -217,7 +217,7 @@ export default function Personal({ cpf }) {
         <Form.Group className="mb-4" controlId="acceptTerms">
           <Form.Check
             type="checkbox"
-            label="I accept the terms of use and privacy policy:"
+            label="Aceito os termos de uso e política de privacidade:"
             checked={accepted}
             onChange={e => setAccepted(e.target.checked)}
             required
@@ -235,7 +235,7 @@ export default function Personal({ cpf }) {
             color: '#222',
           }}
         >
-          Create account
+          Criar conta
         </Button>
       </Form>
     </Container>

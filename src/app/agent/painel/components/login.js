@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Container, Form, Button } from 'react-bootstrap';
 import { useAuth } from '../authcontex';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://teste.mapadacultura.com/api';
+
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -33,7 +35,7 @@ export default function Login() {
     setError('');
 
     try {
-      const response = await fetch('https://teste.mapadacultura.com/api/agent/profile/login', {
+      const response = await fetch(`${API_BASE_URL}/agent/profile/login`, {
         // const response = await fetch('http://localhost:4000/api/agent/profile/login', {
         method: 'POST',
         headers: {
@@ -82,20 +84,20 @@ export default function Login() {
       </p>
       <Form className="w-100" onSubmit={handleSubmit}>
         <Form.Group className="mb-3" controlId="emailOrCpf">
-          <Form.Label style={{ fontSize: '16px' }}>Email or CPF</Form.Label>
+          <Form.Label style={{ fontSize: '16px' }}>Email ou CPF</Form.Label>
           <Form.Control 
             type="text" 
             name="emailOrCpf"
             value={formData.emailOrCpf}
             onChange={handleInputChange}
             className="p-3 rounded-4" 
-            placeholder="Enter your email or CPF"
+            placeholder="Digite seu email ou CPF"
             disabled={isLoading}
             isInvalid={!!error}
           />
         </Form.Group>
         <Form.Group className="mb-3" controlId="password">
-          <Form.Label style={{ fontSize: '16px' }}>Password</Form.Label>
+          <Form.Label style={{ fontSize: '16px' }}>Senha</Form.Label>
           <div className="position-relative">
             <Form.Control
               type={showPassword ? 'text' : 'password'}
@@ -103,7 +105,7 @@ export default function Login() {
               value={formData.password}
               onChange={handleInputChange}
               className="p-3 rounded-4"
-              placeholder="Enter your password"
+              placeholder="Digite sua senha"
               disabled={isLoading}
               isInvalid={!!error}
             />
@@ -139,11 +141,11 @@ export default function Login() {
             color: '#222',
           }}
         >
-          {isLoading ? 'Logging in...' : 'Login'}
+          {isLoading ? 'Entrando...' : 'Entrar'}
         </Button>
       </Form>
       <a href="#" className="mt-3" style={{ fontSize: '16px' }}>
-        Forgot password?
+        Esqueceu a senha?
       </a>
     </Container>
   );

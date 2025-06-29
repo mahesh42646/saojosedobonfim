@@ -19,7 +19,7 @@ function AgentPanelContent() {
           <div className="spinner-border text-primary" role="status">
             <span className="visually-hidden">Loading...</span>
           </div>
-          <p className="mt-2">Verificando autenticação...</p>
+          <p className="mt-2">Loading...</p>
         </div>
       </div>
     );
@@ -40,7 +40,7 @@ function AgentPanelContent() {
 // Main page component with AuthProvider wrapper
 export default function Page() {
   return (
-    <AuthProvider >
+    <AuthProvider>
       <AccountTypeProvider>
         <AgentPanelContent />
       </AccountTypeProvider>

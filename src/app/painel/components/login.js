@@ -34,8 +34,8 @@ const LoginPage = () => {
     
     // Additional form validation
     if (!formData.email || !formData.password) {
-      setError('Please fill in all fields');
-      alert('Please fill in all fields'); // Debug alert
+      setError('Por favor, preencha todos os campos');
+      alert('Por favor, preencha todos os campos'); // Debug alert
       return false;
     }
 
@@ -53,20 +53,20 @@ const LoginPage = () => {
         // No need to do anything else, the auth context will handle the state update
       } else {
         // Handle failed login - prevent page reload
-        const errorMessage = result?.error || 'Invalid email or password. Please try again.';
+        const errorMessage = result?.error || 'Email ou senha inválidos. Por favor, tente novamente.';
         console.log('❌ Setting error:', errorMessage);
         setError(errorMessage);
         
         // Show alert to confirm error is being set
-        alert('Login failed: ' + errorMessage);
+        alert('Falha no login: ' + errorMessage);
       }
     } catch (err) {
       console.error('💥 Login error:', err);
-      const errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+      const errorMessage = 'Email ou senha inválidos. Por favor, verifique suas credenciais e tente novamente.';
       setError(errorMessage);
       
       // Show alert for catch block too
-      alert('Error caught: ' + errorMessage);
+      alert('Erro: ' + errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -87,12 +87,12 @@ const LoginPage = () => {
       <div className="container" style={{ minHeight: '90vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#fff' }}>
         {/* Login Form */}
         <div style={{ width: 392, padding: 32, borderRadius: 12, background: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <h2 style={{ marginBottom: 24, fontWeight: 600 }}>Hello again!</h2>
+          <h2 style={{ marginBottom: 24, fontWeight: 600 }}>Olá novamente!</h2>
           
           {/* Debug info */}
           {error && (
             <div style={{ padding: '8px', backgroundColor: 'yellow', margin: '10px 0', fontSize: '12px' }}>
-              DEBUG: Error state = &quot;{error}&quot;
+              {/* DEBUG: Estado do erro = &quot;{error}&quot; */}
             </div>
           )}
           
@@ -115,7 +115,7 @@ const LoginPage = () => {
             )}
 
             <div style={{ width: '100%' }}>
-              <label style={{ fontSize: 12, color: '#888' }}>Your email</label>
+              <label style={{ fontSize: 12, color: '#888' }}>Seu email</label>
               <input 
                 name="email"
                 type="email" 
@@ -130,13 +130,13 @@ const LoginPage = () => {
                   marginTop: 4,
                   boxSizing: 'border-box'
                 }} 
-                placeholder="Enter your email"
+                placeholder="Digite seu email"
                 disabled={isLoading}
               />
             </div>
             
             <div style={{ width: '100%' }}>
-              <label style={{ fontSize: 12, color: '#888' }}>Your password</label>
+              <label style={{ fontSize: 12, color: '#888' }}>Sua senha</label>
               <div style={{ position: 'relative' }}>
                 <input 
                   name="password"
@@ -152,7 +152,7 @@ const LoginPage = () => {
                     marginTop: 4,
                     boxSizing: 'border-box'
                   }} 
-                  placeholder="Enter your password"
+                  placeholder="Digite sua senha"
                   disabled={isLoading}
                 />
                 <button
@@ -191,12 +191,12 @@ const LoginPage = () => {
                 cursor: isLoading ? 'not-allowed' : 'pointer' 
               }}
             >
-              {isLoading ? 'Logging in...' : 'Login'}
+              {isLoading ? 'Entrando...' : 'Entrar'}
             </button>
           </form>
           
           <div style={{ width: '100%', textAlign: 'left', marginTop: 12 }}>
-            <a href="#" style={{ fontSize: 12, color: '#222', textDecoration: 'none' }}>Forgot password?</a>
+            <a href="#" style={{ fontSize: 12, color: '#222', textDecoration: 'none' }}>Esqueceu a senha?</a>
           </div>
           
          

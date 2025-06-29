@@ -201,66 +201,66 @@ export default function Personal({ cpf }) {
         <Row>
           <Col md={6}>
             <Form.Group className="mb-3" controlId="email">
-              <Form.Label>Email to login *</Form.Label>
+              <Form.Label>Email para login *</Form.Label>
               <Form.Control className="border-dark-gray" type="email" />
             </Form.Group>
           </Col>
           <Col md={6}>
             <Form.Group className="mb-3" controlId="password">
-              <Form.Label>Password *</Form.Label>
+              <Form.Label>Senha *</Form.Label>
               <Form.Control className="border-dark-gray" type="password" />
             </Form.Group>
           </Col>
         </Row>
        <h3 className="fw-bold text-center py-4" style={{ fontSize: '20px' }}>
-       Enter the organization&apos;s additional data
+       Insira os dados adicionais da organização
       </h3>
   
       <Form.Group className="mb-3" controlId="collectiveName">
-        <Form.Label>Name of the Collective *</Form.Label>
+        <Form.Label>Nome do Coletivo *</Form.Label>
         <Form.Control className="border-dark-gray" type="text" />
       </Form.Group>
       <Row>
         <Col md={4}>
           <Form.Group className="mb-3" controlId="dayCreated">
-            <Form.Label>Day</Form.Label>
+            <Form.Label>Dia</Form.Label>
             <Form.Control className="border-dark-gray" type="text" defaultValue="16" />
           </Form.Group>
         </Col>
         <Col md={4}>
           <Form.Group className="mb-3" controlId="monthCreated">
-            <Form.Label>Month</Form.Label>
-            <Form.Select className="border-dark-gray" defaultValue="July">
-              <option>January</option>
-              <option>February</option>
-              <option>March</option>
-              <option>April</option>
-              <option>May</option>
-              <option>June</option>
-              <option>July</option>
-              <option>August</option>
-              <option>September</option>
-              <option>October</option>
-              <option>November</option>
-              <option>December</option>
+            <Form.Label>Mês</Form.Label>
+            <Form.Select className="border-dark-gray" defaultValue="Julho">
+              <option>Janeiro</option>
+              <option>Fevereiro</option>
+              <option>Março</option>
+              <option>Abril</option>
+              <option>Maio</option>
+              <option>Junho</option>
+              <option>Julho</option>
+              <option>Agosto</option>
+              <option>Setembro</option>
+              <option>Outubro</option>
+              <option>Novembro</option>
+              <option>Dezembro</option>
             </Form.Select>
           </Form.Group>
         </Col>
         <Col md={4}>
           <Form.Group className="mb-3" controlId="yearCreated">
-            <Form.Label>Year</Form.Label>
+            <Form.Label>Ano</Form.Label>
             <Form.Control className="border-dark-gray" type="text" defaultValue="1998" />
           </Form.Group>
         </Col>
       </Row>
       <Form.Group className="mb-3" controlId="participants">
-        <Form.Label>How many people participate in the collective *</Form.Label>
+        <Form.Label>Quantas pessoas participam do coletivo *</Form.Label>
         <Form.Control className="border-dark-gray" type="text" />
       </Form.Group>
       <Form.Group className="mb-4" controlId="acceptTerms">
         <Form.Check
           type="checkbox"
-          label="I accept the terms of use and privacy policy:"
+          label="Aceito os termos de uso e política de privacidade:"
           checked={accepted}
           onChange={e => setAccepted(e.target.checked)}
           required

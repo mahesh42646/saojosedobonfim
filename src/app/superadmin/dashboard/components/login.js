@@ -3,8 +3,7 @@ import { useState } from 'react';
 import { useAuth } from '../authContex';
 import { useRouter } from 'next/navigation';
 
-// const API_BASE_URL = 'http://localhost:4000/api';
-const API_BASE_URL = 'https://teste.mapadacultura.com/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://teste.mapadacultura.com/api';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -100,7 +99,7 @@ const Login = () => {
                 marginTop: 4,
                 boxSizing: 'border-box'
               }} 
-              placeholder="Enter your email"
+              placeholder="Digite seu email"
               disabled={isLoading}
             />
           </div>
@@ -123,7 +122,7 @@ const Login = () => {
                   marginTop: 4,
                   boxSizing: 'border-box'
                 }} 
-                placeholder="Enter your password"
+                placeholder="Digite sua senha"
                 disabled={isLoading}
               />
               <button
@@ -162,7 +161,7 @@ const Login = () => {
               cursor: isLoading ? 'not-allowed' : 'pointer' 
             }}
           >
-            {isLoading ? 'Logging in...' : 'Login'}
+            {isLoading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
         
@@ -180,7 +179,7 @@ const Login = () => {
             }}
             onClick={() => {
               // Handle forgot password logic here
-              alert('Forgot password functionality coming soon!');
+              alert('Funcionalidade de recuperação de senha em breve!');
             }}
           >
            Esqueceu sua senha?
