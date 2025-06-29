@@ -70,7 +70,7 @@ function AgentPageContent() {
 
   // Back arrow component
   const BackArrow = () => (
-    <div className="d-flex align-items-center  gap-5 w-100"
+    <div className="d-none align-items-center  gap-5 w-100"
       style={{ position: 'absolute', top: 30, left: 30, cursor: 'pointer', zIndex: 10, fontSize: 28, }}
       onClick={handleBack}   >
       <div className="d-flex align-items-center ">

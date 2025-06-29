@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { Container, Form, Button } from 'react-bootstrap';
 import { useAuth } from '../authcontex';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://teste.mapadacultura.com/api';
 
 export default function Login() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     emailOrCpf: '',
@@ -14,6 +17,14 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   
   const { login } = useAuth();
+  const handleBack = () => {
+    router.push('/agent');
+  };
+
+  const handleClose = () => {
+    router.push('/');
+  };
+
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -73,8 +84,45 @@ export default function Login() {
       setIsLoading(false);
     }
   };
+  
 
   return (
+    <>
+    <div className="container py-3 border-0" style={{ background: '#fff' }}>
+        <div className="d-flex align-items-center justify-content-between">
+          {/* Left: Logo and Text */}
+          <div className="d-flex gap-5 align-items-center">
+          <Image src="/images/MadminLogo.jpg" alt="Gestor Cultural Logo" width={160} height={50} style={{ marginRight: 8 }} />
+            <button   onClick={handleBack}
+          className="btn btn-link text-decoration-none"
+          style={{ color: '#1A2530', fontSize: '26px', border: '0.1px solid rgb(206, 206, 206)',borderRadius: '50%', background: 'rgba(26, 37, 48, 0.1)', height: '50px', width: '50px' }}
+        >
+          ← 
+        </button>
+        </div>
+          {/* Right: Icons */}
+          <div className="d-flex align-items-center gap-3">
+            <span className="d-flex align-items-center justify-content-center rounded-circle" style={{ background: '#D9DED9', width: 48, height: 48 }}>
+              {/* Calendar Icon (placeholder SVG) */}
+              <svg width="24" height="24" fill="none" stroke="#1A2530" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="18" rx="2"/>
+                <path d="M16 2v4M8 2v4M3 10h18"/>
+              </svg>
+            </span>
+            <span 
+              className="d-flex align-items-center justify-content-center" 
+              style={{ width: 32, height: 32, cursor: 'pointer' }}
+              onClick={handleClose}
+            >
+              {/* Close Icon (X, placeholder SVG) */}
+              <svg width="28" height="28" fill="none" stroke="#1A2530" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </span>
+          </div>
+        </div>
+      </div>
     <Container className="d-flex flex-column align-items-center justify-content-center" style={{ minHeight: '80vh', maxWidth: 400 }}>
       <h2 className="fw-bold text-center mb-3" style={{ fontSize: '2rem' }}>
         Olá de novo!
@@ -148,5 +196,6 @@ export default function Login() {
         Esqueceu a senha?
       </a>
     </Container>
+    </>
   );
 }

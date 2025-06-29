@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Form, Button, Row, Col, Modal } from 'react-bootstrap';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://teste.mapadacultura.com/api';
 
@@ -73,10 +76,20 @@ function CPFExistsModal({ show, onHide, cpf, fullName, accountType, isSameType }
 
 // Combined Registration Form Component
 function RegistrationForm({ cpf, selectedType, existingProfile }) {
+  const router = useRouter();
   const [accepted, setAccepted] = useState(false);
   const [pcd, setPcd] = useState(existingProfile?.pcd || 'Selecione');
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({});
+
+  // Navigation functions
+  const handleBack = () => {
+    router.push('/agent?view=type', { scroll: false });
+  };
+
+  const handleClose = () => {
+    router.push('/agent?view=type', { scroll: false });
+  };
 
   // Pre-populate common fields if existingProfile is provided
   useEffect(() => {
@@ -236,564 +249,535 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
   };
 
   return (
-    <Container className="py-5 px-2 px-lg-5" style={{ maxWidth: 800 }}>
-      <h3 className="fw-bold text-center py-4" style={{ fontSize: '20px' }}>
-        {getHeaderText()}
-      </h3>
-      <hr />
-      <Form onSubmit={handleSubmit}>
-        <Form.Group className="mb-3" controlId="cpf">
-          <Form.Label>CPF *</Form.Label>
-          <Form.Control className="border-dark-gray" type="text" value={cpf} readOnly />
-        </Form.Group>
+    <>
+      {/* Header with navigation */}
+      <div className="container py-2 border-0" style={{ background: '#fff' }}>
+        <div className="d-flex align-items-center justify-content-between">
+          {/* Left: Logo and Text */}
+          <div className="d-flex gap-5 align-items-center">
+          <Image src="/images/MadminLogo.jpg" alt="Gestor Cultural Logo" width={160} height={50} style={{ marginRight: 8 }} />
+            <button   onClick={handleBack}
+          className="btn btn-link text-decoration-none"
+          style={{ color: '#1A2530', fontSize: '26px', border: '0.1px solid rgb(206, 206, 206)',borderRadius: '50%', background: 'rgba(26, 37, 48, 0.1)', height: '50px', width: '50px' }}
+        >
+          ← 
+        </button>
+        </div>
+          {/* Right: Icons */}
+          <div className="d-flex align-items-center gap-3">
+            <span className="d-flex align-items-center justify-content-center rounded-circle" style={{ background: '#D9DED9', width: 48, height: 48 }}>
+              {/* Calendar Icon (placeholder SVG) */}
+              <svg width="24" height="24" fill="none" stroke="#1A2530" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="18" rx="2"/>
+                <path d="M16 2v4M8 2v4M3 10h18"/>
+              </svg>
+            </span>
+            <span 
+              className="d-flex align-items-center justify-content-center" 
+              style={{ width: 32, height: 32, cursor: 'pointer' }}
+              onClick={handleClose}
+            >
+              {/* Close Icon (X, placeholder SVG) */}
+              <svg width="28" height="28" fill="none" stroke="#1A2530" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </span>
+          </div>
+        </div>
+      </div>
 
-        <Form.Group className="mb-3" controlId="dob">
-          <Form.Label>Date of birth *</Form.Label>
-          <Form.Control
-            className="border-dark-gray"
-            type="date"
-            value={formData.dob || ''}
-            isInvalid={!!errors.dob}
-            onChange={(e) => handleFieldChange('dob', e.target.value)}
-          />
-          <Form.Control.Feedback type="invalid">{errors.dob}</Form.Control.Feedback>
-        </Form.Group>
-
-        <Form.Group className="mb-3" controlId="fullname">
-          <Form.Label>Full name *</Form.Label>
-          <Form.Control
-            className="border-dark-gray"
-            type="text"
-            value={formData.fullname || ''}
-            isInvalid={!!errors.fullname}
-            onChange={(e) => handleFieldChange('fullname', e.target.value)}
-          />
-          <Form.Control.Feedback type="invalid">{errors.fullname}</Form.Control.Feedback>
-        </Form.Group>
-
-        <Form.Group className="mb-3" controlId="rg">
-          <Form.Label>RG *</Form.Label>
-          <Form.Control
-            className="border-dark-gray"
-            type="text"
-            value={formData.rg || ''}
-            isInvalid={!!errors.rg}
-            onChange={(e) => handleFieldChange('rg', e.target.value)}
-          />
-          <Form.Control.Feedback type="invalid">{errors.rg}</Form.Control.Feedback>
-        </Form.Group>
-
-        <Form.Group className="mb-3" controlId="socialname">
-          <Form.Label>Social name</Form.Label>
-          <Form.Control
-            className="border-dark-gray"
-            type="text"
-            value={formData.socialname || ''}
-            onChange={(e) => handleFieldChange('socialname', e.target.value)}
-          />
-        </Form.Group>
-
-        <Row>
-          <Col md={6}>
-            <Form.Group className="mb-3" controlId="gender">
-              <Form.Label>Gender *</Form.Label>
-              <Form.Select
-                className="border-dark-gray"
-                value={formData.gender || 'Select'}
-                isInvalid={!!errors.gender}
-                onChange={(e) => handleFieldChange('gender', e.target.value)}
-              >
-                <option>Select</option>
-                <option>Male</option>
-                <option>Female</option>
-                <option>Other</option>
-              </Form.Select>
-              <Form.Control.Feedback type="invalid">{errors.gender}</Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-          <Col md={6}>
-            <Form.Group className="mb-3" controlId="breed">
-              <Form.Label>Breed *</Form.Label>
-              <Form.Select
-                className="border-dark-gray"
-                value={formData.breed || 'Select'}
-                isInvalid={!!errors.breed}
-                onChange={(e) => handleFieldChange('breed', e.target.value)}
-              >
-                <option>Select</option>
-                <option>Breed 1</option>
-                <option>Breed 2</option>
-              </Form.Select>
-              <Form.Control.Feedback type="invalid">{errors.breed}</Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-        </Row>
-
-        <Row>
-          <Col md={6}>
-            <Form.Group className="mb-3" controlId="lgbtq">
-              <Form.Label>Você é LGBTQIAPN+? *</Form.Label>
-              <Form.Select
-                className="border-dark-gray"
-                value={formData.lgbtq || 'Selecione'}
-                isInvalid={!!errors.lgbtq}
-                onChange={(e) => handleFieldChange('lgbtq', e.target.value)}
-              >
-                <option>Selecione</option>
-                <option>Sim</option>
-                <option>Não</option>
-              </Form.Select>
-              <Form.Control.Feedback type="invalid">{errors.lgbtq}</Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-          <Col md={6}>
-            <Form.Group className="mb-3" controlId="education">
-              <Form.Label>Escolaridade *</Form.Label>
-              <Form.Select
-                className="border-dark-gray"
-                value={formData.education || 'Selecione'}
-                isInvalid={!!errors.education}
-                onChange={(e) => handleFieldChange('education', e.target.value)}
-              >
-                <option>Selecione</option>
-                <option>Ensino Médio</option>
-                <option>Graduação</option>
-                <option>Mestrado</option>
-              </Form.Select>
-              <Form.Control.Feedback type="invalid">{errors.education}</Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-        </Row>
-
-        <Row>
-          <Col md={6}>
-            <Form.Group className="mb-3" controlId="income">
-              <Form.Label>Individual income *</Form.Label>
-              <Form.Select
-                className="border-dark-gray"
-                value={formData.income || 'Select'}
-                isInvalid={!!errors.income}
-                onChange={(e) => handleFieldChange('income', e.target.value)}
-              >
-                <option>Select</option>
-                <option>Below $20,000</option>
-                <option>$20,000 - $50,000</option>
-                <option>Above $50,000</option>
-              </Form.Select>
-              <Form.Control.Feedback type="invalid">{errors.income}</Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-          <Col md={6}>
-            <Form.Group className="mb-3" controlId="mainActivity">
-              <Form.Label>Main area of activity *</Form.Label>
-              <Form.Select
-                className="border-dark-gray"
-                value={formData.mainActivity || 'Select'}
-                isInvalid={!!errors.mainActivity}
-                onChange={(e) => handleFieldChange('mainActivity', e.target.value)}
-              >
-                <option>Select</option>
-                <option>Activity 1</option>
-                <option>Activity 2</option>
-              </Form.Select>
-              <Form.Control.Feedback type="invalid">{errors.mainActivity}</Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-        </Row>
-
-        <Row>
-          <Col md={6}>
-            <Form.Group className="mb-3" controlId="otherActivity">
-              <Form.Label>Outras áreas de atuação</Form.Label>
-              <Form.Select
-                className="border-dark-gray"
-                value={formData.otherActivity || 'Selecione'}
-                onChange={(e) => handleFieldChange('otherActivity', e.target.value)}
-              >
-                <option>Selecione</option>
-                <option>Atividade 1</option>
-                <option>Atividade 2</option>
-              </Form.Select>
-            </Form.Group>
-          </Col>
-          <Col md={6}>
-            <Form.Group className="mb-3" controlId="traditionalCommunities">
-              <Form.Label>Comunidades tradicionais *</Form.Label>
-              <Form.Select
-                className="border-dark-gray"
-                value={formData.traditionalCommunities || 'Selecione'}
-                isInvalid={!!errors.traditionalCommunities}
-                onChange={(e) => handleFieldChange('traditionalCommunities', e.target.value)}
-              >
-                <option>Selecione</option>
-                <option>Comunidade 1</option>
-                <option>Comunidade 2</option>
-              </Form.Select>
-              <Form.Control.Feedback type="invalid">{errors.traditionalCommunities}</Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-        </Row>
-
-        <Row>
-          <Col md={6}>
-            <Form.Group className="mb-3" controlId="pcd">
-              <Form.Label>Você tem alguma deficiência (PCD)? *</Form.Label>
-              <Form.Select
-                className="border-dark-gray"
-                value={pcd}
-                isInvalid={!!errors.pcd}
-                onChange={(e) => {
-                  setPcd(e.target.value);
-                  handleFieldChange('pcd', e.target.value);
-                }}
-              >
-                <option value="Selecione">Selecione</option>
-                <option value="Sim">Sim</option>
-                <option value="Não">Não</option>
-              </Form.Select>
-              <Form.Control.Feedback type="invalid">{errors.pcd}</Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-          {pcd === 'Sim' && (
+      <Container className="py-5 px-2 px-lg-5" style={{ maxWidth: 800 }}>
+        <h3 className="fw-bold text-center py-4" style={{ fontSize: '20px' }}>
+          {getHeaderText()}
+        </h3>
+        <hr />
+        <Form onSubmit={handleSubmit}>
+          <h4 className="fw-bold mb-3">Dados Pessoais</h4>
+          <Form.Group className="mb-3" controlId="cpf">
+            <Form.Label>CPF *</Form.Label>
+            <Form.Control className="border-dark-gray" type="text" value={cpf} readOnly />
+          </Form.Group>
+          <Form.Group className="mb-3" controlId="fullname">
+            <Form.Label>Nome completo *</Form.Label>
+            <Form.Control
+              className="border-dark-gray"
+              type="text"
+              value={formData.fullname || ''}
+              isInvalid={!!errors.fullname}
+              onChange={(e) => handleFieldChange('fullname', e.target.value)}
+            />
+            <Form.Control.Feedback type="invalid">{errors.fullname}</Form.Control.Feedback>
+          </Form.Group>
+          <Form.Group className="mb-3" controlId="socialname">
+            <Form.Label>Nome social</Form.Label>
+            <Form.Control
+              className="border-dark-gray"
+              type="text"
+              value={formData.socialname || ''}
+              onChange={(e) => handleFieldChange('socialname', e.target.value)}
+            />
+          </Form.Group>
+          <Row>
             <Col md={6}>
-              <Form.Group className="mb-3" controlId="withoutPcd">
-                <Form.Label>Qual deficiência?</Form.Label>
-                <Form.Control
+              <Form.Group className="mb-3" controlId="gender">
+                <Form.Label>Gênero *</Form.Label>
+                <Form.Select
                   className="border-dark-gray"
-                  type="text"
-                  value={formData.withoutPcd || ''}
-                  onChange={(e) => handleFieldChange('withoutPcd', e.target.value)}
-                />
+                  value={formData.gender || 'Selecione'}
+                  isInvalid={!!errors.gender}
+                  onChange={(e) => handleFieldChange('gender', e.target.value)}
+                >
+                  <option>Selecione</option>
+                  <option>Masculino</option>
+                  <option>Feminino</option>
+                  <option>Outro</option>
+                </Form.Select>
+                <Form.Control.Feedback type="invalid">{errors.gender}</Form.Control.Feedback>
               </Form.Group>
             </Col>
+            <Col md={6}>
+              <Form.Group className="mb-3" controlId="breed">
+                <Form.Label>Raça *</Form.Label>
+                <Form.Select
+                  className="border-dark-gray"
+                  value={formData.breed || 'Selecione'}
+                  isInvalid={!!errors.breed}
+                  onChange={(e) => handleFieldChange('breed', e.target.value)}
+                >
+                  <option>Selecione</option>
+                  <option>Raça 1</option>
+                  <option>Raça 2</option>
+                </Form.Select>
+                <Form.Control.Feedback type="invalid">{errors.breed}</Form.Control.Feedback>
+              </Form.Group>
+            </Col>
+          </Row>
+          <Form.Group className="mb-3" controlId="lgbtq">
+            <Form.Label>Você é LGBTQIAPN+? *</Form.Label>
+            <Form.Select
+              className="border-dark-gray"
+              value={formData.lgbtq || 'Selecione'}
+              isInvalid={!!errors.lgbtq}
+              onChange={(e) => handleFieldChange('lgbtq', e.target.value)}
+            >
+              <option>Selecione</option>
+              <option>Sim</option>
+              <option>Não</option>
+            </Form.Select>
+            <Form.Control.Feedback type="invalid">{errors.lgbtq}</Form.Control.Feedback>
+          </Form.Group>
+          <Form.Group className="mb-3" controlId="dob">
+            <Form.Label>Data de nascimento *</Form.Label>
+            <Form.Control
+              className="border-dark-gray"
+              type="date"
+              value={formData.dob || ''}
+              isInvalid={!!errors.dob}
+              onChange={(e) => handleFieldChange('dob', e.target.value)}
+            />
+            <Form.Control.Feedback type="invalid">{errors.dob}</Form.Control.Feedback>
+          </Form.Group>
+          <Form.Group className="mb-3" controlId="rg">
+            <Form.Label>RG *</Form.Label>
+            <Form.Control
+              className="border-dark-gray"
+              type="text"
+              value={formData.rg || ''}
+              isInvalid={!!errors.rg}
+              onChange={(e) => handleFieldChange('rg', e.target.value)}
+            />
+            <Form.Control.Feedback type="invalid">{errors.rg}</Form.Control.Feedback>
+          </Form.Group>
+          <h4 className="fw-bold mb-3">Informações de Acessibilidade</h4>
+          <Form.Group className="mb-3" controlId="pcd">
+            <Form.Label>Você tem alguma deficiência de PCD? *</Form.Label>
+            <Form.Select
+              className="border-dark-gray"
+              value={pcd}
+              isInvalid={!!errors.pcd}
+              onChange={(e) => {
+                setPcd(e.target.value);
+                handleFieldChange('pcd', e.target.value);
+              }}
+            >
+              <option value="Selecione">Selecione</option>
+              <option value="Sim">Sim</option>
+              <option value="Não">Não</option>
+            </Form.Select>
+            <Form.Control.Feedback type="invalid">{errors.pcd}</Form.Control.Feedback>
+          </Form.Group>
+          {pcd === 'Sim' && (
+            <Form.Group className="mb-3" controlId="withoutPcd">
+              <Form.Label>No caso sem PCD, qual?</Form.Label>
+              <Form.Control
+                className="border-dark-gray"
+                type="text"
+                value={formData.withoutPcd || ''}
+                onChange={(e) => handleFieldChange('withoutPcd', e.target.value)}
+              />
+            </Form.Group>
           )}
-        </Row>
-
-        <Form.Group className="mb-3" controlId="socialProgramBeneficiary">
-          <Form.Label>Beneficiary of any social program?</Form.Label>
-          <Form.Select
-            className="border-dark-gray"
-            value={formData.socialProgramBeneficiary || 'Select'}
-            onChange={(e) => handleFieldChange('socialProgramBeneficiary', e.target.value)}
+          <h4 className="fw-bold mb-3">Informações Socioeconômicas e Educacionais</h4>
+          <Row>
+            <Col md={6}>
+              <Form.Group className="mb-3" controlId="education">
+                <Form.Label>Educação *</Form.Label>
+                <Form.Select
+                  className="border-dark-gray"
+                  value={formData.education || 'Selecione'}
+                  isInvalid={!!errors.education}
+                  onChange={(e) => handleFieldChange('education', e.target.value)}
+                >
+                  <option>Selecione</option>
+                  <option>Ensino Médio</option>
+                  <option>Graduação</option>
+                  <option>Mestrado</option>
+                </Form.Select>
+                <Form.Control.Feedback type="invalid">{errors.education}</Form.Control.Feedback>
+              </Form.Group>
+            </Col>
+            <Col md={6}>
+              <Form.Group className="mb-3" controlId="income">
+                <Form.Label>Renda individual *</Form.Label>
+                <Form.Select
+                  className="border-dark-gray"
+                  value={formData.income || 'Selecione'}
+                  isInvalid={!!errors.income}
+                  onChange={(e) => handleFieldChange('income', e.target.value)}
+                >
+                  <option>Selecione</option>
+                  <option>Abaixo de R$ 20.000</option>
+                  <option>R$ 20.000 - R$ 50.000</option>
+                  <option>Acima de R$ 50.000</option>
+                </Form.Select>
+                <Form.Control.Feedback type="invalid">{errors.income}</Form.Control.Feedback>
+              </Form.Group>
+            </Col>
+          </Row>
+          <Form.Group className="mb-3" controlId="socialProgramBeneficiary">
+            <Form.Label>Beneficiário de algum programa social?</Form.Label>
+            <Form.Select
+              className="border-dark-gray"
+              value={formData.socialProgramBeneficiary || 'Selecione'}
+              onChange={(e) => handleFieldChange('socialProgramBeneficiary', e.target.value)}
+            >
+              <option>Selecione</option>
+              <option>Sim</option>
+              <option>Não</option>
+            </Form.Select>
+          </Form.Group>
+          <Form.Group className="mb-3" controlId="socialProgramName">
+            <Form.Label>Nome do programa social</Form.Label>
+            <Form.Control
+              className="border-dark-gray"
+              type="text"
+              value={formData.socialProgramName || ''}
+              onChange={(e) => handleFieldChange('socialProgramName', e.target.value)}
+            />
+          </Form.Group>
+          <h4 className="fw-bold mb-3">Informações Profissionais</h4>
+          <Form.Group className="mb-3" controlId="mainActivity">
+            <Form.Label>Principal área de atuação *</Form.Label>
+            <Form.Select
+              className="border-dark-gray"
+              value={formData.mainActivity || 'Selecione'}
+              isInvalid={!!errors.mainActivity}
+              onChange={(e) => handleFieldChange('mainActivity', e.target.value)}
+            >
+              <option>Selecione</option>
+              <option>Atividade 1</option>
+              <option>Atividade 2</option>
+            </Form.Select>
+            <Form.Control.Feedback type="invalid">{errors.mainActivity}</Form.Control.Feedback>
+          </Form.Group>
+          <Form.Group className="mb-3" controlId="otherActivity">
+            <Form.Label>Outras áreas de atuação</Form.Label>
+            <Form.Select
+              className="border-dark-gray"
+              value={formData.otherActivity || 'Selecione'}
+              onChange={(e) => handleFieldChange('otherActivity', e.target.value)}
+            >
+              <option>Selecione</option>
+              <option>Atividade 1</option>
+              <option>Atividade 2</option>
+            </Form.Select>
+          </Form.Group>
+          <Form.Group className="mb-3" controlId="traditionalCommunities">
+            <Form.Label>Você pertence a comunidades tradicionais?</Form.Label>
+            <Form.Select
+              className="border-dark-gray"
+              value={formData.traditionalCommunities || 'Selecione'}
+              isInvalid={!!errors.traditionalCommunities}
+              onChange={(e) => handleFieldChange('traditionalCommunities', e.target.value)}
+            >
+              <option>Selecione</option>
+              <option>Comunidade 1</option>
+              <option>Comunidade 2</option>
+            </Form.Select>
+            <Form.Control.Feedback type="invalid">{errors.traditionalCommunities}</Form.Control.Feedback>
+          </Form.Group>
+          <h4 className="fw-bold mb-3">Endereço</h4>
+          <Row>
+            <Col md={6}>
+              <Form.Group className="mb-3" controlId="city">
+                <Form.Label>Cidade *</Form.Label>
+                <Form.Select
+                  className="border-dark-gray"
+                  value={formData.city || 'Selecione'}
+                  isInvalid={!!errors.city}
+                  onChange={(e) => handleFieldChange('city', e.target.value)}
+                >
+                  <option>Selecione</option>
+                  <option>Cidade 1</option>
+                  <option>Cidade 2</option>
+                </Form.Select>
+                <Form.Control.Feedback type="invalid">{errors.city}</Form.Control.Feedback>
+              </Form.Group>
+            </Col>
+            <Col md={6}>
+              <Form.Group className="mb-3" controlId="district">
+                <Form.Label>Estado</Form.Label>
+                <Form.Select
+                  className="border-dark-gray"
+                  value={formData.district || 'Selecione'}
+                  onChange={(e) => handleFieldChange('district', e.target.value)}
+                >
+                  <option>Selecione</option>
+                  <option>Estado 1</option>
+                  <option>Estado 2</option>
+                </Form.Select>
+              </Form.Group>
+            </Col>
+          </Row>
+          <Form.Group className="mb-3" controlId="street">
+            <Form.Label>Nome e número da rua</Form.Label>
+            <Form.Control
+              className="border-dark-gray"
+              type="text"
+              value={formData.street || ''}
+              onChange={(e) => handleFieldChange('street', e.target.value)}
+            />
+          </Form.Group>
+          {(selectedType === 'business' || selectedType === 'collective') && (
+            <>
+              <h4 className="py-4 text-center" style={{background:'#f7f8f9'}}>Insira os dados adicionais da organização</h4>
+              {selectedType === 'business' && (
+                <>
+                  <Form.Group className="mb-3" controlId="cnpjType">
+                    <Form.Label>Tipo de CNPJ</Form.Label>
+                    <Form.Select
+                      className="border-dark-gray"
+                      value={formData.cnpjType || 'Selecione'}
+                      isInvalid={!!errors.cnpjType}
+                      onChange={(e) => handleFieldChange('cnpjType', e.target.value)}
+                    >
+                      <option>Selecione</option>
+                      <option>MEI</option>
+                      <option>ME</option>
+                      <option>EIRELI</option>
+                      <option>Sociedade Empresária Limitada</option>
+                      <option>Sociedade Anônima</option>
+                      <option>Outros</option>
+                    </Form.Select>
+                    <Form.Control.Feedback type="invalid">{errors.cnpjType}</Form.Control.Feedback>
+                  </Form.Group>
+                  <Form.Group className="mb-3" controlId="razaoSocial">
+                    <Form.Label>Razão Social</Form.Label>
+                    <Form.Text className="text-muted d-block mb-2" style={{ fontSize: '12px', color: '#666' }}>
+                      O nome deve corresponder ao registrado oficialmente.
+                    </Form.Text>
+                    <Form.Control
+                      className="border-dark-gray"
+                      type="text"
+                      value={formData.razaoSocial || ''}
+                      isInvalid={!!errors.razaoSocial}
+                      onChange={(e) => handleFieldChange('razaoSocial', e.target.value)}
+                    />
+                    <Form.Control.Feedback type="invalid">{errors.razaoSocial}</Form.Control.Feedback>
+                  </Form.Group>
+                  <Form.Group className="mb-3" controlId="nomeFantasia">
+                    <Form.Label>Nome fantasia da empresa (Opcional)</Form.Label>
+                    <Form.Control
+                      className="border-dark-gray"
+                      type="text"
+                      value={formData.nomeFantasia || ''}
+                      onChange={(e) => handleFieldChange('nomeFantasia', e.target.value)}
+                    />
+                  </Form.Group>
+                  <Form.Group className="mb-3" controlId="cnpj">
+                    <Form.Label>Número do CNPJ</Form.Label>
+                    <Form.Control
+                      className="border-dark-gray"
+                      type="text"
+                      value={formData.cnpj || ''}
+                      isInvalid={!!errors.cnpj}
+                      onChange={(e) => handleFieldChange('cnpj', e.target.value)}
+                    />
+                    <Form.Control.Feedback type="invalid">{errors.cnpj}</Form.Control.Feedback>
+                  </Form.Group>
+                </>
+              )}
+              {selectedType === 'collective' && (
+                <>
+                  <Form.Group className="mb-3" controlId="collectiveName">
+                    <Form.Label>Nome do coletivo *</Form.Label>
+                    <Form.Control
+                      className="border-dark-gray"
+                      type="text"
+                      value={formData.collectiveName || ''}
+                      isInvalid={!!errors.collectiveName}
+                      onChange={(e) => handleFieldChange('collectiveName', e.target.value)}
+                    />
+                    <Form.Control.Feedback type="invalid">{errors.collectiveName}</Form.Control.Feedback>
+                  </Form.Group>
+                  <Row>
+                    <Col md={4}>
+                      <Form.Group className="mb-3" controlId="dayCreated">
+                        <Form.Label>Dia</Form.Label>
+                        <Form.Control
+                          className="border-dark-gray"
+                          type="text"
+                          value={formData.dayCreated || ''}
+                          onChange={(e) => handleFieldChange('dayCreated', e.target.value)}
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={4}>
+                      <Form.Group className="mb-3" controlId="monthCreated">
+                        <Form.Label>Mês</Form.Label>
+                        <Form.Select
+                          className="border-dark-gray"
+                          value={formData.monthCreated || 'Selecione'}
+                          onChange={(e) => handleFieldChange('monthCreated', e.target.value)}
+                        >
+                          <option>Janeiro</option>
+                          <option>Fevereiro</option>
+                          <option>Março</option>
+                          <option>Abril</option>
+                          <option>Maio</option>
+                          <option>Junho</option>
+                          <option>Julho</option>
+                          <option>Agosto</option>
+                          <option>Setembro</option>
+                          <option>Outubro</option>
+                          <option>Novembro</option>
+                          <option>Dezembro</option>
+                        </Form.Select>
+                      </Form.Group>
+                    </Col>
+                    <Col md={4}>
+                      <Form.Group className="mb-3" controlId="yearCreated">
+                        <Form.Label>Ano</Form.Label>
+                        <Form.Control
+                          className="border-dark-gray"
+                          type="text"
+                          value={formData.yearCreated || ''}
+                          onChange={(e) => handleFieldChange('yearCreated', e.target.value)}
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
+                  <Form.Group className="mb-3" controlId="participants">
+                    <Form.Label>Quantas pessoas participam do coletivo *</Form.Label>
+                    <Form.Control
+                      className="border-dark-gray"
+                      type="text"
+                      value={formData.participants || ''}
+                      isInvalid={!!errors.participants}
+                      onChange={(e) => handleFieldChange('participants', e.target.value)}
+                    />
+                    <Form.Control.Feedback type="invalid">{errors.participants}</Form.Control.Feedback>
+                  </Form.Group>
+                </>
+              )}
+            </>
+          )}
+          <h4 className="fw-bold mb-3">Contato</h4>
+          <Form.Group className="mb-3" controlId="telephone">
+            <Form.Label>Telefone</Form.Label>
+            <Form.Control
+              className="border-dark-gray"
+              type="text"
+              value={formData.telephone || ''}
+              isInvalid={!!errors.telephone}
+              onChange={(e) => handleFieldChange('telephone', e.target.value)}
+            />
+            <Form.Control.Feedback type="invalid">{errors.telephone}</Form.Control.Feedback>
+          </Form.Group>
+          <Row>
+            <Col md={6}>
+              <Form.Group className="mb-3" controlId="email">
+                <Form.Label>E-mail para login *</Form.Label>
+                <Form.Control
+                  className="border-dark-gray"
+                  type="email"
+                  value={formData.email || ''}
+                  isInvalid={!!errors.email}
+                  onChange={(e) => handleFieldChange('email', e.target.value)}
+                />
+                <Form.Control.Feedback type="invalid">{errors.email}</Form.Control.Feedback>
+              </Form.Group>
+            </Col>
+            <Col md={6}>
+              <Form.Group className="mb-3" controlId="password">
+                <Form.Label>Senha *</Form.Label>
+                <Form.Control
+                  className="border-dark-gray"
+                  type="password"
+                  isInvalid={!!errors.password}
+                  onChange={(e) => handleFieldChange('password', e.target.value)}
+                />
+                <Form.Control.Feedback type="invalid">{errors.password}</Form.Control.Feedback>
+              </Form.Group>
+            </Col>
+          </Row>
+          <h4 className="fw-bold mb-3">Responsável pela Inscrição</h4>
+          <Form.Group className="mb-3" controlId="responsible">
+            <Form.Label>Nome da pessoa responsável pelo registro (se não for a própria pessoa)</Form.Label>
+            <Form.Control
+              className="border-dark-gray"
+              type="text"
+              value={formData.responsible || ''}
+              isInvalid={!!errors.responsible}
+              onChange={(e) => handleFieldChange('responsible', e.target.value)}
+            />
+            <Form.Control.Feedback type="invalid">{errors.responsible}</Form.Control.Feedback>
+          </Form.Group>
+          <Form.Group className="mb-4" controlId="acceptTerms">
+            <Form.Check
+              type="checkbox"
+              label="Aceito os termos de uso e a política de privacidade:"
+              checked={accepted}
+              onChange={e => setAccepted(e.target.checked)}
+              isInvalid={!!errors.acceptTerms}
+            />
+            {errors.acceptTerms && (
+              <div className="invalid-feedback d-block">{errors.acceptTerms}</div>
+            )}
+          </Form.Group>
+          <Button
+            type="submit"
+            className="w-100 fw-bold"
+            style={{
+              background: '#A8EB7D',
+              border: 'none',
+              borderRadius: '50px',
+              fontSize: '1rem',
+              padding: '18px 0',
+              color: '#222',
+            }}
           >
-            <option>Select</option>
-            <option>Yes</option>
-            <option>No</option>
-          </Form.Select>
-        </Form.Group>
-
-        <Form.Group className="mb-3" controlId="socialProgramName">
-          <Form.Label>Name of the social program</Form.Label>
-          <Form.Control
-            className="border-dark-gray"
-            type="text"
-            value={formData.socialProgramName || ''}
-            onChange={(e) => handleFieldChange('socialProgramName', e.target.value)}
-          />
-        </Form.Group>
-
-        <Row>
-          <Col md={6}>
-            <Form.Group className="mb-3" controlId="city">
-              <Form.Label>City *</Form.Label>
-              <Form.Select
-                className="border-dark-gray"
-                value={formData.city || 'Select'}
-                isInvalid={!!errors.city}
-                onChange={(e) => handleFieldChange('city', e.target.value)}
-              >
-                <option>Select</option>
-                <option>City 1</option>
-                <option>City 2</option>
-              </Form.Select>
-              <Form.Control.Feedback type="invalid">{errors.city}</Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-          <Col md={6}>
-            <Form.Group className="mb-3" controlId="district">
-              <Form.Label>District</Form.Label>
-              <Form.Select
-                className="border-dark-gray"
-                value={formData.district || 'Select'}
-                onChange={(e) => handleFieldChange('district', e.target.value)}
-              >
-                <option>Select</option>
-                <option>District 1</option>
-                <option>District 2</option>
-              </Form.Select>
-            </Form.Group>
-          </Col>
-        </Row>
-
-        <Form.Group className="mb-3" controlId="street">
-          <Form.Label>Street</Form.Label>
-          <Form.Control
-            className="border-dark-gray"
-            type="text"
-            value={formData.street || ''}
-            onChange={(e) => handleFieldChange('street', e.target.value)}
-          />
-        </Form.Group>
-
-        <Row>
-          <Col md={6}>
-            <Form.Group className="mb-3" controlId="telephone">
-              <Form.Label>Telefone *</Form.Label>
-              <Form.Control
-                className="border-dark-gray"
-                type="text"
-                value={formData.telephone || ''}
-                isInvalid={!!errors.telephone}
-                onChange={(e) => handleFieldChange('telephone', e.target.value)}
-              />
-              <Form.Control.Feedback type="invalid">{errors.telephone}</Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-          <Col md={6}>
-            <Form.Group className="mb-3" controlId="responsible">
-              <Form.Label>Responsável pelo cadastro *</Form.Label>
-              <Form.Control
-                className="border-dark-gray"
-                type="text"
-                value={formData.responsible || ''}
-                isInvalid={!!errors.responsible}
-                onChange={(e) => handleFieldChange('responsible', e.target.value)}
-              />
-              <Form.Control.Feedback type="invalid">{errors.responsible}</Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-        </Row>
-
-        <Row>
-          <Col md={6}>
-            <Form.Group className="mb-3" controlId="email">
-              <Form.Label>Email to login *</Form.Label>
-              <Form.Control
-                className="border-dark-gray"
-                type="email"
-                value={formData.email || ''}
-                isInvalid={!!errors.email}
-                onChange={(e) => handleFieldChange('email', e.target.value)}
-              />
-              <Form.Control.Feedback type="invalid">{errors.email}</Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-          <Col md={6}>
-            <Form.Group className="mb-3" controlId="password">
-              <Form.Label>Password *</Form.Label>
-              <Form.Control
-                className="border-dark-gray"
-                type="password"
-                isInvalid={!!errors.password}
-                onChange={(e) => handleFieldChange('password', e.target.value)}
-              />
-              <Form.Control.Feedback type="invalid">{errors.password}</Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-        </Row>
-
-        {/* Type-specific additional fields */}
-        {(selectedType === 'business' || selectedType === 'collective') && (
-          <>
-            <h4 className="py-4 text-center">Insira os dados adicionais da organização</h4>
-
-            {/* Business-specific fields */}
-            {selectedType === 'business' && (
-              <>
-                <Form.Group className="mb-3" controlId="cnpjType">
-                  <Form.Label style={{ fontWeight: 500, color: '#333', marginBottom: '6px' }}>Tipo de CNPJ</Form.Label>
-                  <Form.Select
-                    className="border-dark-gray"
-                    value={formData.cnpjType || 'Selecione'}
-                    isInvalid={!!errors.cnpjType}
-                    onChange={(e) => handleFieldChange('cnpjType', e.target.value)}
-                    style={{
-                      border: '1px solid #ccc',
-                      borderRadius: '4px',
-                      padding: '8px 12px',
-                      fontSize: '14px'
-                    }}
-                  >
-                    <option>Selecione</option>
-                    <option>MEI</option>
-                    <option>ME</option>
-                    <option>EIRELI</option>
-                    <option>Sociedade Empresária Limitada</option>
-                    <option>Sociedade Anônima</option>
-                    <option>Outros</option>
-                  </Form.Select>
-                  <Form.Control.Feedback type="invalid">{errors.cnpjType}</Form.Control.Feedback>
-                </Form.Group>
-
-                <Form.Group className="mb-3" controlId="razaoSocial">
-                  <Form.Label style={{ fontWeight: 500, color: '#333', marginBottom: '6px' }}>Razão Social</Form.Label>
-                  <Form.Text className="text-muted d-block mb-2" style={{ fontSize: '12px', color: '#666' }}>
-                    O nome deve corresponder ao registrado oficialmente.
-                  </Form.Text>
-                  <Form.Control
-                    className="border-dark-gray"
-                    type="text"
-                    value={formData.razaoSocial || ''}
-                    isInvalid={!!errors.razaoSocial}
-                    onChange={(e) => handleFieldChange('razaoSocial', e.target.value)}
-                    style={{
-                      border: '1px solid #ccc',
-                      borderRadius: '4px',
-                      padding: '8px 12px',
-                      fontSize: '14px'
-                    }}
-                  />
-                  <Form.Control.Feedback type="invalid">{errors.razaoSocial}</Form.Control.Feedback>
-                </Form.Group>
-
-                <Form.Group className="mb-3" controlId="nomeFantasia">
-                  <Form.Label style={{ fontWeight: 500, color: '#333', marginBottom: '6px' }}>Nome fantasia da empresa (Opcional)</Form.Label>
-                  <Form.Control
-                    className="border-dark-gray"
-                    type="text"
-                    value={formData.nomeFantasia || ''}
-                    onChange={(e) => handleFieldChange('nomeFantasia', e.target.value)}
-                    style={{
-                      border: '1px solid #ccc',
-                      borderRadius: '4px',
-                      padding: '8px 12px',
-                      fontSize: '14px'
-                    }}
-                  />
-                </Form.Group>
-
-                <Form.Group className="mb-3" controlId="cnpj">
-                  <Form.Label style={{ fontWeight: 500, color: '#333', marginBottom: '6px' }}>Número do CNPJ</Form.Label>
-                  <Form.Control
-                    className="border-dark-gray"
-                    type="text"
-                    value={formData.cnpj || ''}
-                    isInvalid={!!errors.cnpj}
-                    onChange={(e) => handleFieldChange('cnpj', e.target.value)}
-                    style={{
-                      border: '1px solid #ccc',
-                      borderRadius: '4px',
-                      padding: '8px 12px',
-                      fontSize: '14px'
-                    }}
-                  />
-                  <Form.Control.Feedback type="invalid">{errors.cnpj}</Form.Control.Feedback>
-                </Form.Group>
-              </>
-            )}
-
-            {/* Collective-specific fields */}
-            {selectedType === 'collective' && (
-              <>
-                <Form.Group className="mb-3" controlId="collectiveName">
-                  <Form.Label>Name of the Collective *</Form.Label>
-                  <Form.Control
-                    className="border-dark-gray"
-                    type="text"
-                    value={formData.collectiveName || ''}
-                    isInvalid={!!errors.collectiveName}
-                    onChange={(e) => handleFieldChange('collectiveName', e.target.value)}
-                  />
-                  <Form.Control.Feedback type="invalid">{errors.collectiveName}</Form.Control.Feedback>
-                </Form.Group>
-
-                <Row>
-                  <Col md={4}>
-                    <Form.Group className="mb-3" controlId="dayCreated">
-                      <Form.Label>Day</Form.Label>
-                      <Form.Control
-                        className="border-dark-gray"
-                        type="text"
-                        value={formData.dayCreated || ''}
-                        onChange={(e) => handleFieldChange('dayCreated', e.target.value)}
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={4}>
-                    <Form.Group className="mb-3" controlId="monthCreated">
-                      <Form.Label>Month</Form.Label>
-                      <Form.Select
-                        className="border-dark-gray"
-                        value={formData.monthCreated || 'Select'}
-                        onChange={(e) => handleFieldChange('monthCreated', e.target.value)}
-                      >
-                        <option>January</option>
-                        <option>February</option>
-                        <option>March</option>
-                        <option>April</option>
-                        <option>May</option>
-                        <option>June</option>
-                        <option>July</option>
-                        <option>August</option>
-                        <option>September</option>
-                        <option>October</option>
-                        <option>November</option>
-                        <option>December</option>
-                      </Form.Select>
-                    </Form.Group>
-                  </Col>
-                  <Col md={4}>
-                    <Form.Group className="mb-3" controlId="yearCreated">
-                      <Form.Label>Year</Form.Label>
-                      <Form.Control
-                        className="border-dark-gray"
-                        type="text"
-                        value={formData.yearCreated || ''}
-                        onChange={(e) => handleFieldChange('yearCreated', e.target.value)}
-                      />
-                    </Form.Group>
-                  </Col>
-                </Row>
-
-                <Form.Group className="mb-3" controlId="participants">
-                  <Form.Label>How many people participate in the collective *</Form.Label>
-                  <Form.Control
-                    className="border-dark-gray"
-                    type="text"
-                    value={formData.participants || ''}
-                    isInvalid={!!errors.participants}
-                    onChange={(e) => handleFieldChange('participants', e.target.value)}
-                  />
-                  <Form.Control.Feedback type="invalid">{errors.participants}</Form.Control.Feedback>
-                </Form.Group>
-              </>
-            )}
-          </>
-        )}
-
-        <Form.Group className="mb-4" controlId="acceptTerms">
-          <Form.Check
-            type="checkbox"
-            label="Aceito os termos de uso e política de privacidade:"
-            checked={accepted}
-            onChange={e => setAccepted(e.target.checked)}
-            isInvalid={!!errors.acceptTerms}
-          />
-          {errors.acceptTerms && (
-            <div className="invalid-feedback d-block">{errors.acceptTerms}</div>
-          )}
-        </Form.Group>
-
-        <Button
-          type="submit"
-          className="w-100 fw-bold"
-          style={{
-            background: '#A8EB7D',
-            border: 'none',
-            borderRadius: '50px',
-            fontSize: '1rem',
-            padding: '18px 0',
-            color: '#222',
-          }}
-        >
-          Criar conta
-        </Button>
-      </Form>
-    </Container>
+            Criar conta
+          </Button>
+        </Form>
+      </Container>
+    </>
   );
 }
 
 export default function CPF({ selectedType, onContinue }) {
+  const router = useRouter();
   const [cpf, setCpf] = useState('');
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
@@ -809,6 +793,15 @@ export default function CPF({ selectedType, onContinue }) {
     accountType: '',
     isSameType: false
   });
+
+  // Navigation functions
+  const handleBack = () => {
+    router.push('/agent?view=type', { scroll: false });
+  };
+
+  const handleClose = () => {
+    router.push('/agent?view=type', { scroll: false });
+  };
 
   const handleChange = (e) => {
     const raw = e.target.value.replace(/\D/g, '').slice(0, 11);
@@ -937,6 +930,44 @@ export default function CPF({ selectedType, onContinue }) {
   // Show CPF input form
   return (
     <>
+  
+  <div className="container py-2 border-0" style={{ background: '#fff' }}>
+      <div className="d-flex align-items-center justify-content-between">
+        {/* Left: Logo and Text */}
+        <div className="d-flex gap-5 align-items-center">
+          <Image src="/images/MadminLogo.jpg" alt="Gestor Cultural Logo" width={160} height={50} style={{ marginRight: 8 }} />
+            <button   onClick={handleBack}
+          className="btn btn-link text-decoration-none"
+          style={{ color: '#1A2530', fontSize: '26px', border: '0.1px solid rgb(206, 206, 206)',borderRadius: '50%', background: 'rgba(26, 37, 48, 0.1)', height: '50px', width: '50px' }}
+        >
+          ← 
+        </button>
+        </div>
+      
+        {/* Right: Icons */}
+        <div className="d-flex align-items-center gap-3">
+          <span className="d-flex align-items-center justify-content-center rounded-circle" style={{ background: '#D9DED9', width: 48, height: 48 }}>
+            {/* Calendar Icon (placeholder SVG) */}
+            <svg width="24" height="24" fill="none" stroke="#1A2530" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <path d="M16 2v4M8 2v4M3 10h18"/>
+            </svg>
+          </span>
+          <span 
+            className="d-flex align-items-center justify-content-center" 
+            style={{ width: 32, height: 32, cursor: 'pointer' }}
+            onClick={handleClose}
+          >
+            {/* Close Icon (X, placeholder SVG) */}
+            <svg width="28" height="28" fill="none" stroke="#1A2530" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </span>
+        </div>
+      </div>
+    </div>
+
       <Container className="d-flex flex-column align-items-center justify-content-center" style={{ minHeight: '60vh', maxWidth: 700 }}>
         <div className="position-relative w-100">
           <h2 className="fw-bold text-center mb-4" style={{ fontSize: '1.6rem' }}>
