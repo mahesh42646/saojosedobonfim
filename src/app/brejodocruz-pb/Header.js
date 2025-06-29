@@ -10,7 +10,7 @@ export default function Header() {
             <div className="row align-items-center justify-content-between">
                     {/* Logo */}
                     <div className="col-auto d-flex align-items-center">
-                        <Image src="/images/logo.png" alt="Logo" style={{ height: 70 }} width={100} height={100} />
+                        <Image src="/images/Logo.png" alt="Logo" style={{ height: 70 }} width={100} height={100} />
                     </div>
 
                     {/* Navigation */}

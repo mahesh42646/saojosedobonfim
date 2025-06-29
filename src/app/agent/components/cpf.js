@@ -74,7 +74,7 @@ function CPFExistsModal({ show, onHide, cpf, fullName, accountType, isSameType }
 // Combined Registration Form Component
 function RegistrationForm({ cpf, selectedType, existingProfile }) {
   const [accepted, setAccepted] = useState(false);
-  const [pcd, setPcd] = useState(existingProfile?.pcd || 'No');
+  const [pcd, setPcd] = useState(existingProfile?.pcd || 'Selecione');
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({});
 
@@ -169,39 +169,21 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
     // Common required fields for all types
     const commonRequiredFields = [
       'dob', 'fullname', 'rg', 'gender', 'breed', 'lgbtq', 'education',
-      'income', 'mainActivity', 'traditionalCommunities', 'pcd', 'city',
+      'income', 'mainActivity', 'traditionalCommunities', 'city',
       'telephone', 'responsible', 'email', 'password'
     ];
 
     // Check common required fields
     commonRequiredFields.forEach(field => {
-      if (!formData[field] || formData[field] === 'Select' || formData[field] === '') {
-        newErrors[field] = 'This field is required';
+      if (!formData[field] || formData[field] === 'Select' || formData[field] === 'Selecione' || formData[field] === '') {
+        newErrors[field] = 'Este campo é obrigatório';
       }
     });
 
-    // Type-specific required fields
-    if (selectedType === 'business') {
-      const businessRequiredFields = ['cnpjType', 'razaoSocial', 'cnpj'];
-      businessRequiredFields.forEach(field => {
-        if (!formData[field] || formData[field] === 'Select' || formData[field] === '') {
-          newErrors[field] = 'This field is required';
-        }
-      });
-    }
-
-    if (selectedType === 'collective') {
-      const collectiveRequiredFields = ['collectiveName', 'participants'];
-      collectiveRequiredFields.forEach(field => {
-        if (!formData[field] || formData[field] === '') {
-          newErrors[field] = 'This field is required';
-        }
-      });
-    }
-
-    // Check if terms are accepted
+    // PCD is now optional, so we don't validate it
+    // Only validate if terms are accepted
     if (!accepted) {
-      newErrors.acceptTerms = 'You must accept the terms and conditions';
+      newErrors.acceptTerms = 'Você deve aceitar os termos e condições';
     }
 
     setErrors(newErrors);
@@ -219,6 +201,7 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
           cpf,
           selectedType,
           ...formData,
+          pcd: pcd === 'Selecione' ? null : pcd, // Set to null if not selected
           acceptedTerms: accepted
         };
 
@@ -454,7 +437,7 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
         <Row>
           <Col md={6}>
             <Form.Group className="mb-3" controlId="pcd">
-              <Form.Label>Do you have a PCD disability? *</Form.Label>
+              <Form.Label>Você tem alguma deficiência (PCD)? *</Form.Label>
               <Form.Select
                 className="border-dark-gray"
                 value={pcd}
@@ -464,16 +447,17 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
                   handleFieldChange('pcd', e.target.value);
                 }}
               >
-                <option>No</option>
-                <option>Yes</option>
+                <option value="Selecione">Selecione</option>
+                <option value="Sim">Sim</option>
+                <option value="Não">Não</option>
               </Form.Select>
               <Form.Control.Feedback type="invalid">{errors.pcd}</Form.Control.Feedback>
             </Form.Group>
           </Col>
-          {pcd === 'Yes' && (
+          {pcd === 'Sim' && (
             <Col md={6}>
               <Form.Group className="mb-3" controlId="withoutPcd">
-                <Form.Label>In case without PCD which one?</Form.Label>
+                <Form.Label>Qual deficiência?</Form.Label>
                 <Form.Control
                   className="border-dark-gray"
                   type="text"
@@ -617,22 +601,33 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
             {selectedType === 'business' && (
               <>
                 <Form.Group className="mb-3" controlId="cnpjType">
-                  <Form.Label>Tipo de CNPJ *</Form.Label>
+                  <Form.Label style={{ fontWeight: 500, color: '#333', marginBottom: '6px' }}>Tipo de CNPJ</Form.Label>
                   <Form.Select
                     className="border-dark-gray"
                     value={formData.cnpjType || 'Selecione'}
                     isInvalid={!!errors.cnpjType}
                     onChange={(e) => handleFieldChange('cnpjType', e.target.value)}
+                    style={{
+                      border: '1px solid #ccc',
+                      borderRadius: '4px',
+                      padding: '8px 12px',
+                      fontSize: '14px'
+                    }}
                   >
                     <option>Selecione</option>
-                    {/* Add options here */}
+                    <option>MEI</option>
+                    <option>ME</option>
+                    <option>EIRELI</option>
+                    <option>Sociedade Empresária Limitada</option>
+                    <option>Sociedade Anônima</option>
+                    <option>Outros</option>
                   </Form.Select>
                   <Form.Control.Feedback type="invalid">{errors.cnpjType}</Form.Control.Feedback>
                 </Form.Group>
 
                 <Form.Group className="mb-3" controlId="razaoSocial">
-                  <Form.Label>Razão Social *</Form.Label>
-                  <Form.Text className="text-muted">
+                  <Form.Label style={{ fontWeight: 500, color: '#333', marginBottom: '6px' }}>Razão Social</Form.Label>
+                  <Form.Text className="text-muted d-block mb-2" style={{ fontSize: '12px', color: '#666' }}>
                     O nome deve corresponder ao registrado oficialmente.
                   </Form.Text>
                   <Form.Control
@@ -641,28 +636,46 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
                     value={formData.razaoSocial || ''}
                     isInvalid={!!errors.razaoSocial}
                     onChange={(e) => handleFieldChange('razaoSocial', e.target.value)}
+                    style={{
+                      border: '1px solid #ccc',
+                      borderRadius: '4px',
+                      padding: '8px 12px',
+                      fontSize: '14px'
+                    }}
                   />
                   <Form.Control.Feedback type="invalid">{errors.razaoSocial}</Form.Control.Feedback>
                 </Form.Group>
 
                 <Form.Group className="mb-3" controlId="nomeFantasia">
-                  <Form.Label>Nome fantasia da empresa (Opcional)</Form.Label>
+                  <Form.Label style={{ fontWeight: 500, color: '#333', marginBottom: '6px' }}>Nome fantasia da empresa (Opcional)</Form.Label>
                   <Form.Control
                     className="border-dark-gray"
                     type="text"
                     value={formData.nomeFantasia || ''}
                     onChange={(e) => handleFieldChange('nomeFantasia', e.target.value)}
+                    style={{
+                      border: '1px solid #ccc',
+                      borderRadius: '4px',
+                      padding: '8px 12px',
+                      fontSize: '14px'
+                    }}
                   />
                 </Form.Group>
 
                 <Form.Group className="mb-3" controlId="cnpj">
-                  <Form.Label>CNPJ *</Form.Label>
+                  <Form.Label style={{ fontWeight: 500, color: '#333', marginBottom: '6px' }}>Número do CNPJ</Form.Label>
                   <Form.Control
                     className="border-dark-gray"
                     type="text"
                     value={formData.cnpj || ''}
                     isInvalid={!!errors.cnpj}
                     onChange={(e) => handleFieldChange('cnpj', e.target.value)}
+                    style={{
+                      border: '1px solid #ccc',
+                      borderRadius: '4px',
+                      padding: '8px 12px',
+                      fontSize: '14px'
+                    }}
                   />
                   <Form.Control.Feedback type="invalid">{errors.cnpj}</Form.Control.Feedback>
                 </Form.Group>

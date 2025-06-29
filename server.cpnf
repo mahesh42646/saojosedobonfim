@@ -63,3 +63,22 @@ rushikesh@Rushikeshs-MacBook-Air MapaNew % curl -X POST \
     "email": "cidadeteste@gmail.com",
     "password": "123456"
   }'
+
+
+
+
+
+
+
+
+on local
+git add .
+git commit -m "live commit"
+git branch -M main
+git push -u origin main
+
+on live
+git pull
+npm run build
+pm2 restart all
+systemctl reload nginx
