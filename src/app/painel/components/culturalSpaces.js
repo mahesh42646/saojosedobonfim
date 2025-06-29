@@ -70,7 +70,7 @@ function SpaceDetails({ space, onBack, fetchSpaceDetails }) {
             <div style={{ width: 56, height: 56, borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {space.coverPhoto ? (
                 <Image
-                  src={`http://localhost:4000/uploads/${space.coverPhoto}`}
+                  src={`https://mapacultural.gestorcultural.com.br/uploads/${space.coverPhoto}`}
                   alt={space.title}
                   width={56}
                   height={56}
@@ -349,7 +349,7 @@ function SpaceDetails({ space, onBack, fetchSpaceDetails }) {
                 {space.coverPhoto && (
                   <div style={{ width: 160, height: 170, borderRadius: 12, overflow: 'hidden', position: 'relative' }}>
                     <Image
-                      src={`http://localhost:4000/uploads/${space.coverPhoto}`}
+                      src={`https://mapacultural.gestorcultural.com.br/uploads/${space.coverPhoto}`}
                       alt="Cover"
                       width={160}
                       height={170}
@@ -364,7 +364,7 @@ function SpaceDetails({ space, onBack, fetchSpaceDetails }) {
                 {space.photos?.map((photo, index) => (
                   <div key={index} style={{ width: 160, height: 170, borderRadius: 12, overflow: 'hidden' }}>
                     <Image
-                      src={`http://localhost:4000/uploads/${photo}`}
+                      src={`https://mapacultural.gestorcultural.com.br/uploads/${photo}`}
                       alt={`Photo ${index + 1}`}
                       width={160}
                       height={170}
@@ -623,7 +623,7 @@ export default function CspacePage() {
                   <div style={{ width: 48, height: 48, borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {space.coverPhoto ? (
                       <Image
-                        src={`http://localhost:4000/uploads/${space.coverPhoto}`}
+                        src={`https://mapacultural.gestorcultural.com.br/uploads/${space.coverPhoto}`}
                         alt={space.title}
                         width={48}
                         height={48}

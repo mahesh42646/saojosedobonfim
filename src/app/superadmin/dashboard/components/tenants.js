@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 // import Image from 'next/image';
 // import { Modal, Button, Form, Row, Col } from 'react-bootstrap';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://mapacultural.gestorcultural.com.br/api';
 
 const AddTenantModal = ({ show, onClose, onSave }) => {
   const [tenantName, setTenantName] = useState('');

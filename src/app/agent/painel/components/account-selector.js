@@ -48,7 +48,7 @@ function AccountSelector({ onAccountSelect }) {
         const user = JSON.parse(userData);
         const cpf = user.cpf;
         const response = await fetch(`${API_BASE_URL}/agent/profile/${cpf}`, {
-        // const response = await fetch(`http://localhost:4000/api/agent/profile/${cpf}`, {
+        // const response = await fetch(`https://mapacultural.gestorcultural.com.br/api/agent/profile/${cpf}`, {
           method: 'GET',  
           headers: {
             'Authorization': token

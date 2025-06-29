@@ -8,7 +8,7 @@ import { useSearchParams } from 'next/navigation';
 import { buildApiUrl } from '../../config/api';
 
 // Base URL for images (without /api)
-const IMAGE_BASE_URL = 'http://localhost:4000';
+const IMAGE_BASE_URL = 'https://mapacultural.gestorcultural.com.br';
 
 function AgentProfileContent() {
     const searchParams = useSearchParams();

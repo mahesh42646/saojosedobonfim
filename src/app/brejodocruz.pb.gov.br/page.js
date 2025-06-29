@@ -404,7 +404,7 @@ export default function BrejoDoCruzPage() {
                     <div style={{ width: '100%', height: 159, position: 'relative', padding: '  10px 1px 1px 1px' }}>
                       {space.coverPhoto ? (
                         <Image
-                          src={`http://localhost:4000/uploads/${space.coverPhoto}`}
+                          src={`https://mapacultural.gestorcultural.com.br/uploads/${space.coverPhoto}`}
                           alt={space.title}
                           width={100}
                           height={100}
@@ -495,7 +495,7 @@ export default function BrejoDoCruzPage() {
               <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', background: '#fff', borderRadius: 16, padding: 24, gap: 24, boxShadow: '0 0 8px 0 #0001' }}>
                 {project.coverPhoto ? (
                   <Image 
-                    src={`http://localhost:4000/uploads/${project.coverPhoto}`}
+                    src={`https://mapacultural.gestorcultural.com.br/uploads/${project.coverPhoto}`}
                     alt={project.title}
                     width={150}
                     height={150}

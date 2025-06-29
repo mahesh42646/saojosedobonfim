@@ -6,7 +6,7 @@ import { buildApiUrl } from '../../config/api';
 import Link from 'next/link';
 
 // Base URL for images (without /api)
-const IMAGE_BASE_URL = 'http://localhost:4000';
+const IMAGE_BASE_URL = 'https://mapacultural.gestorcultural.com.br';
 
 export default function CulturalSpacesPage() {
   const [spaces, setSpaces] = useState([]);

@@ -4,7 +4,7 @@ import Image from 'next/image';
 import axios from 'axios';
 import { useAuth } from '../authContex';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mapacultural.gestorcultural.com.br/api';
 
 const agents = [
 

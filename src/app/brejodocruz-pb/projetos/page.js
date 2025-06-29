@@ -66,7 +66,7 @@ function ProjectContent() {
                 {/* Main Image */}
                 <div className="rounded-4 border h-100 overflow-hidden" style={{ maxHeight: "400px" }}>
                     <Image
-                        src={space.coverPhoto ? `http://localhost:4000/uploads/${space.coverPhoto}` : "/images/image2.png"}
+                        src={space.coverPhoto ? `https://mapacultural.gestorcultural.com.br/uploads/${space.coverPhoto}` : "/images/image2.png"}
                         alt={space.title}
                         width={1200}
                         height={400}
@@ -174,7 +174,7 @@ function ProjectContent() {
                                 <div key={index} className="col-md-3">
                                     <div className="rounded-4 border overflow-hidden">
                                         <Image
-                                            src={`http://localhost:4000/uploads/${photo}`}
+                                            src={`https://mapacultural.gestorcultural.com.br/uploads/${photo}`}
                                             alt={`Gallery ${index + 1}`}
                                             width={200}
                                             height={200}
