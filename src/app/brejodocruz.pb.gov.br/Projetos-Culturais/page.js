@@ -267,10 +267,10 @@ export default function CulturalProjectsPage() {
       {/* Header */}
       <Headerpb />
       <div style={{ position: 'relative', width: '100%', height: 334, overflow: 'visible', borderBottomLeftRadius: 2, borderBottomRightRadius: 32, marginBottom: 0 }}>
-        <Image src="/images/banner2.png" alt="Banner" fill style={{ objectFit: 'cover' }} />
+        <Image src="/images/projectsBG.png" alt="Banner" width={100} height={100} style={{ objectFit: 'cover', width: '80%', height: '334px', objectPosition: 'end', marginLeft: '20%' }} />
         {/* Green overlay gradient */}
         <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderBottomLeftRadius: 2, borderBottomRightRadius: 32,
-            background: 'linear-gradient(88.74deg, rgb(47, 127, 45) 0%, rgba(26, 139, 26, 0.15) 100%)', }} />
+            background: 'linear-gradient(88.74deg, rgb(47, 127, 45) 20%, rgba(26, 139, 26, 0.15) 100%)', }} />
         {/* Text */}
         <div style={{ position: 'absolute', top: 88, left: '15%', color: '#fff', zIndex: 2 }}>
           <div style={{ fontSize: 20, fontWeight: 600, marginBottom: 8, letterSpacing: 0.5 }}>BEM VINDO AO</div>
@@ -278,7 +278,7 @@ export default function CulturalProjectsPage() {
         </div>
         {/* Bottom image border */}
         <div style={{ position: 'absolute', left: 0, bottom: -24, width: '100%', height: 24, borderBottomLeftRadius: 32, borderBottomRightRadius: 32, overflow: 'hidden', zIndex: 3 }}>
-          <Image src="/images/banner2.png" className="img-fluid    " style={{  opacity: 0.5, background: 'rgb(187, 0, 0)' }} alt="Banner Border" fill />
+          <Image src="/images/banner_bottom.jpg" className="img-fluid" style={{ opacity: 0.9, background: 'rgba(187, 0, 0, 0)' }} alt="Banner Border" fill />
         </div>
       </div>
       {/* View options and search */}

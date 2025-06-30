@@ -3,11 +3,18 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import EditProfile from './editprofile';
 import { useAuth } from '../authContex';
+import { useRouter } from 'next/navigation';
 
 const Profile = () => {
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [adminData, setAdminData] = useState(null);
   const { token, logout } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    logout();
+    router.push('/painel');
+  };
 
   useEffect(() => {
     const fetchAdminProfile = async () => {
@@ -46,10 +53,10 @@ const Profile = () => {
           <div className="bg-light rounded-4 my-1 p-4" style={{ background: '#F5FFF0', width:"404px", height:"303px" }}>
             <div className="text-center mb-4">
               <div className="position-relative d-inline-block">
-                {adminData?.profilePhoto ? (
+                {adminData?.profilePhoto && adminData.profilePhoto.trim() ? (
                   <Image
-                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL.replace('/api', '')}/uploads/${adminData.profilePhoto}`}
-                    alt="Profile"
+                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL.replace('/api', '')}/uploads/${adminData.profilePhoto.trim()}`}
+                    alt="Perfil"
                     width={100}
                     height={100}
                     className="rounded-circle border"
@@ -58,7 +65,7 @@ const Profile = () => {
                 ) : (
                   <Image
                     src="/images/placeholder-Avatar.png"
-                    alt="Default Profile"
+                    alt="Perfil Padrão"
                     width={100}
                     height={100}
                     className="rounded-circle border"
@@ -67,7 +74,7 @@ const Profile = () => {
                 )}
               </div>
               <h2 className="py-4 my-2" style={{ fontSize: '24px', fontWeight: '600' }}>
-                {adminData?.name || 'Loading...'}
+                {adminData?.name || 'Carregando...'}
               </h2>
               {adminData?.title && (
                 <p className="text-muted mb-2">{adminData.title}</p>
@@ -80,7 +87,7 @@ const Profile = () => {
           <div className="d-flex py-2 justify-content-center align-items-center">
             <button 
               className="btn" 
-              onClick={logout}
+              onClick={handleLogout}
               style={{ 
                 background: '#F8F9FA',
                 border: '1px solid #F5FFF0',

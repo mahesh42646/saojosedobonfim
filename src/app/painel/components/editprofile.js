@@ -24,8 +24,8 @@ const EditProfile = ({ adminData, onBack }) => {
         description: adminData.description || '',
         profilePhoto: null
       });
-      if (adminData.profilePhoto) {
-        setPreviewImage(`${process.env.NEXT_PUBLIC_API_BASE_URL.replace('/api', '')}/uploads/${adminData.profilePhoto}`);
+      if (adminData.profilePhoto && adminData.profilePhoto.trim()) {
+        setPreviewImage(`${process.env.NEXT_PUBLIC_API_BASE_URL.replace('/api', '')}/uploads/${adminData.profilePhoto.trim()}`);
       }
     }
   }, [adminData]);

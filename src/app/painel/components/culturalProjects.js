@@ -221,12 +221,16 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
                   padding: 12, 
                   borderRadius: 8, 
                   border: '1px solid #ccc', 
-                  fontSize: 16, 
+                  fontSize: 12, 
                   minHeight: 80, 
-                  background: '#F7F7F7' 
+                  background: '#F7F7F7',
+                  fontFamily: 'monospace',
+                  overflow: 'auto',
+                  whiteSpace: 'pre-wrap'
                 }}
-                dangerouslySetInnerHTML={{ __html: space.description || '' }}
-              />
+              >
+                {space.description || 'No content'}
+              </div>
             </div>
             {/* Period */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

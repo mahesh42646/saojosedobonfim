@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import Home from "@/app/painel/components/home";
 import Agents from "./culturalAgents";
@@ -10,6 +10,7 @@ import Staff from "./staffs";
 import SelectionProcess from "./selectionProcess";
 import Proposals from "./proposals";
 import Profile from "./profile";
+import { useAuth } from '../authContex';
 
 const menuItems = [
   {
@@ -26,6 +27,33 @@ const menuItems = [
 
 const Sidebar = () => {
   const [activeTab, setActiveTab] = useState("home");
+  const [adminData, setAdminData] = useState(null);
+  const { token } = useAuth();
+
+  useEffect(() => {
+    const fetchAdminProfile = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/profile`, {
+          headers: {
+            'Authorization': token
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setAdminData(data);
+        } else {
+          console.error('Failed to fetch admin profile');
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    };
+
+    if (token) {
+      fetchAdminProfile();
+    }
+  }, [token]);
 
   return (
     <>
@@ -60,7 +88,7 @@ const Sidebar = () => {
                 style={{ borderRadius: "50%" }}
                 priority
               />
-              <span id="user-name" className="fw-semibold fs-16 text-dark">perfil-usuário</span>
+              <span id="user-name" className="fw-semibold fs-16 text-dark">{adminData?.name || 'Loading...'}</span>
               <span className="ms-3" style={{ fontSize: 20, color: "#888" }}>&#8250;</span>
             </div>
 

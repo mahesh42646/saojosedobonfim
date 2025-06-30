@@ -145,62 +145,136 @@ const ProjectDetails = ({ project, onBack, onDelete }) => {
                         <div className="p-3">
                             <div className="d-flex align-items-start mb-4">
                                 <div className="me-3">
-                                    <div className="fw-bold" style={{ color: '#666' }}>segunda-feira, 5 de maio 21:51</div>
-                                    <div>Project created successfully</div>
+                                    <div className="fw-bold" style={{ color: '#666' }}>
+                                        {new Date(project.createdAt).toLocaleString('pt-BR')}
+                                    </div>
+                                    <div>Projeto criado com sucesso</div>
                                 </div>
                             </div>
-                            <div className="d-flex align-items-start">
-                                <div className="me-3">
-                                    <div className="fw-bold" style={{ color: '#666' }}>sexta-feira, 9 de maio 10:01</div>
-                                    <div className="fw-bold">Project approved and published</div>
-                                </div>
-                            </div>
+                            
+                            {project.statusHistory && project.statusHistory.length > 0 ? (
+                                project.statusHistory.map((statusUpdate, index) => (
+                                    <div key={index} className="d-flex align-items-start mb-4">
+                                        <div className="me-3">
+                                            <div className="fw-bold" style={{ color: '#666' }}>
+                                                {new Date(statusUpdate.changedAt).toLocaleString('pt-BR')}
+                                            </div>
+                                            <div className="fw-bold">
+                                                {statusUpdate.status === 'approved' && 'Projeto aprovado e publicado'}
+                                                {statusUpdate.status === 'rejected' && 'Projeto recusado'}
+                                                {statusUpdate.status === 'pending' && 'Projeto em análise'}
+                                                {statusUpdate.status === 'inactive' && 'Projeto inativo'}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                project.status !== 'pending' && (
+                                    <div className="d-flex align-items-start">
+                                        <div className="me-3">
+                                            <div className="fw-bold" style={{ color: '#666' }}>
+                                                {new Date(project.updatedAt).toLocaleString('pt-BR')}
+                                            </div>
+                                            <div className="fw-bold">
+                                                {project.status === 'approved' && 'Projeto aprovado e publicado'}
+                                                {project.status === 'rejected' && 'Projeto recusado'}
+                                                {project.status === 'inactive' && 'Projeto inativo'}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )
+                            )}
                         </div>
                     </Tab>
                     <Tab eventKey="details" title="Detalhes">
                         <div className="p-3">
                             <div className="mb-4">
-                                <div className="fw-bold mb-2">Project approved and published</div>
+                                <div className="fw-bold mb-2">Descrição do Projeto</div>
                                 <div className="d-flex align-items-start mb-4">
                                     <div className="me-3">
-                                        <div className="fw-bold" style={{ color: '#666' }}>O Cine Derréis</div>
-                                        <div style={{ color: '#666' }}>É Um Resgate Cultural, Da Versão Cinema Na Comunidade, Projeto Criado E Executado Por Marcelo Lima, Quando Então Secretário De Cultura. Atualmente Como Secretário Executivo Do Coletivo Derréis E Um Dos Representantes Do Nosso Audiovisual, Revitalizamos O Projeto Na Versão Cine Derréis Que Visa Promover A Produção E A Exibição De Obras Audiovisuais De Produção Nordestina Brasileira.</div>
-                                    </div>
-                                </div>
-                                <div className="mb-4">
-                                    <div className="fw-bold mb-2">Photo gallery</div>
-                                    <div className="d-flex gap-3">
-                                        {[1, 2, 3].map((num) => (
-                                            <Image
-                                                key={num}
-                                                src={`/images/photo0${num}.png`}
-                                                alt={`Gallery photo ${num}`}
-                                                width={150}
-                                                height={150}
-                                                className="rounded-3"
-                                                style={{ objectFit: 'cover' }}
-                                            />
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className="mb-4">
-                                    <div className="fw-bold mb-2">Youtube Videos (URL)</div>
-                                    <div className="d-flex gap-3">
-                                        <Image
-                                            src="/images/videos.png"
-                                            alt="Video thumbnail"
-                                            width={150}
-                                            height={150}
-                                            className="rounded-3"
-                                            style={{ objectFit: 'cover' }}
+                                        <div className="fw-bold" style={{ color: '#666' }}>{project.title}</div>
+                                        <div 
+                                            style={{ color: '#666' }}
+                                            dangerouslySetInnerHTML={{ __html: project.description }}
                                         />
                                     </div>
                                 </div>
-                                <div>
-                                    <div className="fw-bold mb-2">Contact Information</div>
+                                
+                                {project.period && (
+                                    <div className="mb-4">
+                                        <div className="fw-bold mb-2">Período do Projeto</div>
+                                        <div style={{ color: '#666' }}>
+                                            <div>Início: {project.period.start ? new Date(project.period.start).toLocaleDateString('pt-BR') : 'Não definido'}</div>
+                                            {project.period.end && (
+                                                <div>Fim: {new Date(project.period.end).toLocaleDateString('pt-BR')}</div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {project.photos && project.photos.length > 0 && (
+                                    <div className="mb-4">
+                                        <div className="fw-bold mb-2">Galeria de Fotos</div>
+                                        <div className="d-flex gap-3 flex-wrap">
+                                            {project.photos.map((photo, index) => (
+                                                <Image
+                                                    key={index}
+                                                    src={`https://mapacultural.gestorcultural.com.br/uploads/${photo}`}
+                                                    alt={`Gallery photo ${index + 1}`}
+                                                    width={150}
+                                                    height={150}
+                                                    className="rounded-3"
+                                                    style={{ objectFit: 'cover' }}
+                                                    onError={(e) => {
+                                                        e.target.src = '/images/card.png';
+                                                    }}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {project.socialLinks && Object.keys(project.socialLinks).length > 0 && (
+                                    <div className="mb-4">
+                                        <div className="fw-bold mb-2">Links Sociais</div>
+                                        <div style={{ color: '#666' }}>
+                                            {project.socialLinks.instagram && (
+                                                <div>
+                                                    <strong>Instagram:</strong> 
+                                                    <a href={project.socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="ms-2">
+                                                        {project.socialLinks.instagram}
+                                                    </a>
+                                                </div>
+                                            )}
+                                            {project.socialLinks.youtube && (
+                                                <div>
+                                                    <strong>YouTube:</strong> 
+                                                    <a href={project.socialLinks.youtube} target="_blank" rel="noopener noreferrer" className="ms-2">
+                                                        {project.socialLinks.youtube}
+                                                    </a>
+                                                </div>
+                                            )}
+                                            {project.socialLinks.facebook && (
+                                                <div>
+                                                    <strong>Facebook:</strong> 
+                                                    <a href={project.socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="ms-2">
+                                                        {project.socialLinks.facebook}
+                                                    </a>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="mb-4">
+                                    <div className="fw-bold mb-2">Informações do Projeto</div>
                                     <div style={{ color: '#666' }}>
-                                        <div>Email: cinemacomunidade@gmail.com</div>
-                                        <div>Phone: (83) 9 9999-9999</div>
+                                        <div><strong>Tipo:</strong> {project.type}</div>
+                                        <div><strong>Status:</strong> {StatusText({ status: project.status })}</div>
+                                        <div><strong>Data de Criação:</strong> {new Date(project.createdAt).toLocaleString('pt-BR')}</div>
+                                        {project.updatedAt && (
+                                            <div><strong>Última Atualização:</strong> {new Date(project.updatedAt).toLocaleString('pt-BR')}</div>
+                                        )}
                                     </div>
                                 </div>
                             </div>

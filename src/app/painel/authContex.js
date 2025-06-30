@@ -75,6 +75,7 @@ export const AuthProvider = ({ children }) => {
       // Store user data
       const userData = { 
         id: data.id || 'admin', 
+        name: data.name || data.email || email,
         email, 
         role: 'admin' 
       };

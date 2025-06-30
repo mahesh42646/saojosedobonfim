@@ -2,15 +2,20 @@ import React from "react";
 import Link from "next/link"; // for Next.js routing
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import Image from "next/image";
-            
+import { useRouter } from 'next/navigation';
+
 export default function Header() {
+    const router = useRouter();
+
     return (
         <header className="bg-white py-2 border-bottom">
             <div className="container">
                 <div className="row align-items-center justify-content-center">
                     {/* Logo */}
                     <div className="col-auto d-flex align-items-center">
-                        <Image src="/images/Logo.png" alt="Logo" style={{ height: 70 }} width={200} height={100} />
+                    <div onClick={() => window.location.href = '/'}>
+                          <Image src="/images/Logo.png" alt="Logo" style={{ height: 70, cursor: 'pointer' }} width={200} height={100} />
+                        </div>
                     </div>
 
                     {/* Navigation */}
@@ -41,8 +46,8 @@ export default function Header() {
                     </div>
 
                     {/* Login */}
-                    <div className="col-auto">
-                        <Link href="/#  " className="d-flex align-items-center text-decoration-none fw-bold" style={{ color: "#005100" }}>
+                    <div  onClick={() => router.push('/agent')} className="col-auto">
+                        <Link href="/#" className="d-flex align-items-center text-decoration-none fw-bold" style={{ color: "#005100" }}>
                             <i className="bi bi-person-circle me-2" style={{ fontSize: 20 }}></i> Entrar
                         </Link>
                     </div>

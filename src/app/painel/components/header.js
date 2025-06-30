@@ -1,16 +1,16 @@
 "use client";
 import React from "react";
 import Image from 'next/image';
+import { useAuth } from '../authContex';
 
 const HeaderM = () => {
-  // Placeholder for login state. Change to true to see logged-in view.
-  const isLoggedIn = false;
+  const { isAuthenticated, user } = useAuth();
 
   return (
     <div style={{ maxWidth: 1300, margin: "0 auto", width: "100%" }}>
       <nav style={{ minHeight: 66, background: "#fff", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 32px",  position: "relative" }}>
         {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }} onClick={() => window.location.href = '/'}>
           <Image 
             src="/images/MadminLogo.jpg"
             alt="Gestor Cultural"
@@ -21,6 +21,7 @@ const HeaderM = () => {
           />
         </div>
         
+        {isAuthenticated() && (
           <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
             <div style={{ background: "#9FE870", color: "#222", borderRadius: 20, padding: "4px 16px", fontWeight: 600, fontSize: 16 }}>
               15 mensagens
@@ -34,12 +35,12 @@ const HeaderM = () => {
                 style={{ borderRadius: "50%" }}
                 priority
               />
-              <span className="fw-semibold fs-16 text-dark">ADMINISTRAÇÃO MUNICIPAL</span>
+              <span className="fw-semibold fs-16 text-dark">{user?.name || 'Perfil'}</span>
               <span className="ms-3" style={{ fontSize: 20, color: "#888" }}>&#8250;</span>
             </div>
            
           </div>
-        {/* )} */}
+        )}
       </nav>
     </div>
   );

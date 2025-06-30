@@ -3,9 +3,11 @@ import Image from "next/image";
 import Headerpb from "./Header-pb";
 import { buildApiUrl } from '../config/api';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 // import styles from "./page.module.css";
 
 export default function BrejoDoCruzPage() {
+  const router = useRouter();
   const [agents, setAgents] = useState([]);
   const [spaces, setSpaces] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -36,7 +38,7 @@ export default function BrejoDoCruzPage() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const url = buildApiUrl('/agent/profiles');
       const response = await fetch(url, {
         headers: {
@@ -119,7 +121,7 @@ export default function BrejoDoCruzPage() {
   }, []);
 
   return (
-    <div style={{  background: '#F8F9FA', minHeight: '100vh' }}>
+    <div style={{ background: '#F8F9FA', minHeight: '100vh' }}>
       {/* Header */}
       <Headerpb />
 
@@ -127,24 +129,24 @@ export default function BrejoDoCruzPage() {
       <div style={{ position: 'relative', width: '100%', height: 334, overflow: 'visible', borderBottomLeftRadius: 2, borderBottomRightRadius: 32, marginBottom: 0 }}>
         <Image src="/images/banner2.png" alt="Banner" fill style={{ objectFit: 'cover' }} />
         {/* Green overlay gradient */}
-        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderBottomLeftRadius: 2, borderBottomRightRadius: 32,
-            background: 'linear-gradient(88.74deg, rgb(47, 127, 45) 0%, rgba(26, 139, 26, 0.15) 100%)', }} />
+        <div style={{
+          position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderBottomLeftRadius: 2, borderBottomRightRadius: 32,
+          background: 'linear-gradient(88.74deg, rgb(47, 127, 45) 0%, rgba(26, 139, 26, 0.15) 100%)',
+        }} />
         {/* Text */}
         <div style={{ position: 'absolute', top: 88, left: '15%', color: '#fff', zIndex: 2 }}>
           <div style={{ fontSize: 20, fontWeight: 600, marginBottom: 8, letterSpacing: 0.5 }}>BEM VINDO AO</div>
           <div style={{ fontSize: 48, fontWeight: 700, lineHeight: 1.1, textShadow: '0 2px 8px rgba(0,0,0,0.10)' }}>Mapa Cultural de<br />Brejo do Cruz</div>
         </div>
         {/* Bottom image border */}
-        <div style={{ position: 'absolute', left: 0, bottom: -16, width: '100%', height: 24, borderBottomLeftRadius: 32, borderBottomRightRadius: 32, overflow: 'hidden', zIndex: 3 }}>
-          <Image src="/images/banner2.png" className="img-fluid    " style={{  opacity: 0.5, background: 'rgb(187, 0, 0)' }} alt="Banner Border" fill />
-        </div>
+        <div style={{ position: 'absolute', left: 0, bottom: -24, width: '100%', height: 24, borderBottomLeftRadius: 32, borderBottomRightRadius: 32, overflow: 'hidden', zIndex: 3 }}>           <Image src="/images/banner_bottom.jpg" className="img-fluid" style={{ opacity: 0.9, background: 'rgba(187, 0, 0, 0)' }} alt="Banner Border" fill />         </div>
       </div>
 
 
       {/* Info and Sign Up */}
       <div className="p-4 container" style={{ display: 'flex', justifyContent: 'center', gap: 32, marginTop: 30, marginBottom: 32 }}>
         {/* Info Card */}
-        <div style={{ 
+        <div style={{
           position: 'relative',
           // width: 831,
           minHeight: 245,
@@ -153,14 +155,14 @@ export default function BrejoDoCruzPage() {
           boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
         }}>
           {/* Background Image */}
-          <Image 
-            src="/images/dash-news.png" 
-            alt="Background" 
-            fill 
-            style={{ objectFit: 'cover' }} 
+          <Image
+            src="/images/dash-news.png"
+            alt="Background"
+            fill
+            style={{ objectFit: 'cover' }}
           />
           {/* Green Gradient Overlay */}
-          <div style={{ 
+          <div style={{
             position: 'absolute',
             top: 0,
             left: 0,
@@ -169,7 +171,7 @@ export default function BrejoDoCruzPage() {
             background: 'linear-gradient(88.74deg, rgb(47, 127, 45) 0%, rgba(26, 139, 26, 0.15) 100%)',
           }} />
           {/* Content */}
-          <div style={{ 
+          <div style={{
             position: 'relative',
             zIndex: 1,
             padding: '38px 38px',
@@ -185,25 +187,32 @@ export default function BrejoDoCruzPage() {
           </div>
         </div>
         {/* Sign Up Card */}
-        <div style={{
-          position: 'relative',
-          width: 240,
-          minHeight: 220,
-          borderRadius: 20,
-          overflow: 'hidden',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
+        <div 
+          onClick={() => router.push('/agent')}
+          style={{
+            position: 'relative',
+            width: 240,
+            minHeight: 220,
+            borderRadius: 20,
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            transition: 'transform 0.2s ease-in-out'
+          }}
+          onMouseEnter={(e) => e.target.style.transform = 'scale(1.02)'}
+          onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+        >
           {/* Background Image */}
-          <Image 
-            src="/images/dashboard-vector.png" 
-            alt="Map" 
-            fill 
-            style={{ objectFit: 'cover' }} 
+          <Image
+            src="/images/dashboard-vector.png"
+            alt="Map"
+            fill
+            style={{ objectFit: 'cover' }}
           />
           {/* Green Overlay */}
-          <div style={{ 
+          <div style={{
             position: 'absolute',
             top: 0,
             left: 0,
@@ -212,21 +221,21 @@ export default function BrejoDoCruzPage() {
             background: 'rgba(22, 51, 0, 0.8)'
           }} />
           {/* Text */}
-          <span style={{ 
+          <span style={{
             position: 'relative',
             color: '#fff',
             fontWeight: 600,
             fontSize: 24,
             zIndex: 2
-          }}>Sign up</span>
+          }}>Inscrever-se</span>
         </div>
       </div>
 
       {/* Our Agents */}
       <div style={{ maxWidth: 1100, margin: '0 auto', marginBottom: 32, padding: '0 32px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-          <div style={{ fontWeight: 600, fontSize: 20, color: '#215C2D', textAlign: 'left' }}>Our agents</div>
-          <a href="/brejodocruz-pb/agentcultural" style={{ 
+          <div style={{ fontWeight: 600, fontSize: 20, color: '#215C2D', textAlign: 'left' }}>Nossos agentes</div>
+          <a href="/brejodocruz-pb/agentcultural" style={{
             textDecoration: 'none',
             color: '#215C2D',
             fontSize: 15,
@@ -246,15 +255,15 @@ export default function BrejoDoCruzPage() {
           <div style={{ textAlign: 'center', padding: '40px', color: '#ff4444' }}>
             {error}
             <br />
-            <button 
-              onClick={() => fetchAgents()} 
-              style={{ 
-                background: '#7CFC00', 
-                border: 'none', 
-                borderRadius: 16, 
-                padding: '8px 16px', 
-                fontWeight: 600, 
-                color: '#fff', 
+            <button
+              onClick={() => fetchAgents()}
+              style={{
+                background: '#7CFC00',
+                border: 'none',
+                borderRadius: 16,
+                padding: '8px 16px',
+                fontWeight: 600,
+                color: '#fff',
                 cursor: 'pointer',
                 marginTop: '10px'
               }}
@@ -273,28 +282,28 @@ export default function BrejoDoCruzPage() {
               {agents.slice(0, 4).map((agent, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 16, minWidth: 210 }}>
                   {agent.avatar ? (
-                    <Image 
-                      src={agent.avatar} 
-                      alt={agent.fullname || 'Agent'} 
-                      width={64} 
-                      height={64} 
+                    <Image
+                      src={agent.avatar}
+                      alt={agent.fullname || 'Agent'}
+                      width={64}
+                      height={64}
                       style={{ borderRadius: '50%', objectFit: 'cover' }}
                     />
                   ) : (
-                    <div style={{ 
-                      width: 64, 
-                      height: 64, 
-                      borderRadius: '50%', 
-                      background: getAgentColor(agent), 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center', 
-                      color: '#fff', 
-                      fontWeight: 700, 
-                      fontSize: 24 
+                    <div style={{
+                      width: 64,
+                      height: 64,
+                      borderRadius: '50%',
+                      background: getAgentColor(agent),
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#fff',
+                      fontWeight: 700,
+                      fontSize: 24
                     }}>
-                      {(agent.fullname || 'A').split(' ').length > 1 
-                        ? (agent.fullname || 'A').split(' ').map(n => n[0]).join('') 
+                      {(agent.fullname || 'A').split(' ').length > 1
+                        ? (agent.fullname || 'A').split(' ').map(n => n[0]).join('')
                         : (agent.fullname || 'A')[0]}
                     </div>
                   )}
@@ -310,28 +319,28 @@ export default function BrejoDoCruzPage() {
               {agents.slice(4, 8).map((agent, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 16, minWidth: 210 }}>
                   {agent.avatar ? (
-                    <Image 
-                      src={agent.avatar} 
-                      alt={agent.fullname || 'Agent'} 
-                      width={64} 
-                      height={64} 
+                    <Image
+                      src={agent.avatar}
+                      alt={agent.fullname || 'Agent'}
+                      width={64}
+                      height={64}
                       style={{ borderRadius: '50%', objectFit: 'cover' }}
                     />
                   ) : (
-                    <div style={{ 
-                      width: 64, 
-                      height: 64, 
-                      borderRadius: '50%', 
-                      background: getAgentColor(agent), 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center', 
-                      color: '#fff', 
-                      fontWeight: 700, 
-                      fontSize: 24 
+                    <div style={{
+                      width: 64,
+                      height: 64,
+                      borderRadius: '50%',
+                      background: getAgentColor(agent),
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#fff',
+                      fontWeight: 700,
+                      fontSize: 24
                     }}>
-                      {(agent.fullname || 'A').split(' ').length > 1 
-                        ? (agent.fullname || 'A').split(' ').map(n => n[0]).join('') 
+                      {(agent.fullname || 'A').split(' ').length > 1
+                        ? (agent.fullname || 'A').split(' ').map(n => n[0]).join('')
                         : (agent.fullname || 'A')[0]}
                     </div>
                   )}
@@ -351,12 +360,12 @@ export default function BrejoDoCruzPage() {
         <div style={{ maxWidth: 1000, margin: '0 auto' }}>
           <div style={{ display: 'flex', gap: 24 }}>
             <div style={{ display: 'flex', flexDirection: 'column', marginBottom: 24 }}>
-              <div style={{ fontWeight: 600, fontSize: 32, marginRight: 24 }}>Our <br /> Spaces</div>
+              <div style={{ fontWeight: 600, fontSize: 32, marginRight: 24 }}>Nossos <br /> Espaços</div>
               <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
                 <button style={{ width: 48, height: 48, borderRadius: '50%', border: '1px solid #000', background: '#f1f1f1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, cursor: 'pointer' }}><i className="bi bi-chevron-left"></i></button>
                 <button style={{ width: 48, height: 48, borderRadius: '50%', border: '1px solid #000', background: '#f1f1f1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, cursor: 'pointer' }}><i className="bi bi-chevron-right"></i></button>
               </div>
-              <a href="/brejodocruz-pb/espacos" style={{ 
+              <a href="/brejodocruz-pb/espacos" style={{
                 textDecoration: 'none',
                 color: '#215C2D',
                 fontSize: 15,
@@ -377,9 +386,9 @@ export default function BrejoDoCruzPage() {
             ) : spacesError ? (
               <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '40px', color: '#ff4444' }}>
                 {spacesError}
-                <button 
+                <button
                   onClick={fetchSpaces}
-                  style={{ 
+                  style={{
                     marginLeft: 16,
                     background: '#7CFC00',
                     border: 'none',
@@ -411,7 +420,7 @@ export default function BrejoDoCruzPage() {
                           style={{ borderRadius: '20px 20px 0px 0px', objectFit: 'cover', alignSelf: 'center', width: '100%', height: '100%' }}
                         />
                       ) : (
-                        <div style={{ 
+                        <div style={{
                           width: '100%',
                           height: '100%',
                           borderRadius: '20px 20px 0px 0px',
@@ -433,8 +442,8 @@ export default function BrejoDoCruzPage() {
                       )}
                     </div>
                     <div style={{ fontSize: 13, color: '#666', textAlign: 'start' }}>
-                      {space.description?.length > 100 
-                        ? `${space.description.substring(0, 100)}...` 
+                      {space.description?.length > 100
+                        ? `${space.description.substring(0, 100)}...`
                         : space.description}
                     </div>
                   </div>
@@ -448,8 +457,8 @@ export default function BrejoDoCruzPage() {
       {/* Cultural Projects */}
       <div style={{ maxWidth: 1100, margin: '48px auto', padding: '0 32px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <div style={{ fontWeight: 600, fontSize: 32, color: '#215C2D' }}>Cultural Projects</div>
-          <a href="/brejodocruz-pb/projetos" style={{ 
+          <div style={{ fontWeight: 600, fontSize: 32, color: '#215C2D' }}>Projetos Culturais</div>
+          <a href="/brejodocruz-pb/projetos" style={{
             textDecoration: 'none',
             color: '#215C2D',
             fontSize: 15,
@@ -469,9 +478,9 @@ export default function BrejoDoCruzPage() {
         ) : projectsError ? (
           <div style={{ textAlign: 'center', padding: '40px', color: '#ff4444' }}>
             {projectsError}
-            <button 
+            <button
               onClick={fetchProjects}
-              style={{ 
+              style={{
                 marginLeft: 16,
                 background: '#7CFC00',
                 border: 'none',
@@ -494,7 +503,7 @@ export default function BrejoDoCruzPage() {
             {projects.slice(0, 3).map((project, idx) => (
               <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', background: '#fff', borderRadius: 16, padding: 24, gap: 24, boxShadow: '0 0 8px 0 #0001' }}>
                 {project.coverPhoto ? (
-                  <Image 
+                  <Image
                     src={`https://mapacultural.gestorcultural.com.br/uploads/${project.coverPhoto}`}
                     alt={project.title}
                     width={150}
@@ -502,7 +511,7 @@ export default function BrejoDoCruzPage() {
                     style={{ borderRadius: 16, objectFit: 'cover' }}
                   />
                 ) : (
-                  <div style={{ 
+                  <div style={{
                     width: 150,
                     height: 150,
                     borderRadius: 16,
@@ -521,13 +530,14 @@ export default function BrejoDoCruzPage() {
                   </div>
                   <div style={{ fontSize: 15, color: '#222' }}>
                     {project.description?.length > 200 
-                      ? `${project.description.substring(0, 200)}...` 
-                      : project.description}
+                      ? <div dangerouslySetInnerHTML={{__html: `${project.description.substring(0, 200)}...`}} />
+                      : <div dangerouslySetInnerHTML={{__html: project.description}} />
+                    }
                   </div>
                 </div>
-                <a 
+                <a
                   href={`/brejodocruz-pb/projetos?id=${project._id}`}
-                  style={{ 
+                  style={{
                     background: '#2CB34A',
                     color: '#fff',
                     border: 'none',
