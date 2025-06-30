@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, Button, Container, Modal, ProgressBar } from 'react-bootstrap';
 import { FaCamera, FaRegCalendar, FaInstagram, FaYoutube, FaFacebook, FaTimes, FaRegListAlt } from 'react-icons/fa';
 import RichTextEditor from './RichTextEditor';
@@ -29,9 +29,15 @@ function NewProjectForm({ onClose, onSuccess }) {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState('');
+  const [showUploadModal, setShowUploadModal] = useState(false);
 
   const [showDescriptionModal, setShowDescriptionModal] = useState(false);
   const [tempDescription, setTempDescription] = useState(formData.description);
+
+  // Debug: Log the API URL on component mount
+  useEffect(() => {
+    console.log('NewProjectForm mounted. API URL:', buildApiUrl('/project'));
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -63,11 +69,11 @@ function NewProjectForm({ onClose, onSuccess }) {
     const files = Array.from(e.target.files);
     if (files.length > 0) {
       // Check file sizes
-      const maxSize = 150 * 1024 * 1024; // 150MB
-      const oversizedFiles = files.filter(file => file.size > maxSize);
+      const maxPhotoSize = 200 * 1024 * 1024; // 200MB
+      const oversizedFiles = files.filter(file => file.size > maxPhotoSize);
       
       if (oversizedFiles.length > 0) {
-        alert(`Os seguintes arquivos são muito grandes (máximo 150MB): ${oversizedFiles.map(f => f.name).join(', ')}`);
+        alert(`Os seguintes arquivos são muito grandes (máximo 200MB): ${oversizedFiles.map(f => f.name).join(', ')}`);
         return;
       }
 
@@ -83,9 +89,9 @@ function NewProjectForm({ onClose, onSuccess }) {
     const file = e.target.files[0];
     if (file) {
       // Check file size
-      const maxSize = 150 * 1024 * 1024; // 150MB
-      if (file.size > maxSize) {
-        alert(`Arquivo muito grande. Tamanho máximo: 150MB`);
+      const maxCoverSize = 200 * 1024 * 1024; // 200MB
+      if (file.size > maxCoverSize) {
+        alert(`Arquivo muito grande. Tamanho máximo: 200MB`);
         return;
       }
 
@@ -135,6 +141,7 @@ function NewProjectForm({ onClose, onSuccess }) {
       setLoading(true);
       setUploadProgress(0);
       setSubmitError('');
+      setShowUploadModal(true);
       const token = localStorage.getItem('agentToken');
       
       // Prepare form data
@@ -168,19 +175,30 @@ function NewProjectForm({ onClose, onSuccess }) {
       // Create XMLHttpRequest for progress tracking
       const xhr = new XMLHttpRequest();
       
+      // Debug information
+      const apiUrl = buildApiUrl('/project');
+      console.log('Making request to:', apiUrl);
+      console.log('Request method: POST');
+      console.log('Authorization token:', token ? 'Present' : 'Missing');
+      
       xhr.upload.addEventListener('progress', (event) => {
         if (event.lengthComputable) {
           const progress = Math.round((event.loaded / event.total) * 100);
           setUploadProgress(progress);
+          console.log('Upload progress:', progress + '%');
         }
       });
 
       xhr.addEventListener('load', () => {
+        console.log('XHR Load event - Status:', xhr.status);
+        console.log('XHR Response:', xhr.responseText);
+        
         if (xhr.status === 201) {
           setUploadProgress(100);
           setTimeout(() => {
+            setShowUploadModal(false);
             onSuccess();
-          }, 500);
+          }, 1000);
         } else {
           let errorMessage = 'Falha ao criar projeto. Por favor, tente novamente.';
           
@@ -190,6 +208,7 @@ function NewProjectForm({ onClose, onSuccess }) {
               errorMessage = response.error;
             }
           } catch (e) {
+            console.log('Failed to parse error response:', e);
             // If response is not JSON, use status text
             if (xhr.status === 413) {
               errorMessage = 'Arquivos muito grandes. Reduza o tamanho dos arquivos e tente novamente.';
@@ -201,36 +220,44 @@ function NewProjectForm({ onClose, onSuccess }) {
               errorMessage = 'Acesso negado.';
             } else if (xhr.status >= 500) {
               errorMessage = 'Erro no servidor. Tente novamente mais tarde.';
+            } else if (xhr.status === 0) {
+              errorMessage = 'Erro de conexão. Verifique se o servidor está rodando e tente novamente.';
             }
           }
           
+          console.error('Request failed with status:', xhr.status, 'Error:', errorMessage);
           setSubmitError(errorMessage);
           setLoading(false);
           setUploadProgress(0);
         }
       });
 
-      xhr.addEventListener('error', () => {
-        setSubmitError('Erro de conexão. Verifique sua internet e tente novamente.');
+      xhr.addEventListener('error', (event) => {
+        console.error('XHR Error event:', event);
+        setSubmitError('Erro de conexão. Verifique sua internet e se o servidor está rodando.');
         setLoading(false);
         setUploadProgress(0);
       });
 
       xhr.addEventListener('abort', () => {
+        console.log('XHR Abort event');
         setSubmitError('Upload cancelado.');
         setLoading(false);
         setUploadProgress(0);
       });
 
       xhr.addEventListener('timeout', () => {
+        console.log('XHR Timeout event');
         setSubmitError('Upload demorou muito tempo. Tente novamente.');
         setLoading(false);
         setUploadProgress(0);
       });
 
-      xhr.open('POST', buildApiUrl('/project'));
+      xhr.open('POST', apiUrl);
       xhr.setRequestHeader('Authorization', token);
-      xhr.timeout = 300000; // 5 minutes timeout
+      xhr.timeout = 600000; // 10 minutes timeout for large files
+      
+      console.log('Sending XHR request...');
       xhr.send(formDataToSend);
 
     } catch (error) {
@@ -244,33 +271,6 @@ function NewProjectForm({ onClose, onSuccess }) {
   return (
     <Container className="col-lg-8">
       <h2 className="fs-5 fw-bold mb-4">Novo Projeto</h2>
-      
-      {submitError && (
-        <div className="mb-4 p-3 bg-danger bg-opacity-10 border border-danger rounded-3">
-          <div className="d-flex align-items-center gap-2">
-            <span className="text-danger fw-semibold">Erro:</span>
-            <span className="text-danger">{submitError}</span>
-          </div>
-        </div>
-      )}
-      
-      {loading && (
-        <div className="mb-4 p-3 bg-light rounded-3">
-          <div className="d-flex align-items-center gap-2 mb-2">
-            <div className="spinner-border spinner-border-sm text-success" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-            <span className="fw-semibold">Enviando projeto...</span>
-          </div>
-          <ProgressBar 
-            now={uploadProgress} 
-            variant="success" 
-            className="rounded-pill"
-            style={{ height: '8px' }}
-          />
-          <small className="text-muted mt-1 d-block">{uploadProgress}% concluído</small>
-        </div>
-      )}
       
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3">
@@ -332,7 +332,7 @@ function NewProjectForm({ onClose, onSuccess }) {
           <Form.Label className="d-flex align-items-center gap-2 mb-3">
             <FaCamera className="text-secondary" />
             <span>Capa *</span>
-            <small className="text-muted ms-auto">(Máx: 150MB)</small>
+            <small className="text-muted ms-auto">(Máx: 200MB)</small>
           </Form.Label>
           <div className="d-flex gap-2 p-3 flex-wrap rounded-3">
             {coverPhoto ? (
@@ -442,7 +442,7 @@ function NewProjectForm({ onClose, onSuccess }) {
           <Form.Label className="d-flex align-items-center gap-2 mb-3">
             <FaCamera className="text-secondary" />
             <span>Galeria de fotos</span>
-            <small className="text-muted ms-auto">(Máx: 150MB por arquivo)</small>
+            <small className="text-muted ms-auto">(Máx: 200MB por arquivo)</small>
           </Form.Label>
           <div className="d-flex gap-2 flex-wrap">
             {photos.map((photo, index) => (
@@ -516,6 +516,113 @@ function NewProjectForm({ onClose, onSuccess }) {
           >
             Salvar descrição
           </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Upload Progress Modal */}
+      <Modal show={showUploadModal} onHide={() => {}} centered backdrop="static" keyboard={false}>
+        <Modal.Header className="border-0 pb-0">
+          <div className="d-flex align-items-center gap-2 w-100">
+            <div className="rounded-circle d-flex align-items-center justify-content-center" style={{width: 32, height: 32, backgroundColor: 'rgba(0,0,0,0.05)'}}>
+              <FaCamera />
+            </div>
+            <Modal.Title as="h6">
+              {loading ? 'Enviando Projeto...' : submitError ? 'Erro no Upload' : 'Upload Concluído'}
+            </Modal.Title>
+          </div>
+        </Modal.Header>
+        <Modal.Body className="pt-2">
+          {loading && (
+            <div className="text-center">
+              <div className="mb-3">
+                <div className="spinner-border text-success mb-3" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+                <p className="fw-semibold mb-2">Enviando projeto...</p>
+                <small className="text-muted">
+                  Isso pode levar alguns minutos para arquivos grandes
+                </small>
+              </div>
+              <ProgressBar 
+                now={uploadProgress} 
+                variant="success" 
+                className="rounded-pill mb-2"
+                style={{ height: '12px' }}
+              />
+              <div className="d-flex justify-content-between text-sm">
+                <span className="text-muted">{uploadProgress}% concluído</span>
+                <span className="text-muted">
+                  {uploadProgress < 100 ? 'Carregando...' : 'Finalizando...'}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {submitError && (
+            <div className="text-center">
+              <div className="mb-3">
+                <div className="rounded-circle bg-danger bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-3" style={{width: 64, height: 64}}>
+                  <FaTimes className="text-danger" size={24} />
+                </div>
+                <h6 className="text-danger mb-2">Erro no Upload</h6>
+                <p className="text-muted">{submitError}</p>
+              </div>
+            </div>
+          )}
+
+          {!loading && !submitError && uploadProgress === 100 && (
+            <div className="text-center">
+              <div className="mb-3">
+                <div className="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-3" style={{width: 64, height: 64}}>
+                  <span className="text-success" style={{fontSize: '24px'}}>✓</span>
+                </div>
+                <h6 className="text-success mb-2">Upload Concluído!</h6>
+                <p className="text-muted">Projeto criado com sucesso</p>
+              </div>
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer className="border-0 pt-0">
+          {submitError && (
+            <div className="d-flex gap-2 w-100">
+              <Button 
+                variant="outline-secondary" 
+                className="flex-fill rounded-pill"
+                onClick={() => {
+                  setShowUploadModal(false);
+                  setSubmitError('');
+                  setUploadProgress(0);
+                }}
+              >
+                Fechar
+              </Button>
+              <Button 
+                variant="success" 
+                className="flex-fill rounded-pill"
+                style={{ backgroundColor: '#8BC34A', borderColor: '#8BC34A' }}
+                onClick={() => {
+                  setSubmitError('');
+                  setUploadProgress(0);
+                  handleSubmit({ preventDefault: () => {} });
+                }}
+              >
+                Tentar Novamente
+              </Button>
+            </div>
+          )}
+          {!loading && !submitError && (
+            <Button 
+              variant="success" 
+              className="w-100 rounded-pill"
+              style={{ backgroundColor: '#8BC34A', borderColor: '#8BC34A' }}
+              onClick={() => {
+                setShowUploadModal(false);
+                onSuccess();
+              }}
+            >
+              Continuar
+            </Button>
+          )}
         </Modal.Footer>
       </Modal>
     </Container>
