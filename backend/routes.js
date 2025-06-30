@@ -25,11 +25,8 @@ const storage = multer.diskStorage({
 const upload = multer({ 
   storage: storage,
   limits: {
-    fileSize: 200 * 1024 * 1024, // 200MB limit per file
-    files: 150, // Increased file count limit
-    fieldSize: 200 * 1024 * 1024, // Field size limit
-    fieldNameSize: 100, // Field name size limit
-    fields: 1000 // Number of non-file fields
+    fileSize: 150 * 1024 * 1024, // 150MB limit per file
+    files: 111 // 1 cover photo + 110 gallery photos
   },
   fileFilter: function (req, file, cb) {
     const filetypes = /jpeg|jpg|png/;
@@ -48,32 +45,17 @@ const handleMulterError = (error, req, res, next) => {
   if (error instanceof multer.MulterError) {
     if (error.code === 'LIMIT_FILE_SIZE') {
       return res.status(413).json({ 
-        error: 'File too large. Maximum file size is 200MB per file.' 
+        error: 'File too large. Maximum file size is 150MB per file.' 
       });
     }
     if (error.code === 'LIMIT_FILE_COUNT') {
       return res.status(413).json({ 
-        error: 'Too many files. Maximum 150 files allowed.' 
+        error: 'Too many files. Maximum 111 files allowed (1 cover + 110 gallery).' 
       });
     }
     if (error.code === 'LIMIT_UNEXPECTED_FILE') {
       return res.status(400).json({ 
         error: 'Unexpected file field.' 
-      });
-    }
-    if (error.code === 'LIMIT_FIELD_COUNT') {
-      return res.status(400).json({ 
-        error: 'Too many fields in request.' 
-      });
-    }
-    if (error.code === 'LIMIT_FIELD_KEY') {
-      return res.status(400).json({ 
-        error: 'Field name too long.' 
-      });
-    }
-    if (error.code === 'LIMIT_FIELD_VALUE') {
-      return res.status(400).json({ 
-        error: 'Field value too long.' 
       });
     }
   }
