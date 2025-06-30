@@ -28,6 +28,7 @@ function NewProjectForm({ onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [errors, setErrors] = useState({});
+  const [submitError, setSubmitError] = useState('');
 
   const [showDescriptionModal, setShowDescriptionModal] = useState(false);
   const [tempDescription, setTempDescription] = useState(formData.description);
@@ -62,11 +63,11 @@ function NewProjectForm({ onClose, onSuccess }) {
     const files = Array.from(e.target.files);
     if (files.length > 0) {
       // Check file sizes
-      const maxSize = 50 * 1024 * 1024; // 50MB
+      const maxSize = 150 * 1024 * 1024; // 150MB
       const oversizedFiles = files.filter(file => file.size > maxSize);
       
       if (oversizedFiles.length > 0) {
-        alert(`Os seguintes arquivos são muito grandes (máximo 50MB): ${oversizedFiles.map(f => f.name).join(', ')}`);
+        alert(`Os seguintes arquivos são muito grandes (máximo 150MB): ${oversizedFiles.map(f => f.name).join(', ')}`);
         return;
       }
 
@@ -133,6 +134,7 @@ function NewProjectForm({ onClose, onSuccess }) {
     try {
       setLoading(true);
       setUploadProgress(0);
+      setSubmitError('');
       const token = localStorage.getItem('agentToken');
       
       // Prepare form data
@@ -180,30 +182,60 @@ function NewProjectForm({ onClose, onSuccess }) {
             onSuccess();
           }, 500);
         } else {
-          throw new Error(`HTTP ${xhr.status}: ${xhr.statusText}`);
+          let errorMessage = 'Falha ao criar projeto. Por favor, tente novamente.';
+          
+          try {
+            const response = JSON.parse(xhr.responseText);
+            if (response.error) {
+              errorMessage = response.error;
+            }
+          } catch (e) {
+            // If response is not JSON, use status text
+            if (xhr.status === 413) {
+              errorMessage = 'Arquivos muito grandes. Reduza o tamanho dos arquivos e tente novamente.';
+            } else if (xhr.status === 400) {
+              errorMessage = 'Dados inválidos. Verifique as informações e tente novamente.';
+            } else if (xhr.status === 401) {
+              errorMessage = 'Sessão expirada. Faça login novamente.';
+            } else if (xhr.status === 403) {
+              errorMessage = 'Acesso negado.';
+            } else if (xhr.status >= 500) {
+              errorMessage = 'Erro no servidor. Tente novamente mais tarde.';
+            }
+          }
+          
+          setSubmitError(errorMessage);
+          setLoading(false);
+          setUploadProgress(0);
         }
       });
 
       xhr.addEventListener('error', () => {
-        throw new Error('Network error occurred');
+        setSubmitError('Erro de conexão. Verifique sua internet e tente novamente.');
+        setLoading(false);
+        setUploadProgress(0);
+      });
+
+      xhr.addEventListener('abort', () => {
+        setSubmitError('Upload cancelado.');
+        setLoading(false);
+        setUploadProgress(0);
+      });
+
+      xhr.addEventListener('timeout', () => {
+        setSubmitError('Upload demorou muito tempo. Tente novamente.');
+        setLoading(false);
+        setUploadProgress(0);
       });
 
       xhr.open('POST', buildApiUrl('/project'));
       xhr.setRequestHeader('Authorization', token);
+      xhr.timeout = 300000; // 5 minutes timeout
       xhr.send(formDataToSend);
 
     } catch (error) {
       console.error('Error creating project:', error);
-      let errorMessage = 'Falha ao criar projeto. Por favor, tente novamente.';
-      
-      if (error.message.includes('413')) {
-        errorMessage = 'Arquivos muito grandes. Reduza o tamanho dos arquivos e tente novamente.';
-      } else if (error.message.includes('Network error')) {
-        errorMessage = 'Erro de conexão. Verifique sua internet e tente novamente.';
-      }
-      
-      alert(errorMessage);
-    } finally {
+      setSubmitError('Falha ao criar projeto. Por favor, tente novamente.');
       setLoading(false);
       setUploadProgress(0);
     }
@@ -212,6 +244,15 @@ function NewProjectForm({ onClose, onSuccess }) {
   return (
     <Container className="col-lg-8">
       <h2 className="fs-5 fw-bold mb-4">Novo Projeto</h2>
+      
+      {submitError && (
+        <div className="mb-4 p-3 bg-danger bg-opacity-10 border border-danger rounded-3">
+          <div className="d-flex align-items-center gap-2">
+            <span className="text-danger fw-semibold">Erro:</span>
+            <span className="text-danger">{submitError}</span>
+          </div>
+        </div>
+      )}
       
       {loading && (
         <div className="mb-4 p-3 bg-light rounded-3">
@@ -401,7 +442,7 @@ function NewProjectForm({ onClose, onSuccess }) {
           <Form.Label className="d-flex align-items-center gap-2 mb-3">
             <FaCamera className="text-secondary" />
             <span>Galeria de fotos</span>
-            <small className="text-muted ms-auto">(Máx: 50MB por arquivo)</small>
+            <small className="text-muted ms-auto">(Máx: 150MB por arquivo)</small>
           </Form.Label>
           <div className="d-flex gap-2 flex-wrap">
             {photos.map((photo, index) => (
