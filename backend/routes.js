@@ -24,6 +24,10 @@ const storage = multer.diskStorage({
 
 const upload = multer({ 
   storage: storage,
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB limit per file
+    files: 11 // 1 cover photo + 10 gallery photos
+  },
   fileFilter: function (req, file, cb) {
     const filetypes = /jpeg|jpg|png/;
     const mimetype = filetypes.test(file.mimetype);
@@ -35,6 +39,35 @@ const upload = multer({
     cb(new Error('Only .png, .jpg and .jpeg format allowed!'));
   }
 });
+
+// Error handling middleware for multer
+const handleMulterError = (error, req, res, next) => {
+  if (error instanceof multer.MulterError) {
+    if (error.code === 'LIMIT_FILE_SIZE') {
+      return res.status(413).json({ 
+        error: 'File too large. Maximum file size is 150MB per file.' 
+      });
+    }
+    if (error.code === 'LIMIT_FILE_COUNT') {
+      return res.status(413).json({ 
+        error: 'Too many files. Maximum 111 files allowed (1 cover + 110 gallery).' 
+      });
+    }
+    if (error.code === 'LIMIT_UNEXPECTED_FILE') {
+      return res.status(400).json({ 
+        error: 'Unexpected file field.' 
+      });
+    }
+  }
+  
+  if (error.message === 'Only .png, .jpg and .jpeg format allowed!') {
+    return res.status(400).json({ 
+      error: 'Invalid file type. Only .png, .jpg and .jpeg files are allowed.' 
+    });
+  }
+  
+  next(error);
+};
 
 // middleware to check token - modified for testing
 function authMiddleware(req, res, next) {
@@ -1076,10 +1109,14 @@ router.patch('/space/:id/status', authMiddleware, async (req, res) => {
 // PROJECT ROUTES
 
 // Create new project
-router.post('/project', [authMiddleware, upload.fields([
-  { name: 'coverPhoto', maxCount: 1 },
-  { name: 'photos', maxCount: 10 }
-])], async (req, res) => {
+router.post('/project', [
+  authMiddleware, 
+  upload.fields([
+    { name: 'coverPhoto', maxCount: 1 },
+    { name: 'photos', maxCount: 100 }
+  ]),
+  handleMulterError
+], async (req, res) => {
   try {
     const {
       type,

@@ -1,6 +1,6 @@
 "use client"
 import React, { useState } from 'react';
-import { Form, Button, Container, Modal } from 'react-bootstrap';
+import { Form, Button, Container, Modal, ProgressBar } from 'react-bootstrap';
 import { FaCamera, FaRegCalendar, FaInstagram, FaYoutube, FaFacebook, FaTimes, FaRegListAlt } from 'react-icons/fa';
 import RichTextEditor from './RichTextEditor';
 import Image from 'next/image';
@@ -26,6 +26,7 @@ function NewProjectForm({ onClose, onSuccess }) {
   const [photos, setPhotos] = useState([]);
   const [coverPhoto, setCoverPhoto] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [errors, setErrors] = useState({});
 
   const [showDescriptionModal, setShowDescriptionModal] = useState(false);
@@ -60,6 +61,15 @@ function NewProjectForm({ onClose, onSuccess }) {
   const handlePhotoAdd = (e) => {
     const files = Array.from(e.target.files);
     if (files.length > 0) {
+      // Check file sizes
+      const maxSize = 50 * 1024 * 1024; // 50MB
+      const oversizedFiles = files.filter(file => file.size > maxSize);
+      
+      if (oversizedFiles.length > 0) {
+        alert(`Os seguintes arquivos são muito grandes (máximo 50MB): ${oversizedFiles.map(f => f.name).join(', ')}`);
+        return;
+      }
+
       const newPhotos = files.map(file => ({
         file,
         preview: URL.createObjectURL(file)
@@ -71,6 +81,13 @@ function NewProjectForm({ onClose, onSuccess }) {
   const handleCoverPhotoAdd = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Check file size
+      const maxSize = 150 * 1024 * 1024; // 150MB
+      if (file.size > maxSize) {
+        alert(`Arquivo muito grande. Tamanho máximo: 150MB`);
+        return;
+      }
+
       setCoverPhoto({
         file,
         preview: URL.createObjectURL(file)
@@ -115,6 +132,7 @@ function NewProjectForm({ onClose, onSuccess }) {
 
     try {
       setLoading(true);
+      setUploadProgress(0);
       const token = localStorage.getItem('agentToken');
       
       // Prepare form data
@@ -145,30 +163,73 @@ function NewProjectForm({ onClose, onSuccess }) {
         }
       });
 
-      const response = await fetch(buildApiUrl('/project'), {
-        method: 'POST',
-        headers: {
-          'Authorization': token
-        },
-        body: formDataToSend
+      // Create XMLHttpRequest for progress tracking
+      const xhr = new XMLHttpRequest();
+      
+      xhr.upload.addEventListener('progress', (event) => {
+        if (event.lengthComputable) {
+          const progress = Math.round((event.loaded / event.total) * 100);
+          setUploadProgress(progress);
+        }
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to create project');
-      }
+      xhr.addEventListener('load', () => {
+        if (xhr.status === 201) {
+          setUploadProgress(100);
+          setTimeout(() => {
+            onSuccess();
+          }, 500);
+        } else {
+          throw new Error(`HTTP ${xhr.status}: ${xhr.statusText}`);
+        }
+      });
 
-      onSuccess();
+      xhr.addEventListener('error', () => {
+        throw new Error('Network error occurred');
+      });
+
+      xhr.open('POST', buildApiUrl('/project'));
+      xhr.setRequestHeader('Authorization', token);
+      xhr.send(formDataToSend);
+
     } catch (error) {
       console.error('Error creating project:', error);
-      alert('Falha ao criar projeto. Por favor, tente novamente.');
+      let errorMessage = 'Falha ao criar projeto. Por favor, tente novamente.';
+      
+      if (error.message.includes('413')) {
+        errorMessage = 'Arquivos muito grandes. Reduza o tamanho dos arquivos e tente novamente.';
+      } else if (error.message.includes('Network error')) {
+        errorMessage = 'Erro de conexão. Verifique sua internet e tente novamente.';
+      }
+      
+      alert(errorMessage);
     } finally {
       setLoading(false);
+      setUploadProgress(0);
     }
   };
 
   return (
     <Container className="col-lg-8">
       <h2 className="fs-5 fw-bold mb-4">Novo Projeto</h2>
+      
+      {loading && (
+        <div className="mb-4 p-3 bg-light rounded-3">
+          <div className="d-flex align-items-center gap-2 mb-2">
+            <div className="spinner-border spinner-border-sm text-success" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+            <span className="fw-semibold">Enviando projeto...</span>
+          </div>
+          <ProgressBar 
+            now={uploadProgress} 
+            variant="success" 
+            className="rounded-pill"
+            style={{ height: '8px' }}
+          />
+          <small className="text-muted mt-1 d-block">{uploadProgress}% concluído</small>
+        </div>
+      )}
       
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3">
@@ -178,6 +239,7 @@ function NewProjectForm({ onClose, onSuccess }) {
             value={formData.type}
             onChange={handleInputChange}
             className={`rounded-3 py-2 border-dark ${errors.type ? 'is-invalid' : ''}`}
+            disabled={loading}
           >
             <option value="">Selecione</option>
             <option value="MOSTRA">MOSTRA</option>
@@ -194,6 +256,7 @@ function NewProjectForm({ onClose, onSuccess }) {
             value={formData.title}
             onChange={handleInputChange}
             className={`rounded-3 py-2 border-dark ${errors.title ? 'is-invalid' : ''}`}
+            disabled={loading}
           />
           {errors.title && <div className="invalid-feedback">{errors.title}</div>}
         </Form.Group>
@@ -218,6 +281,7 @@ function NewProjectForm({ onClose, onSuccess }) {
               setTempDescription(formData.description);
               setShowDescriptionModal(true);
             }}
+            disabled={loading}
           >
             Editar
           </Button>
@@ -227,6 +291,7 @@ function NewProjectForm({ onClose, onSuccess }) {
           <Form.Label className="d-flex align-items-center gap-2 mb-3">
             <FaCamera className="text-secondary" />
             <span>Capa *</span>
+            <small className="text-muted ms-auto">(Máx: 150MB)</small>
           </Form.Label>
           <div className="d-flex gap-2 p-3 flex-wrap rounded-3">
             {coverPhoto ? (
@@ -242,14 +307,15 @@ function NewProjectForm({ onClose, onSuccess }) {
                   variant="link"
                   className="position-absolute top-0 end-0 p-1"
                   onClick={handleRemoveCoverPhoto}
+                  disabled={loading}
                 >
                   <FaTimes />
                 </Button>
               </div>
             ) : (
               <label className="d-flex align-items-center w-100 justify-content-center rounded-3" 
-                     style={{ width: 100, height: "200px", cursor: 'pointer', backgroundColor: 'rgba(22, 51, 0, 0.08)', color: '#fff' }}>
-                <input type="file" hidden onChange={handleCoverPhotoAdd} accept="image/*" />
+                     style={{ width: 100, height: "200px", cursor: loading ? 'not-allowed' : 'pointer', backgroundColor: 'rgba(22, 51, 0, 0.08)', color: '#fff' }}>
+                <input type="file" hidden onChange={handleCoverPhotoAdd} accept="image/*" disabled={loading} />
                 <div className="text-center text-dark">
                   <div className="rounded-circle border bg-white p-2 mx-auto mb-1" style={{ width: 'fit-content', height:'44px', width:'44px' }}>
                     <span>+</span>
@@ -277,6 +343,7 @@ function NewProjectForm({ onClose, onSuccess }) {
                   type="switch"
                   checked={enabled}
                   onChange={() => handleSocialToggle(platform)}
+                  disabled={loading}
                 />
               </div>
               {enabled && (
@@ -290,6 +357,7 @@ function NewProjectForm({ onClose, onSuccess }) {
                       ...prev,
                       [platform]: { ...prev[platform], url: e.target.value }
                     }))}
+                    disabled={loading}
                   />
                 </div>
               )}
@@ -311,6 +379,7 @@ function NewProjectForm({ onClose, onSuccess }) {
                 value={formData.period.start}
                 onChange={handleInputChange}
                 className={`rounded-3 border-dark py-2 ${errors.startDate ? 'is-invalid' : ''}`}
+                disabled={loading}
               />
               {errors.startDate && <div className="invalid-feedback">{errors.startDate}</div>}
             </Form.Group>
@@ -322,6 +391,7 @@ function NewProjectForm({ onClose, onSuccess }) {
                 value={formData.period.end}
                 onChange={handleInputChange}
                 className="rounded-3 border-dark py-2"
+                disabled={loading}
               />
             </Form.Group>
           </div>
@@ -331,6 +401,7 @@ function NewProjectForm({ onClose, onSuccess }) {
           <Form.Label className="d-flex align-items-center gap-2 mb-3">
             <FaCamera className="text-secondary" />
             <span>Galeria de fotos</span>
+            <small className="text-muted ms-auto">(Máx: 50MB por arquivo)</small>
           </Form.Label>
           <div className="d-flex gap-2 flex-wrap">
             {photos.map((photo, index) => (
@@ -346,14 +417,15 @@ function NewProjectForm({ onClose, onSuccess }) {
                   variant="link"
                   className="position-absolute top-0 end-0 p-1"
                   onClick={() => handleRemovePhoto(index)}
+                  disabled={loading}
                 >
                   <FaTimes />
                 </Button>
               </div>
             ))}
             <label className="bg-white d-flex align-items-center justify-content-center rounded-3" 
-                   style={{ width: 100, height: 100, cursor: 'pointer' }}>
-              <input type="file" hidden onChange={handlePhotoAdd} accept="image/*" multiple />
+                   style={{ width: 100, height: 100, cursor: loading ? 'not-allowed' : 'pointer' }}>
+              <input type="file" hidden onChange={handlePhotoAdd} accept="image/*" multiple disabled={loading} />
               <div className="text-center">
                 <div className="rounded-circle bg-light p-2 mx-auto mb-1" style={{ width: 'fit-content' }}>
                   <span>+</span>
