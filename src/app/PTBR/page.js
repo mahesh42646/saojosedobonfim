@@ -127,16 +127,16 @@ export default function BrejoDoCruzPage() {
 
       {/* Banner */}
       <div style={{ position: 'relative', width: '100%', height: 334, overflow: 'visible', borderBottomLeftRadius: 2, borderBottomRightRadius: 32, marginBottom: 0 }}>
-        <Image src="/images/banner-home.jpeg" alt="Banner" fill style={{ objectFit: 'cover' }} />
+        <Image className="img-fluid" src="/images/banner-home.jpeg" alt="Banner" fill style={{ objectFit: 'cover' ,}} />
         {/* Green overlay gradient */}
         <div style={{
           position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderBottomLeftRadius: 2, borderBottomRightRadius: 32,
-          background: 'linear-gradient(88.74deg, rgb(47, 127, 45) 0%, rgba(26, 139, 26, 0) 100%)',
+          background: 'linear-gradient(88.74deg, rgba(48, 194, 45, 0.87) 10%, rgba(55, 172, 55, 0) 100%)',
         }} />
         {/* Text */}
         <div style={{ position: 'absolute', top: 88, left: '15%', color: '#fff', zIndex: 2 }}>
           <div style={{ fontSize: 20, fontWeight: 600, marginBottom: 8, letterSpacing: 0.5 }}>BEM VINDO AO</div>
-          <div style={{ fontSize: 48, fontWeight: 700, lineHeight: 1.1, textShadow: '0 2px 8px rgba(0,0,0,0.10)' }}>Mapa Cultural de<br />Brejo do Cruz</div>
+          <div style={{ fontSize: 48, fontWeight: 700, lineHeight: 1.1, textShadow: '0 2px 8px rgba(0,0,0,0.10)' }}>Mapa Cultural de<br />São José do Bonfim</div>
         </div>
         {/* Bottom image border */}
         <div style={{ position: 'absolute', left: 0, bottom: -24, width: '100%', height: 24, borderBottomLeftRadius: 32, borderBottomRightRadius: 32, overflow: 'hidden', zIndex: 3 }}>           <Image src="/images/banner_bottom.jpg" className="img-fluid" style={{ opacity: 0.9, background: 'rgba(187, 0, 0, 0)' }} alt="Banner Border" fill />         </div>
@@ -236,7 +236,7 @@ export default function BrejoDoCruzPage() {
       <div style={{ maxWidth: 1100, margin: '0 auto', marginBottom: 32, padding: '0 32px' }}>
         <div className="d-flex flex-wrap" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
           <div style={{ fontWeight: 600, fontSize: 20, color: '#215C2D', textAlign: 'left' }}>Nossos agentes</div>
-          <a href="/brejodocruz-pb/agentcultural" style={{
+          <a href="/PTBR/Agentes-Culturais" style={{
             textDecoration: 'none',
             color: '#215C2D',
             fontSize: 15,
@@ -366,7 +366,7 @@ export default function BrejoDoCruzPage() {
                 <button style={{ width: 48, height: 48, borderRadius: '50%', border: '1px solid #000', background: '#f1f1f1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, cursor: 'pointer' }}><i className="bi bi-chevron-left"></i></button>
                 <button style={{ width: 48, height: 48, borderRadius: '50%', border: '1px solid #000', background: '#f1f1f1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, cursor: 'pointer' }}><i className="bi bi-chevron-right"></i></button>
               </div>
-              <a href="/brejodocruz-pb/espacos" style={{
+              <a href="/PTBR/Espacos-Culturais" style={{
                 textDecoration: 'none',
                 color: '#215C2D',
                 fontSize: 15,
@@ -459,7 +459,7 @@ export default function BrejoDoCruzPage() {
       <div style={{ maxWidth: 1100, margin: '48px auto', padding: '0 32px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div style={{ fontWeight: 600, fontSize: 32, color: '#215C2D' }}>Projetos Culturais</div>
-          <a href="/brejodocruz-pb/projetos" style={{
+          <a href="/PTBR/Projetos-Culturais" style={{
             textDecoration: 'none',
             color: '#215C2D',
             fontSize: 15,
