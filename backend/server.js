@@ -14,11 +14,12 @@ app.use(express.json({ limit: '150mb' }));
 app.use(express.urlencoded({ limit: '150mb', extended: true }));
 
 app.use(cors({
-  origin: ['https://mapacultural.gestorcultural.com.br', 'https://teste.mapadacultura.com','https://mapadacultura.com', 'http://localhost:3000', 'https://mapacultural.gestorcultural.com.br'],
+  origin: ['https://mapacultural.saojosedobonfim.pb.gov.br','https://mapadacultura.com', 'http://localhost:3000', 'https://mapacultural.saojosedobonfim.pb.gov.br'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
 }));
+
 
 // Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -50,5 +51,5 @@ app.use((error, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 4001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
