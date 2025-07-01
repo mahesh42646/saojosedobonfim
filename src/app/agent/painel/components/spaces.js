@@ -96,7 +96,7 @@ const SpaceDetails = ({ space, onBack, onDelete }) => {
     // Format the dates for updates
     const updates = [
         {
-            date: new Date(space.createdAt).toLocaleString('pt-BR'),
+            date: new Date(space.createdAt).toLocaleString('PTBR'),
             text: 'Espaço criado com sucesso',
             status: 'success'
         }
@@ -104,7 +104,7 @@ const SpaceDetails = ({ space, onBack, onDelete }) => {
 
     if (space.status === 'approved') {
         updates.push({
-            date: new Date(space.updatedAt).toLocaleString('pt-BR'),
+            date: new Date(space.updatedAt).toLocaleString('PTBR'),
             text: 'Espaço aprovado e publicado',
             status: 'approved'
         });

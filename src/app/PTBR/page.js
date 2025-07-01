@@ -127,11 +127,11 @@ export default function BrejoDoCruzPage() {
 
       {/* Banner */}
       <div style={{ position: 'relative', width: '100%', height: 334, overflow: 'visible', borderBottomLeftRadius: 2, borderBottomRightRadius: 32, marginBottom: 0 }}>
-        <Image src="/images/banner2.png" alt="Banner" fill style={{ objectFit: 'cover' }} />
+        <Image src="/images/banner-home.jpeg" alt="Banner" fill style={{ objectFit: 'cover' }} />
         {/* Green overlay gradient */}
         <div style={{
           position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderBottomLeftRadius: 2, borderBottomRightRadius: 32,
-          background: 'linear-gradient(88.74deg, rgb(47, 127, 45) 0%, rgba(26, 139, 26, 0.15) 100%)',
+          background: 'linear-gradient(88.74deg, rgb(47, 127, 45) 0%, rgba(26, 139, 26, 0) 100%)',
         }} />
         {/* Text */}
         <div style={{ position: 'absolute', top: 88, left: '15%', color: '#fff', zIndex: 2 }}>
@@ -144,7 +144,7 @@ export default function BrejoDoCruzPage() {
 
 
       {/* Info and Sign Up */}
-      <div className="p-4 container" style={{ display: 'flex', justifyContent: 'center', gap: 32, marginTop: 30, marginBottom: 32 }}>
+      <div className="p-4 container d-lg-flex justify-content-center gap-3" style={{ marginTop: 30, marginBottom: 32 }}>
         {/* Info Card */}
         <div style={{
           position: 'relative',
@@ -187,9 +187,10 @@ export default function BrejoDoCruzPage() {
           </div>
         </div>
         {/* Sign Up Card */}
-        <div 
+        <div className="mx-auto my-lg-0 my-3"
           onClick={() => router.push('/agent')}
           style={{
+
             position: 'relative',
             width: 240,
             minHeight: 220,
@@ -233,7 +234,7 @@ export default function BrejoDoCruzPage() {
 
       {/* Our Agents */}
       <div style={{ maxWidth: 1100, margin: '0 auto', marginBottom: 32, padding: '0 32px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+        <div className="d-flex flex-wrap" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
           <div style={{ fontWeight: 600, fontSize: 20, color: '#215C2D', textAlign: 'left' }}>Nossos agentes</div>
           <a href="/brejodocruz-pb/agentcultural" style={{
             textDecoration: 'none',
@@ -358,7 +359,7 @@ export default function BrejoDoCruzPage() {
       {/* Our Spaces */}
       <div style={{ background: 'rgba(22, 51, 0, 0.08)', padding: '40px 0', marginTop: 24 }}>
         <div style={{ maxWidth: 1000, margin: '0 auto' }}>
-          <div style={{ display: 'flex', gap: 24 }}>
+          <div className="d-flex p-4 p-lg-0 flex-wrap" style={{ gap: 24 }}>
             <div style={{ display: 'flex', flexDirection: 'column', marginBottom: 24 }}>
               <div style={{ fontWeight: 600, fontSize: 32, marginRight: 24 }}>Nossos <br /> Espaços</div>
               <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
@@ -407,7 +408,7 @@ export default function BrejoDoCruzPage() {
                 No spaces found.
               </div>
             ) : (
-              <div style={{ display: 'flex', gap: 24, overflow: 'hidden' }}>
+              <div className="d-flex flex-wrap" style={{ gap: 24, overflow: 'hidden' }}>
                 {spaces.slice(0, 3).map((space, i) => (
                   <div key={i} style={{ background: '#fff', borderRadius: 24, boxShadow: '0 2px 8px rgba(0,0,0,0.04)', width: 269, padding: '5px 15px 15px 15px', display: 'flex', flexDirection: 'column' }}>
                     <div style={{ width: '100%', height: 159, position: 'relative', padding: '  10px 1px 1px 1px' }}>
@@ -499,18 +500,19 @@ export default function BrejoDoCruzPage() {
             No projects found.
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <div className="d-flex flex-column" style={{ gap: 24 }}>
             {projects.slice(0, 3).map((project, idx) => (
-              <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', background: '#fff', borderRadius: 16, padding: 24, gap: 24, boxShadow: '0 0 8px 0 #0001' }}>
-                {project.coverPhoto ? (
+              <div key={idx} className="d-flex flex-column flex-lg-row align-items-center justify-content-between" style={{  background: '#fff', borderRadius: 16, padding: 24, gap: 24, boxShadow: '0 0 8px 0 #0001' }}>
+               
+               <div className="d-flex  gap-4 ">
+               {project.coverPhoto ? (
                   <Image
                     src={`https://mapacultural.gestorcultural.com.br/uploads/${project.coverPhoto}`}
                     alt={project.title}
                     width={150}
                     height={150}
                     style={{ borderRadius: 16, objectFit: 'cover' }}
-                  />
-                ) : (
+                  />) : (
                   <div style={{
                     width: 150,
                     height: 150,
@@ -521,21 +523,23 @@ export default function BrejoDoCruzPage() {
                     justifyContent: 'center'
                   }}>
                     <i className="bi bi-image" style={{ fontSize: 32, color: '#888' }}></i>
-                  </div>
-                )}
+                  </div>)}
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 700, fontSize: 18 }}>{project.title}</div>
                   <div style={{ fontSize: 14, color: '#888', margin: '4px 0 8px 0' }}>
                     Tipo: {project.type}
                   </div>
                   <div style={{ fontSize: 15, color: '#222' }}>
-                    {project.description?.length > 200 
-                      ? <div dangerouslySetInnerHTML={{__html: `${project.description.substring(0, 200)}...`}} />
-                      : <div dangerouslySetInnerHTML={{__html: project.description}} />
+                    {project.description?.length > 200
+                      ? <div dangerouslySetInnerHTML={{ __html: `${project.description.substring(0, 200)}...` }} />
+                      : <div dangerouslySetInnerHTML={{ __html: project.description }} />
                     }
                   </div>
                 </div>
-                <a
+
+               </div>
+
+                <a className="d-block"
                   href={`/brejodocruz-pb/projetos?id=${project._id}`}
                   style={{
                     background: '#2CB34A',
@@ -554,7 +558,9 @@ export default function BrejoDoCruzPage() {
                   + Conhecer
                 </a>
               </div>
+
             ))}
+
           </div>
         )}
       </div>

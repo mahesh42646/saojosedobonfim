@@ -29,8 +29,8 @@ export default function Type({ onSelectType }) {
       <div className="container py-2 border-0" style={{ background: '#fff' }}>
         <div className="d-flex align-items-center justify-content-between">
           {/* Left: Logo and Text */}
-          <div className="d-flex align-items-center">
-            <Image src="/images/MadminLogo.jpg" alt="Gestor Cultural Logo" width={160} height={50} style={{ marginRight: 8 }} />
+          <div className="d-flex align-items-center" onClick={() => router.push('/')}>
+            <Image src="/images/MadminLogo.jpg" alt="Gestor Cultural Logo" width={160} height={50} style={{ marginRight: 8, cursor: 'pointer' }}  onClick={() => window.location.href = '/'}  />
 
           </div>
           {/* Right: Icons */}

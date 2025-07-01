@@ -135,7 +135,7 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
               <div style={{ flex: 1 }}>
                 <div style={{ marginBottom: 24, minHeight: 24, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                   <div style={{ color: '#888', fontSize: 15 }}>
-                    {new Date(space.createdAt).toLocaleDateString('pt-BR', {
+                    {new Date(space.createdAt).toLocaleDateString('PTBR', {
                       weekday: 'long',
                       year: 'numeric',
                       month: 'long',
@@ -155,7 +155,7 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
                     justifyContent: 'center'
                   }}>
                     <div style={{ color: '#888', fontSize: 15 }}>
-                      {new Date(history.changedAt).toLocaleDateString('pt-BR', {
+                      {new Date(history.changedAt).toLocaleDateString('PTBR', {
                         weekday: 'long',
                         year: 'numeric',
                         month: 'long',

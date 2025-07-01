@@ -1,6 +1,6 @@
 "use client";
 
-import BrejoDoCruzPage from "./brejodocruz.pb.gov.br/page";
+import BrejoDoCruzPage from "./PTBR/page";
 
 
 

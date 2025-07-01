@@ -96,7 +96,7 @@ const ProjectDetails = ({ project, onBack, onDelete }) => {
     // Format the dates for updates
     const updates = [
         {
-            date: new Date(project.createdAt).toLocaleString('pt-BR'),
+            date: new Date(project.createdAt).toLocaleString('PTBR'),
             text: 'Projeto criado com sucesso',
             status: 'success'
         }
@@ -104,7 +104,7 @@ const ProjectDetails = ({ project, onBack, onDelete }) => {
 
     if (project.status === 'approved') {
         updates.push({
-            date: new Date(project.updatedAt).toLocaleString('pt-BR'),
+            date: new Date(project.updatedAt).toLocaleString('PTBR'),
             text: 'Projeto aprovado e publicado',
             status: 'approved'
         });
@@ -146,7 +146,7 @@ const ProjectDetails = ({ project, onBack, onDelete }) => {
                             <div className="d-flex align-items-start mb-4">
                                 <div className="me-3">
                                     <div className="fw-bold" style={{ color: '#666' }}>
-                                        {new Date(project.createdAt).toLocaleString('pt-BR')}
+                                        {new Date(project.createdAt).toLocaleString('PTBR')}
                                     </div>
                                     <div>Projeto criado com sucesso</div>
                                 </div>
@@ -157,7 +157,7 @@ const ProjectDetails = ({ project, onBack, onDelete }) => {
                                     <div key={index} className="d-flex align-items-start mb-4">
                                         <div className="me-3">
                                             <div className="fw-bold" style={{ color: '#666' }}>
-                                                {new Date(statusUpdate.changedAt).toLocaleString('pt-BR')}
+                                                {new Date(statusUpdate.changedAt).toLocaleString('PTBR')}
                                             </div>
                                             <div className="fw-bold">
                                                 {statusUpdate.status === 'approved' && 'Projeto aprovado e publicado'}
@@ -173,7 +173,7 @@ const ProjectDetails = ({ project, onBack, onDelete }) => {
                                     <div className="d-flex align-items-start">
                                         <div className="me-3">
                                             <div className="fw-bold" style={{ color: '#666' }}>
-                                                {new Date(project.updatedAt).toLocaleString('pt-BR')}
+                                                {new Date(project.updatedAt).toLocaleString('PTBR')}
                                             </div>
                                             <div className="fw-bold">
                                                 {project.status === 'approved' && 'Projeto aprovado e publicado'}
@@ -204,9 +204,9 @@ const ProjectDetails = ({ project, onBack, onDelete }) => {
                                     <div className="mb-4">
                                         <div className="fw-bold mb-2">Período do Projeto</div>
                                         <div style={{ color: '#666' }}>
-                                            <div>Início: {project.period.start ? new Date(project.period.start).toLocaleDateString('pt-BR') : 'Não definido'}</div>
+                                            <div>Início: {project.period.start ? new Date(project.period.start).toLocaleDateString('PTBR') : 'Não definido'}</div>
                                             {project.period.end && (
-                                                <div>Fim: {new Date(project.period.end).toLocaleDateString('pt-BR')}</div>
+                                                <div>Fim: {new Date(project.period.end).toLocaleDateString('PTBR')}</div>
                                             )}
                                         </div>
                                     </div>
@@ -271,9 +271,9 @@ const ProjectDetails = ({ project, onBack, onDelete }) => {
                                     <div style={{ color: '#666' }}>
                                         <div><strong>Tipo:</strong> {project.type}</div>
                                         <div><strong>Status:</strong> {StatusText({ status: project.status })}</div>
-                                        <div><strong>Data de Criação:</strong> {new Date(project.createdAt).toLocaleString('pt-BR')}</div>
+                                        <div><strong>Data de Criação:</strong> {new Date(project.createdAt).toLocaleString('PTBR')}</div>
                                         {project.updatedAt && (
-                                            <div><strong>Última Atualização:</strong> {new Date(project.updatedAt).toLocaleString('pt-BR')}</div>
+                                            <div><strong>Última Atualização:</strong> {new Date(project.updatedAt).toLocaleString('PTBR')}</div>
                                         )}
                                     </div>
                                 </div>
