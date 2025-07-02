@@ -556,7 +556,7 @@ export default function CspacePage() {
       ) : (
         <>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-            <h2 style={{ margin: 0, fontWeight: 600, fontSize: 22 }}>List of Cultural Spaces</h2>
+            <h2 style={{ margin: 0, fontWeight: 600, fontSize: 22 }}>Lista de Espaços Culturais</h2>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <input
                 type="text"
@@ -600,7 +600,7 @@ export default function CspacePage() {
             </div>
           ) : spaces.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
-              {searchTerm ? 'No spaces found matching your search.' : 'No spaces found.'}
+              {searchTerm ? 'Nenhum espaço encontrado correspondente à sua pesquisa.' : 'Nenhum espaço encontrado.'}
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

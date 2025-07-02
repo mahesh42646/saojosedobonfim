@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link"; // for Next.js routing
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import Image from "next/image";
@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation';
 export default function Header() {
     const router = useRouter();
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
 
     const toggleSidebar = () => {
         setSidebarOpen(!sidebarOpen);
@@ -16,9 +18,34 @@ export default function Header() {
         setSidebarOpen(false);
     };
 
+    const toggleDropdown = () => {
+        setDropdownOpen(!dropdownOpen);
+    };
+
+    const closeDropdown = () => {
+        setDropdownOpen(false);
+    };
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setDropdownOpen(false);
+            }
+        };
+
+        if (dropdownOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [dropdownOpen]);
+
     return (
         <>
-            <header className="bg-white py-2 border-bottom" style={{ position: "relative", zIndex: 1000 }}>
+            <header className="bg-white py-2 border-bottom" style={{ position: "relative", zIndex: 9998 }}>
                 <div className="container">
                     <div className="row align-items-center justify-content-center">
                         {/* Logo */}
@@ -72,11 +99,71 @@ export default function Header() {
                             </button>
                         </div>
 
-                        {/* Login */}
-                        <div onClick={() => router.push('/agent')} className="col-auto entrar-btn">
-                            <Link href="/#" className="d-flex align-items-center text-decoration-none fw-bold" style={{ color: "#005100" }}>
+                        {/* Login Dropdown */}
+                        <div className="col-auto entrar-btn dropdown-container" ref={dropdownRef}>
+                            <div 
+                                onClick={toggleDropdown}
+                                className="d-flex align-items-center text-decoration-none fw-bold"
+                                style={{ color: "#005100", cursor: "pointer" }}
+                            >
                                 <i className="bi bi-person-circle me-2" style={{ fontSize: 20 }}></i> Entrar
-                            </Link>
+                                <i className={`bi bi-chevron-down ms-1 ${dropdownOpen ? 'rotate' : ''}`} style={{ fontSize: 14, transition: 'transform 0.2s' }}></i>
+                            </div>
+                            
+                            {dropdownOpen && (
+                                <div className="dropdown-menu" style={{
+                                    position: "absolute",
+                                    top: "100%",
+                                    right: 0,
+                                    background: "#fff",
+                                    border: "1px solid #ddd",
+                                    borderRadius: "8px",
+                                    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                                    minWidth: "150px",
+                                    zIndex: 9999,
+                                    marginTop: "5px"
+                                }}>
+                                    <div 
+                                        onClick={() => {
+                                            router.push('/painel');
+                                            closeDropdown();
+                                        }}
+                                        className="dropdown-item"
+                                        style={{
+                                            padding: "10px 15px",
+                                            cursor: "pointer",
+                                            transition: "background-color 0.2s",
+                                            borderBottom: "1px solid #f0f0f0",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            color: "#005100",
+                                            fontWeight: "bold"
+                                        }}
+                                    >
+                                        <i className="bi bi-shield-check me-2"></i>
+                                        Admin
+                                    </div>
+                                    <div 
+                                        onClick={() => {
+                                            router.push('/agent');
+                                            closeDropdown();
+                                        }}
+                                        className="dropdown-item"
+                                        style={{
+                                            padding: "10px 15px",
+                                            cursor: "pointer",
+                                            transition: "background-color 0.2s",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            color: "#005100",
+                                            fontWeight: "bold"
+                                        }}
+                                    >
+                                        <i className="bi bi-person-badge me-2"></i>
+                                        Agente
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -257,13 +344,10 @@ export default function Header() {
                     </ul>
                 </nav>
 
-                {/* Sidebar Footer - Entrar button */}
+                {/* Sidebar Footer - Entrar dropdown */}
                 <div style={{ padding: "20px" }}>
                     <div 
-                        onClick={() => {
-                            router.push('/agent');
-                            closeSidebar();
-                        }}
+                        onClick={toggleDropdown}
                         style={{
                             display: "block",
                             textAlign: "center",
@@ -278,12 +362,105 @@ export default function Header() {
                     >
                         <i className="bi bi-person-circle me-2"></i>
                         Entrar
+                        <i className={`bi bi-chevron-down ms-1 ${dropdownOpen ? 'rotate' : ''}`} style={{ fontSize: 14, transition: 'transform 0.2s' }}></i>
                     </div>
+                    
+                    {dropdownOpen && (
+                        <div style={{
+                            marginTop: "10px",
+                            background: "#fff",
+                            borderRadius: "10px",
+                            boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+                            overflow: "hidden",
+                            zIndex: 1001
+                        }}>
+                            <div 
+                                onClick={() => {
+                                    router.push('/painel');
+                                    closeDropdown();
+                                    closeSidebar();
+                                }}
+                                style={{
+                                    padding: "12px 20px",
+                                    cursor: "pointer",
+                                    borderBottom: "1px solid #f0f0f0",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    color: "#005100",
+                                    fontWeight: "bold"
+                                }}
+                            >
+                                <i className="bi bi-shield-check me-2"></i>
+                                Admin
+                            </div>
+                            <div 
+                                onClick={() => {
+                                    router.push('/agent');
+                                    closeDropdown();
+                                    closeSidebar();
+                                }}
+                                style={{
+                                    padding: "12px 20px",
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    color: "#005100",
+                                    fontWeight: "bold"
+                                }}
+                            >
+                                <i className="bi bi-person-badge me-2"></i>
+                                Agente
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
             {/* Responsive styles */}
             <style>{`
+                /* Dropdown styles */
+                .dropdown-container {
+                    position: relative;
+                    z-index: 9999;
+                }
+
+                .dropdown-menu {
+                    position: absolute;
+                    top: 100%;
+                    right: 0;
+                    background: #fff;
+                    border: 1px solid #ddd;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    min-width: 150px;
+                    z-index: 9999;
+                    margin-top: 5px;
+                    display: block !important;
+                }
+
+                .dropdown-item {
+                    padding: 10px 15px;
+                    cursor: pointer;
+                    transition: background-color 0.2s;
+                    border-bottom: 1px solid #f0f0f0;
+                    display: flex;
+                    align-items: center;
+                    color: #005100;
+                    font-weight: bold;
+                }
+
+                .dropdown-item:last-child {
+                    border-bottom: none;
+                }
+
+                .dropdown-item:hover {
+                    background-color: #f8f9fa;
+                }
+
+                .rotate {
+                    transform: rotate(180deg);
+                }
+
                 /* Desktop styles - keep existing navigation visible */
                 @media (min-width: 901px) {
                     .desktop-nav {

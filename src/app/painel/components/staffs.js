@@ -401,7 +401,7 @@ export default function AgentsPage() {
             ) : (
                 <>
                     <div className="d-flex justify-content-between align-items-center mb-3">
-                        <h2 style={{ margin: 0, fontWeight: 600, fontSize: 20 }}>List of Staff</h2>
+                        <h2 style={{ margin: 0, fontWeight: 600, fontSize: 22 }}>Lista de Funcionários</h2>
                         <div className="d-flex align-items-center w-50 gap-3">
                             {/* Status Filter */}
                             <select

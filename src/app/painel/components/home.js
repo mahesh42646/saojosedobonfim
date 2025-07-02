@@ -45,9 +45,9 @@ export default function HomePage() {
     : recentItems.filter(item => item.itemType === selectedType).slice(0, 4);
 
   return (
-    <div className="ps-lg-5 pe-lg-2 px-2 py-lg-4 py-3 mt-lg-2">
+    <div className="ps-lg-5 pe-lg-2 px-2  py-3 mt-lg-2">
       <div className="d-flex justify-content-between align-items-center">
-        <h2 className="fw-bold py-2" style={{ fontSize: 22 }}>Últimos Projetos e Espaços</h2>
+        <h2 className="fw-semibold py-2" style={{ fontSize: 22 }}>Últimos Projetos e Espaços</h2>
         <div className="position-relative">
           <button 
             className="btn rounded-5 px-4 py-2"
