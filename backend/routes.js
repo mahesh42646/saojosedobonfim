@@ -362,9 +362,10 @@ router.post('/agent/profile', authMiddleware, async (req, res) => {
           commonFields.dob && commonFields.fullname && commonFields.rg && 
           commonFields.gender && commonFields.breed && commonFields.lgbtq && 
           commonFields.education && commonFields.income && commonFields.mainActivity && 
-          commonFields.traditionalCommunities && commonFields.pcd && commonFields.city && 
+          commonFields.traditionalCommunities && commonFields.city && 
           commonFields.telephone && commonFields.responsible && commonFields.email && 
-          commonFields.password && acceptedTerms;
+          commonFields.password && acceptedTerms &&
+          (commonFields.socialProgramBeneficiary !== 'Sim' || (commonFields.socialProgramBeneficiary === 'Sim' && commonFields.socialProgramName));
         
         agentProfile.typeStatus.business.isComplete = isBusinessComplete;
         if (isBusinessComplete) {
@@ -389,9 +390,10 @@ router.post('/agent/profile', authMiddleware, async (req, res) => {
           commonFields.dob && commonFields.fullname && commonFields.rg && 
           commonFields.gender && commonFields.breed && commonFields.lgbtq && 
           commonFields.education && commonFields.income && commonFields.mainActivity && 
-          commonFields.traditionalCommunities && commonFields.pcd && commonFields.city && 
+          commonFields.traditionalCommunities && commonFields.city && 
           commonFields.telephone && commonFields.responsible && commonFields.email && 
-          commonFields.password && acceptedTerms;
+          commonFields.password && acceptedTerms &&
+          (commonFields.socialProgramBeneficiary !== 'Sim' || (commonFields.socialProgramBeneficiary === 'Sim' && commonFields.socialProgramName));
         
         agentProfile.typeStatus.collective.isComplete = isCollectiveComplete;
         if (isCollectiveComplete) {
@@ -408,9 +410,10 @@ router.post('/agent/profile', authMiddleware, async (req, res) => {
           commonFields.dob && commonFields.fullname && commonFields.rg && 
           commonFields.gender && commonFields.breed && commonFields.lgbtq && 
           commonFields.education && commonFields.income && commonFields.mainActivity && 
-          commonFields.traditionalCommunities && commonFields.pcd && commonFields.city && 
+          commonFields.traditionalCommunities && commonFields.city && 
           commonFields.telephone && commonFields.responsible && commonFields.email && 
-          commonFields.password && acceptedTerms;
+          commonFields.password && acceptedTerms &&
+          (commonFields.socialProgramBeneficiary !== 'Sim' || (commonFields.socialProgramBeneficiary === 'Sim' && commonFields.socialProgramName));
         
         agentProfile.typeStatus.personal.isComplete = isPersonalComplete;
         if (isPersonalComplete) {
@@ -470,7 +473,8 @@ router.post('/agent/profile', authMiddleware, async (req, res) => {
         const isBusinessComplete = cnpjType && razaoSocial && cnpj && 
           dob && fullname && rg && gender && breed && lgbtq && 
           education && income && mainActivity && traditionalCommunities && 
-          pcd && city && telephone && responsible && email && password && acceptedTerms;
+          city && telephone && responsible && email && password && acceptedTerms &&
+          (socialProgramBeneficiary !== 'Sim' || (socialProgramBeneficiary === 'Sim' && socialProgramName));
         
         typeStatus.business.isComplete = isBusinessComplete;
         if (isBusinessComplete) {
@@ -480,7 +484,8 @@ router.post('/agent/profile', authMiddleware, async (req, res) => {
         const isCollectiveComplete = collectiveName && participants && 
           dob && fullname && rg && gender && breed && lgbtq && 
           education && income && mainActivity && traditionalCommunities && 
-          pcd && city && telephone && responsible && email && password && acceptedTerms;
+          city && telephone && responsible && email && password && acceptedTerms &&
+          (socialProgramBeneficiary !== 'Sim' || (socialProgramBeneficiary === 'Sim' && socialProgramName));
         
         typeStatus.collective.isComplete = isCollectiveComplete;
         if (isCollectiveComplete) {
@@ -490,7 +495,8 @@ router.post('/agent/profile', authMiddleware, async (req, res) => {
         const isPersonalComplete = 
           dob && fullname && rg && gender && breed && lgbtq && 
           education && income && mainActivity && traditionalCommunities && 
-          pcd && city && telephone && responsible && email && password && acceptedTerms;
+          city && telephone && responsible && email && password && acceptedTerms &&
+          (socialProgramBeneficiary !== 'Sim' || (socialProgramBeneficiary === 'Sim' && socialProgramName));
         
         typeStatus.personal.isComplete = isPersonalComplete;
         if (isPersonalComplete) {

@@ -402,6 +402,34 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
       newErrors.otherActivity = 'Este campo é obrigatório';
     }
 
+    // Conditional validation for socialProgramName - only required when socialProgramBeneficiary is "Sim"
+    if (formData.socialProgramBeneficiary === 'Sim' && (!formData.socialProgramName || formData.socialProgramName.trim() === '')) {
+      newErrors.socialProgramName = 'Este campo é obrigatório';
+    }
+
+    // Business-specific validation
+    if (selectedType === 'business') {
+      if (!formData.cnpjType || formData.cnpjType === 'Selecione') {
+        newErrors.cnpjType = 'Este campo é obrigatório';
+      }
+      if (!formData.razaoSocial || formData.razaoSocial.trim() === '') {
+        newErrors.razaoSocial = 'Este campo é obrigatório';
+      }
+      if (!formData.cnpj || formData.cnpj.trim() === '') {
+        newErrors.cnpj = 'Este campo é obrigatório';
+      }
+    }
+
+    // Collective-specific validation
+    if (selectedType === 'collective') {
+      if (!formData.collectiveName || formData.collectiveName.trim() === '') {
+        newErrors.collectiveName = 'Este campo é obrigatório';
+      }
+      if (!formData.participants || formData.participants.trim() === '') {
+        newErrors.participants = 'Este campo é obrigatório';
+      }
+    }
+
     // PCD is now optional, so we don't validate it
     // Only validate if terms are accepted
     if (!accepted) {
@@ -430,6 +458,7 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
           selectedType,
           ...finalFormData,
           pcd: pcd === 'Selecione' ? null : pcd, // Set to null if not selected
+          socialProgramName: formData.socialProgramBeneficiary === 'Sim' ? formData.socialProgramName : null, // Set to null if not beneficiary
           acceptedTerms: accepted
         };
 
@@ -701,15 +730,17 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
               <option>Não</option>
             </Form.Select>
           </Form.Group>
-          <Form.Group className="mb-3" controlId="socialProgramName">
-            <Form.Label>Nome do programa social</Form.Label>
-            <Form.Control
-              className="border-dark-gray"
-              type="text"
-              value={formData.socialProgramName || ''}
-              onChange={(e) => handleFieldChange('socialProgramName', e.target.value)}
-            />
-          </Form.Group>
+          {formData.socialProgramBeneficiary === 'Sim' && (
+            <Form.Group className="mb-3" controlId="socialProgramName">
+              <Form.Label>Nome do programa social</Form.Label>
+              <Form.Control
+                className="border-dark-gray"
+                type="text"
+                value={formData.socialProgramName || ''}
+                onChange={(e) => handleFieldChange('socialProgramName', e.target.value)}
+              />
+            </Form.Group>
+          )}
           <h4 className="fw-bold mb-3">Informações Profissionais</h4>
           <Form.Group className="mb-3" controlId="mainActivity">
             <Form.Label>Principal área de atuação *</Form.Label>
