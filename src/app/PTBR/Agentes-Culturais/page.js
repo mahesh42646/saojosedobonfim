@@ -378,12 +378,12 @@ export default function CulturalAgentsPage() {
       {/* Header */}
       <Headerpb />
       <div style={{ position: 'relative', width: '100%', height: 334, overflow: 'visible', borderBottomLeftRadius: 2, borderBottomRightRadius: 32, marginBottom: 0 }}>
-        <Image src="/images/projectsBG.png" alt="Banner" width={100} height={100} style={{ objectFit: 'cover', width: '80%', height: '334px', objectPosition: 'end', marginLeft: '20%' }} />
+        <Image src="/images/projectsBG.png" alt="Banner" width={100} height={100} style={{ objectFit: 'cover', width: '100%', height: '334px', objectPosition: 'end' }} />
         {/* Green overlay gradient */}
         <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderBottomLeftRadius: 2, borderBottomRightRadius: 32,
             background: 'linear-gradient(88.74deg, rgb(47, 127, 45) 20%, rgba(26, 139, 26, 0.15) 100%)', }} /> {/* Text */}
-        <div style={{ position: 'absolute', top: 88, left: '15%', color: '#fff', zIndex: 2 }}>
-          <div style={{ fontSize: 20, fontWeight: 600, marginBottom: 8, letterSpacing: 0.5 }}>BEM VINDO AOS</div>
+        <div style={{ position: 'absolute', top: 120, left: '15%', color: '#fff', zIndex: 2 }}>
+          {/* <div style={{ fontSize: 20, fontWeight: 600, marginBottom: 8, letterSpacing: 0.5 }}>BEM VINDO AOS</div> */}
           <div style={{ fontSize: 48, fontWeight: 700, lineHeight: 1.1, textShadow: '0 2px 8px rgba(0,0,0,0.10)' }}>Agentes Culturais</div>
         </div>
         {/* Bottom image border */}
@@ -393,7 +393,7 @@ export default function CulturalAgentsPage() {
       </div>
 
       {/* View options and search */}
-      <div style={{ maxWidth: 1000, margin: '32px auto 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+      <div className="container d-lg-flex gap-2 px-lg-0 px-5 w-100" style={{  margin: '48px auto 0',  alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <span style={{ fontWeight: 500, color: '#888' }}>Visualizar como</span>
           <span 

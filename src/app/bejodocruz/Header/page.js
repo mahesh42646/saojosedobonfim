@@ -30,7 +30,7 @@ export default function Header() {
             }}>
                 {/* Logo and slogan */}
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", marginLeft: 30 }}>
-                    <Image src="/images/Logo.png" alt="Logo" width={77} height={77} style={{ marginBottom: 2 }} />
+                    <Image src="/images/Logo-sjdb.png" alt="Logo" width={77} height={77} style={{ marginBottom: 2 }} />
                 </div>
 
                 {/* Desktop Navigation */}

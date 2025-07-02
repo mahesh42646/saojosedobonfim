@@ -99,10 +99,10 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
         {/* Tabs */}
         <div style={{ display: 'flex', borderBottom: '1px solid #eee', paddingLeft: 24, gap: 32, marginTop: 0 }}>
           <div onClick={() => setTab('update')} style={{ cursor: 'pointer', padding: '18px 0 10px 0', borderBottom: tab === 'update' ? '2px solid #2F5711' : 'none', color: tab === 'update' ? '#2F5711' : '#222', fontWeight: tab === 'update' ? 600 : 500, display: 'flex', alignItems: 'center', gap: 6 }}>
-            Update
+            Atualizar
           </div>
           <div onClick={() => setTab('details')} style={{ cursor: 'pointer', padding: '18px 0 10px 0', borderBottom: tab === 'details' ? '2px solid #2F5711' : 'none', color: tab === 'details' ? '#2F5711' : '#222', fontWeight: tab === 'details' ? 600 : 500, display: 'flex', alignItems: 'center', gap: 6 }}>
-            Details
+            Detalhes
           </div>
         </div>
         {/* Timeline/History */}
@@ -144,7 +144,7 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
                       minute: '2-digit'
                     })}
                   </div>
-                  <div style={{ color: '#222', fontSize: 15 }}>Project created successfully</div>
+                  <div style={{ color: '#222', fontSize: 15 }}>Projeto criado com sucesso</div>
                 </div>
                 {space.statusHistory?.map((history, index) => (
                   <div key={index} style={{ 
@@ -165,10 +165,10 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
                       })}
                     </div>
                     <div style={{ color: '#222', fontWeight: 600, fontSize: 15 }}>
-                      {history.status === 'approved' ? 'Project approved and published' :
-                       history.status === 'rejected' ? 'Project rejected' :
-                       history.status === 'inactive' ? 'Project set to inactive' :
-                       'Project status updated'}
+                      {history.status === 'approved' ? 'Projeto aprovado e publicado' :
+                       history.status === 'rejected' ? 'Projeto rejeitado' :
+                       history.status === 'inactive' ? 'Projeto definido como inativo' :
+                       'Status do projeto atualizado'}
                     </div>
                   </div>
                 ))}
@@ -213,7 +213,7 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <div style={{ display: 'flex', alignItems: 'center', background: '#F2F5F2', borderRadius: 8, padding: '8px 12px', gap: 8 }}>
                 <span style={{ color: '#2F5711', fontSize: 20 }}><i className="bi bi-card-text"></i></span>
-                <span style={{ fontWeight: 500 }}>Description *</span>
+                <span style={{ fontWeight: 500 }}>Descrição *</span>
               </div>
               <div 
                 style={{ 
@@ -229,15 +229,15 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
                   whiteSpace: 'pre-wrap'
                 }}
               >
-                {space.description || 'No content'}
+                {space.description || 'Sem conteúdo'}
               </div>
             </div>
             {/* Period */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <label style={{ fontWeight: 500 }}>Project Period *</label>
+              <label style={{ fontWeight: 500 }}>Período do Projeto *</label>
               <div style={{ display: 'flex', gap: 12 }}>
                 <div style={{ flex: 1 }}>
-                  <label style={{ fontSize: 14, marginBottom: 4, display: 'block' }}>Start Date</label>
+                  <label style={{ fontSize: 14, marginBottom: 4, display: 'block' }}>Data de Início</label>
                   <input 
                     type="text"
                     value={space.period?.start ? new Date(space.period.start).toLocaleDateString() : ''}
@@ -246,7 +246,7 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
                   />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <label style={{ fontSize: 14, marginBottom: 4, display: 'block' }}>End Date</label>
+                  <label style={{ fontSize: 14, marginBottom: 4, display: 'block' }}>Data de Fim</label>
                   <input 
                     type="text"
                     value={space.period?.end ? new Date(space.period.end).toLocaleDateString() : ''}
@@ -258,7 +258,7 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
             </div>
             {/* Social Links */}
             <div style={{ background: '#F2F5F2', borderRadius: 12, padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div style={{ fontWeight: 600, marginBottom: 8 }}>Social Links</div>
+              <div style={{ fontWeight: 600, marginBottom: 8 }}>Links Sociais</div>
               {/* Facebook */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ color: '#2F5711', fontSize: 22 }}><i className="bi bi-facebook"></i></span>
@@ -289,7 +289,7 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
             </div>
             {/* Photo gallery */}
             <div>
-              <div style={{ fontWeight: 600, marginBottom: 8 }}>Photo gallery</div>
+              <div style={{ fontWeight: 600, marginBottom: 8 }}>Galeria de fotos</div>
               <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
                 {/* Cover Photo */}
                 {space.coverPhoto && (
@@ -302,7 +302,7 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
                       style={{ objectFit: 'cover' }}
                     />
                     <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0,0,0,0.7)', color: '#fff', padding: '4px 8px', fontSize: 12 }}>
-                      Cover Photo
+                      Foto de Capa
                     </div>
                   </div>
                 )}
@@ -421,7 +421,7 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
             }}
             disabled={space.status === 'approved'}
           >
-            Approve
+            Aprovar
           </button>
         </div>
       </div>
@@ -514,11 +514,11 @@ export default function CspacePage() {
       ) : (
         <>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-            <h2 style={{ margin: 0, fontWeight: 600, fontSize: 22 }}>List of Cultural Projects</h2>
+            <h2 style={{ margin: 0, fontWeight: 600, fontSize: 22 }}>Lista de Projetos Culturais</h2>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <input
                 type="text"
-                placeholder="Search Project"
+                placeholder="Buscar Projeto"
                 value={searchTerm}
                 onChange={handleSearch}
                 style={{ border: '1px solid #ccc', borderRadius: 24, padding: '6px 24px', outline: 'none', width: 200 }}
@@ -552,7 +552,7 @@ export default function CspacePage() {
             </div>
           ) : projects.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
-              {searchTerm ? 'No projects found matching your search.' : 'No projects found.'}
+              {searchTerm ? 'Nenhum projeto encontrado para sua busca.' : 'Nenhum projeto encontrado.'}
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -591,8 +591,8 @@ export default function CspacePage() {
                     <div style={{ fontWeight: 500, fontSize: 16 }}>{project.title}</div>
                     <div style={{ color: '#888', fontSize: 15 }}>{project.type}</div>
                     <div style={{ fontSize: 13, color: '#666' }}>
-                      {project.period?.start && `From: ${new Date(project.period.start).toLocaleDateString()}`}
-                      {project.period?.end && ` To: ${new Date(project.period.end).toLocaleDateString()}`}
+                      {project.period?.start && `De: ${new Date(project.period.start).toLocaleDateString()}`}
+                      {project.period?.end && ` Até: ${new Date(project.period.end).toLocaleDateString()}`}
                     </div>
                   </div>
                   <div style={{ marginLeft: 'auto', color: project.status === 'approved' ? '#2F5711' : project.status === 'rejected' ? '#ff4444' : '#888' }}>

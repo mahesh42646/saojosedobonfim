@@ -271,8 +271,8 @@ export default function CulturalSpacesPage() {
         {/* Green overlay gradient */}
         <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderBottomLeftRadius: 2, borderBottomRightRadius: 32,
             background: 'linear-gradient(88.74deg, rgb(47, 127, 45) 20%, rgba(26, 139, 26, 0.15) 100%)', }} /> {/* Text */}
-        <div style={{ position: 'absolute', top: 88, left: '15%', color: '#fff', zIndex: 2 }}>
-          <div style={{ fontSize: 20, fontWeight: 600, marginBottom: 8, letterSpacing: 0.5 }}>BEM VINDO AOS</div>
+        <div style={{ position: 'absolute', top: 120, left: '15%', color: '#fff', zIndex: 2 }}>
+          {/* <div style={{ fontSize: 20, fontWeight: 600, marginBottom: 8, letterSpacing: 0.5 }}>BEM VINDO AOS</div> */}
           <div style={{ fontSize: 48, fontWeight: 700, lineHeight: 1.1, textShadow: '0 2px 8px rgba(0,0,0,0.10)' }}>Espaços Culturais</div>
         </div>
         {/* Bottom image border */}
