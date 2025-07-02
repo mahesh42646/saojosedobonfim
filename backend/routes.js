@@ -25,11 +25,8 @@ const storage = multer.diskStorage({
 const upload = multer({ 
   storage: storage,
   limits: {
-    fileSize: 50 * 1024 * 1024, // 50MB limit per file (reduced from 150MB)
-    files: 15, // Reduced number of files
-    fieldSize: 50 * 1024 * 1024, // 50MB field size limit
-    fieldNameSize: 100, // Field name size limit
-    fields: 20 // Number of non-file fields
+    fileSize: 150 * 1024 * 1024, // 150MB limit per file
+    files: 111 // 1 cover photo + 110 gallery photos
   },
   fileFilter: function (req, file, cb) {
     const filetypes = /jpeg|jpg|png/;
@@ -48,27 +45,17 @@ const handleMulterError = (error, req, res, next) => {
   if (error instanceof multer.MulterError) {
     if (error.code === 'LIMIT_FILE_SIZE') {
       return res.status(413).json({ 
-        error: 'File too large. Maximum file size is 50MB per file.' 
+        error: 'File too large. Maximum file size is 150MB per file.' 
       });
     }
     if (error.code === 'LIMIT_FILE_COUNT') {
       return res.status(413).json({ 
-        error: 'Too many files. Maximum 15 files allowed.' 
+        error: 'Too many files. Maximum 111 files allowed (1 cover + 110 gallery).' 
       });
     }
     if (error.code === 'LIMIT_UNEXPECTED_FILE') {
       return res.status(400).json({ 
         error: 'Unexpected file field.' 
-      });
-    }
-    if (error.code === 'LIMIT_FIELD_VALUE') {
-      return res.status(413).json({ 
-        error: 'Field value too large.' 
-      });
-    }
-    if (error.code === 'LIMIT_PART_COUNT') {
-      return res.status(413).json({ 
-        error: 'Too many parts in multipart request.' 
       });
     }
   }
@@ -645,7 +632,7 @@ router.put('/agent/profile/:cpf', authMiddleware, async (req, res) => {
 });
 
 // Update Agent Profile Photo only
-router.put('/agent/profile/:cpf/photo', [authMiddleware, upload.single('profilePhoto'), handleMulterError], async (req, res) => {
+router.put('/agent/profile/:cpf/photo', [authMiddleware, upload.single('profilePhoto')], async (req, res) => {
   try {
     const profile = await AgentProfile.findOne({ cpf: req.params.cpf });
     
@@ -694,7 +681,7 @@ router.put('/agent/profile/:cpf/photo', [authMiddleware, upload.single('profileP
 router.put('/agent/profile/:cpf/public', [authMiddleware, upload.fields([
   { name: 'profilePhoto', maxCount: 1 },
   { name: 'galleryPhotos', maxCount: 10 }
-]), handleMulterError], async (req, res) => {
+])], async (req, res) => {
   try {
     const profile = await AgentProfile.findOne({ cpf: req.params.cpf });
     

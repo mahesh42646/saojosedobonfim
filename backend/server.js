@@ -10,8 +10,8 @@ dotenv.config();
 const app = express();
 
 // Increase body parser limits for large file uploads
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000 }));
+app.use(express.json({ limit: '150mb' }));
+app.use(express.urlencoded({ limit: '150mb', extended: true }));
 
 app.use(cors({
   origin: ['https://mapacultural.saojosedobonfim.pb.gov.br','https://mapadacultura.com', 'http://localhost:3000', 'https://mapacultural.saojosedobonfim.pb.gov.br'],
