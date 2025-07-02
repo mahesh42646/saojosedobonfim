@@ -228,7 +228,7 @@ export default function BrejoDoCruzPage() {
             fontWeight: 600,
             fontSize: 24,
             zIndex: 2
-          }}>Inscrever-se</span>
+          }}>Cadastre-se</span>
         </div>
       </div>
 

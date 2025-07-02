@@ -397,6 +397,11 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
       newErrors.district = 'Este campo é obrigatório';
     }
 
+    // Conditional validation for otherActivity - only required when mainActivity is "Outro(a)"
+    if (formData.mainActivity === 'Outro(a)' && (!formData.otherActivity || formData.otherActivity === 'Selecione')) {
+      newErrors.otherActivity = 'Este campo é obrigatório';
+    }
+
     // PCD is now optional, so we don't validate it
     // Only validate if terms are accepted
     if (!accepted) {
@@ -413,11 +418,17 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
 
     if (validateForm()) {
       try {
+        // Set default value for otherActivity if not visible
+        const finalFormData = {
+          ...formData,
+          otherActivity: formData.mainActivity === 'Outro(a)' ? formData.otherActivity : 'N/A'
+        };
+
         // Prepare data for backend
         const profileData = {
           cpf,
           selectedType,
-          ...formData,
+          ...finalFormData,
           pcd: pcd === 'Selecione' ? null : pcd, // Set to null if not selected
           acceptedTerms: accepted
         };
@@ -533,9 +544,12 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
                   onChange={(e) => handleFieldChange('gender', e.target.value)}
                 >
                   <option>Selecione</option>
-                  <option>Masculino</option>
-                  <option>Feminino</option>
-                  <option>Outro</option>
+                  <option>Homem Cisgênero</option>
+                  <option>Mulher Cisgênero</option>
+                  <option>Homem Transgênero</option>
+                  <option>Mulher Transgênero</option>
+                  <option>Pessoa Não Binária</option>
+                  <option>Outros</option>
                 </Form.Select>
                 <Form.Control.Feedback type="invalid">{errors.gender}</Form.Control.Feedback>
               </Form.Group>
@@ -550,8 +564,12 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
                   onChange={(e) => handleFieldChange('breed', e.target.value)}
                 >
                   <option>Selecione</option>
-                  <option>Raça 1</option>
-                  <option>Raça 2</option>
+                  <option>Branca</option>
+                  <option>Preta</option>
+                  <option>Amarela</option>
+                  <option>Parda</option>
+                  <option>Indígena</option>
+                  <option>Não declarado</option>
                 </Form.Select>
                 <Form.Control.Feedback type="invalid">{errors.breed}</Form.Control.Feedback>
               </Form.Group>
@@ -634,9 +652,16 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
                   onChange={(e) => handleFieldChange('education', e.target.value)}
                 >
                   <option>Selecione</option>
-                  <option>Ensino Médio</option>
-                  <option>Graduação</option>
-                  <option>Mestrado</option>
+                  <option>Não tenho educação formal</option>
+                  <option>Ensino Fundamental incompleto</option>
+                  <option>Ensino Fundamental completo</option>
+                  <option>Ensino Médio incompleto</option>
+                  <option>Ensino Médio completo</option>
+                  <option>Curso Técnico completo</option>
+                  <option>Ensino Superior incompleto</option>
+                  <option>Ensino Superior completo</option>
+                  <option>Pós graduação em curso</option>
+                  <option>Pós graduação completo</option>
                 </Form.Select>
                 <Form.Control.Feedback type="invalid">{errors.education}</Form.Control.Feedback>
               </Form.Group>
@@ -651,9 +676,14 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
                   onChange={(e) => handleFieldChange('income', e.target.value)}
                 >
                   <option>Selecione</option>
-                  <option>Abaixo de R$ 20.000</option>
-                  <option>R$ 20.000 - R$ 50.000</option>
-                  <option>Acima de R$ 50.000</option>
+                  <option>Sem renda</option>
+                  <option>Até R$ 500,00</option>
+                  <option>De R$ 501,00 a R$ 1.000,00</option>
+                  <option>De R$ 1.001,00 a R$ 2.000,00</option>
+                  <option>De R$ 2.001,00 a R$ 3.000,00</option>
+                  <option>De R$ 3.001,00 a R$ 5.000,00</option>
+                  <option>De R$ 5.001,00 a R$ 10.000,00</option>
+                  <option>Acima de R$ 10.000,00</option>
                 </Form.Select>
                 <Form.Control.Feedback type="invalid">{errors.income}</Form.Control.Feedback>
               </Form.Group>
@@ -690,23 +720,30 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
               onChange={(e) => handleFieldChange('mainActivity', e.target.value)}
             >
               <option>Selecione</option>
-              <option>Atividade 1</option>
-              <option>Atividade 2</option>
+              <option>Artes Visuais (artes plásticas, artesanato, fotografia, design, arte urbana, arte digital ou outras linguagens)</option>
+              <option>Artes cênicas (Teatro, Dança, Circo)</option>
+              <option>Música</option>
+              <option>Literatura</option>
+              <option>Outro(a)</option>
             </Form.Select>
             <Form.Control.Feedback type="invalid">{errors.mainActivity}</Form.Control.Feedback>
           </Form.Group>
-          <Form.Group className="mb-3" controlId="otherActivity">
-            <Form.Label>Outras áreas de atuação</Form.Label>
-            <Form.Select
-              className="border-dark-gray"
-              value={formData.otherActivity || 'Selecione'}
-              onChange={(e) => handleFieldChange('otherActivity', e.target.value)}
-            >
-              <option>Selecione</option>
-              <option>Atividade 1</option>
-              <option>Atividade 2</option>
-            </Form.Select>
-          </Form.Group>
+          {formData.mainActivity === 'Outro(a)' && (
+            <Form.Group className="mb-3" controlId="otherActivity">
+              <Form.Label>Outras áreas de atuação *</Form.Label>
+              <Form.Select
+                className="border-dark-gray"
+                value={formData.otherActivity || 'Selecione'}
+                isInvalid={!!errors.otherActivity}
+                onChange={(e) => handleFieldChange('otherActivity', e.target.value)}
+              >
+                <option>Selecione</option>
+                <option>Atividade 1</option>
+                <option>Atividade 2</option>
+              </Form.Select>
+              <Form.Control.Feedback type="invalid">{errors.otherActivity}</Form.Control.Feedback>
+            </Form.Group>
+          )}
           <Form.Group className="mb-3" controlId="traditionalCommunities">
             <Form.Label>Você pertence a comunidades tradicionais?</Form.Label>
             <Form.Select
@@ -716,8 +753,16 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
               onChange={(e) => handleFieldChange('traditionalCommunities', e.target.value)}
             >
               <option>Selecione</option>
-              <option>Comunidade 1</option>
-              <option>Comunidade 2</option>
+              <option>Não pertenço a comunidade tradicional</option>
+              <option>Comunidade extrativista</option>
+              <option>Comunidade ribeirinha</option>
+              <option>Comunidade rural</option>
+              <option>Indígenas</option>
+              <option>Povos ciganos</option>
+              <option>Pescadores(as) artesanais</option>
+              <option>Povos de terreiro</option>
+              <option>Quilombolas</option>
+              <option>Outra comunidade tradicional</option>
             </Form.Select>
             <Form.Control.Feedback type="invalid">{errors.traditionalCommunities}</Form.Control.Feedback>
           </Form.Group>
@@ -953,6 +998,7 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
           <Form.Group className="mb-3" controlId="telephone">
             <Form.Label>Telefone</Form.Label>
             <Form.Control
+              placeholder="(99) 9 9999-9999"
               className="border-dark-gray"
               type="text"
               value={formData.telephone || ''}
