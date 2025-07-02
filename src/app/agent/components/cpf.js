@@ -3,6 +3,69 @@ import { Container, Form, Button, Row, Col, Modal } from 'react-bootstrap';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
+// API functions for Brazil states and cities
+const fetchBrazilStates = async () => {
+  try {
+    const response = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados?orderBy=nome');
+    if (!response.ok) {
+      throw new Error('Failed to fetch states');
+    }
+    const states = await response.json();
+    return states.map(state => ({
+      id: state.sigla,
+      name: state.nome,
+      ibgeId: state.id
+    }));
+  } catch (error) {
+    console.error('Error fetching states:', error);
+    // Fallback to basic states if API fails
+    return [
+      { id: 'SP', name: 'São Paulo' },
+      { id: 'RJ', name: 'Rio de Janeiro' },
+      { id: 'MG', name: 'Minas Gerais' },
+      { id: 'RS', name: 'Rio Grande do Sul' },
+      { id: 'PR', name: 'Paraná' },
+      { id: 'SC', name: 'Santa Catarina' },
+      { id: 'BA', name: 'Bahia' },
+      { id: 'GO', name: 'Goiás' },
+      { id: 'PE', name: 'Pernambuco' },
+      { id: 'CE', name: 'Ceará' },
+      { id: 'PA', name: 'Pará' },
+      { id: 'MA', name: 'Maranhão' },
+      { id: 'AM', name: 'Amazonas' },
+      { id: 'ES', name: 'Espírito Santo' },
+      { id: 'PB', name: 'Paraíba' },
+      { id: 'MT', name: 'Mato Grosso' },
+      { id: 'MS', name: 'Mato Grosso do Sul' },
+      { id: 'PI', name: 'Piauí' },
+      { id: 'RN', name: 'Rio Grande do Norte' },
+      { id: 'AL', name: 'Alagoas' },
+      { id: 'RO', name: 'Rondônia' },
+      { id: 'TO', name: 'Tocantins' },
+      { id: 'AC', name: 'Acre' },
+      { id: 'AP', name: 'Amapá' },
+      { id: 'RR', name: 'Roraima' },
+      { id: 'DF', name: 'Distrito Federal' },
+      { id: 'SE', name: 'Sergipe' }
+    ];
+  }
+};
+
+const fetchCitiesByState = async (stateId) => {
+  try {
+    const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${stateId}/municipios?orderBy=nome`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch cities');
+    }
+    const cities = await response.json();
+    return cities.map(city => city.nome);
+  } catch (error) {
+    console.error('Error fetching cities:', error);
+    // Return empty array if API fails
+    return [];
+  }
+};
+
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://teste.mapadacultura.com/api';
 
@@ -81,6 +144,13 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
   const [pcd, setPcd] = useState(existingProfile?.pcd || 'Selecione');
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({});
+  const [selectedState, setSelectedState] = useState('');
+  const [availableCities, setAvailableCities] = useState([]);
+  const [brazilStates, setBrazilStates] = useState([]);
+  const [loadingStates, setLoadingStates] = useState(true);
+  const [loadingCities, setLoadingCities] = useState(false);
+  const [showCitySuggestions, setShowCitySuggestions] = useState(false);
+  const [filteredCities, setFilteredCities] = useState([]);
 
   // Navigation functions
   const handleBack = () => {
@@ -90,6 +160,38 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
   const handleClose = () => {
     router.push('/agent?view=type', { scroll: false });
   };
+
+  // Fetch Brazil states on component mount
+  useEffect(() => {
+    const loadStates = async () => {
+      try {
+        setLoadingStates(true);
+        const states = await fetchBrazilStates();
+        setBrazilStates(states);
+      } catch (error) {
+        console.error('Error loading states:', error);
+      } finally {
+        setLoadingStates(false);
+      }
+    };
+
+    loadStates();
+  }, []);
+
+  // Handle click outside to close city suggestions
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const cityInput = document.getElementById('city');
+      if (cityInput && !cityInput.contains(event.target)) {
+        setShowCitySuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   // Pre-populate common fields if existingProfile is provided
   useEffect(() => {
@@ -143,8 +245,33 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
       if (existingProfile.pcd) {
         setPcd(existingProfile.pcd);
       }
+
+      // Handle existing state and city data
+      if (existingProfile.district) {
+        setSelectedState(existingProfile.district);
+        // Load cities for existing state
+        loadCitiesForState(existingProfile.district);
+      }
     }
   }, [existingProfile]);
+
+  // Function to load cities for a specific state
+  const loadCitiesForState = async (stateId) => {
+    if (!stateId) return;
+    
+    try {
+      setLoadingCities(true);
+      const cities = await fetchCitiesByState(stateId);
+      setAvailableCities(cities);
+      setFilteredCities(cities); // Initialize filtered cities with all cities
+    } catch (error) {
+      console.error('Error loading cities:', error);
+      setAvailableCities([]);
+      setFilteredCities([]);
+    } finally {
+      setLoadingCities(false);
+    }
+  };
 
   // Get header text based on type
   const getHeaderText = () => {
@@ -175,6 +302,73 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
     }
   };
 
+  // Handle state selection
+  const handleStateChange = async (stateId) => {
+    setSelectedState(stateId);
+    setFormData(prev => ({
+      ...prev,
+      district: stateId,
+      city: '' // Reset city when state changes
+    }));
+    
+    // Clear available cities and load new ones
+    setAvailableCities([]);
+    setFilteredCities([]);
+    setShowCitySuggestions(false);
+    
+    // Load cities for the selected state
+    if (stateId && stateId !== 'Selecione') {
+      await loadCitiesForState(stateId);
+    }
+    
+    // Clear city error when state changes
+    if (errors.city) {
+      setErrors(prev => ({
+        ...prev,
+        city: ''
+      }));
+    }
+  };
+
+  // Handle city input changes
+  const handleCityInputChange = (value) => {
+    setFormData(prev => ({
+      ...prev,
+      city: value
+    }));
+
+    // Filter cities based on input
+    if (value.trim() === '') {
+      setFilteredCities(availableCities);
+    } else {
+      const filtered = availableCities.filter(city =>
+        city.toLowerCase().includes(value.toLowerCase())
+      );
+      setFilteredCities(filtered);
+    }
+
+    // Show suggestions if there are filtered results
+    setShowCitySuggestions(true);
+
+    // Clear error when user starts typing
+    if (errors.city) {
+      setErrors(prev => ({
+        ...prev,
+        city: ''
+      }));
+    }
+  };
+
+  // Handle city selection from suggestions
+  const selectCity = (cityName) => {
+    setFormData(prev => ({
+      ...prev,
+      city: cityName
+    }));
+    setShowCitySuggestions(false);
+    setFilteredCities([]);
+  };
+
   // Validate required fields based on type
   const validateForm = () => {
     const newErrors = {};
@@ -182,7 +376,7 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
     // Common required fields for all types
     const commonRequiredFields = [
       'dob', 'fullname', 'rg', 'gender', 'breed', 'lgbtq', 'education',
-      'income', 'mainActivity', 'traditionalCommunities', 'city',
+      'income', 'mainActivity', 'traditionalCommunities', 'district', 'city',
       'telephone', 'responsible', 'email', 'password'
     ];
 
@@ -192,6 +386,16 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
         newErrors[field] = 'Este campo é obrigatório';
       }
     });
+
+    // Special validation for city (now text input)
+    if (!formData.city || formData.city.trim() === '') {
+      newErrors.city = 'Este campo é obrigatório';
+    }
+
+    // Special validation for state selection
+    if (!selectedState || selectedState === 'Selecione') {
+      newErrors.district = 'Este campo é obrigatório';
+    }
 
     // PCD is now optional, so we don't validate it
     // Only validate if terms are accepted
@@ -519,34 +723,86 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
           </Form.Group>
           <h4 className="fw-bold mb-3">Endereço</h4>
           <Row>
+           
             <Col md={6}>
-              <Form.Group className="mb-3" controlId="city">
-                <Form.Label>Cidade *</Form.Label>
+              <Form.Group className="mb-3" controlId="district">
+                <Form.Label>Estado *</Form.Label>
                 <Form.Select
                   className="border-dark-gray"
-                  value={formData.city || 'Selecione'}
-                  isInvalid={!!errors.city}
-                  onChange={(e) => handleFieldChange('city', e.target.value)}
+                  value={selectedState || 'Selecione'}
+                  isInvalid={!!errors.district}
+                  disabled={loadingStates}
+                  onChange={(e) => handleStateChange(e.target.value)}
                 >
                   <option>Selecione</option>
-                  <option>Cidade 1</option>
-                  <option>Cidade 2</option>
+                  {loadingStates ? (
+                    <option disabled>Carregando estados...</option>
+                  ) : (
+                    brazilStates.map((state) => (
+                      <option key={state.id} value={state.id}>
+                        {state.name}
+                      </option>
+                    ))
+                  )}
                 </Form.Select>
-                <Form.Control.Feedback type="invalid">{errors.city}</Form.Control.Feedback>
+                <Form.Control.Feedback type="invalid">{errors.district}</Form.Control.Feedback>
+                {loadingStates && (
+                  <Form.Text className="text-muted">
+                    <small>Carregando lista de estados...</small>
+                  </Form.Text>
+                )}
               </Form.Group>
             </Col>
             <Col md={6}>
-              <Form.Group className="mb-3" controlId="district">
-                <Form.Label>Estado</Form.Label>
-                <Form.Select
-                  className="border-dark-gray"
-                  value={formData.district || 'Selecione'}
-                  onChange={(e) => handleFieldChange('district', e.target.value)}
-                >
-                  <option>Selecione</option>
-                  <option>Estado 1</option>
-                  <option>Estado 2</option>
-                </Form.Select>
+              <Form.Group className="mb-3" controlId="city">
+                <Form.Label>Cidade *</Form.Label>
+                <div className="position-relative">
+                  <Form.Control
+                    className="border-dark-gray"
+                    type="text"
+                    value={formData.city || ''}
+                    isInvalid={!!errors.city}
+                    disabled={!selectedState || loadingCities}
+                    onChange={(e) => handleCityInputChange(e.target.value)}
+                    onFocus={() => setShowCitySuggestions(true)}
+                    placeholder={loadingCities ? "Carregando cidades..." : "Digite para buscar cidade..."}
+                  />
+                  {showCitySuggestions && availableCities.length > 0 && (
+                    <div 
+                      className="position-absolute w-100 bg-white border rounded-bottom shadow-sm" 
+                      style={{ 
+                        top: '100%', 
+                        zIndex: 1000, 
+                        maxHeight: '200px', 
+                        overflowY: 'auto' 
+                      }}
+                    >
+                      {filteredCities.map((city) => (
+                        <div
+                          key={city}
+                          className="px-3 py-2 cursor-pointer hover-bg-light"
+                          style={{ cursor: 'pointer' }}
+                          onMouseDown={() => selectCity(city)}
+                          onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
+                          onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                        >
+                          {city}
+                        </div>
+                      ))}
+                      {filteredCities.length === 0 && formData.city && (
+                        <div className="px-3 py-2 text-muted">
+                          Nenhuma cidade encontrada
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <Form.Control.Feedback type="invalid">{errors.city}</Form.Control.Feedback>
+                {loadingCities && (
+                  <Form.Text className="text-muted">
+                    <small>Carregando lista de cidades...</small>
+                  </Form.Text>
+                )}
               </Form.Group>
             </Col>
           </Row>
