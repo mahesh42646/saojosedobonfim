@@ -69,34 +69,129 @@ export default function PublicProfileModal({ show, onHide, profile, accountType,
     }
   }, [profile, accountType]);
 
-  const handleProfilePhotoChange = (e) => {
+  const compressImage = (file, maxSizeMB = 5) => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      img.onload = () => {
+        // Calculate new dimensions to maintain aspect ratio
+        const maxWidth = 1920;
+        const maxHeight = 1080;
+        let { width, height } = img;
+        
+        if (width > maxWidth || height > maxHeight) {
+          const ratio = Math.min(maxWidth / width, maxHeight / height);
+          width *= ratio;
+          height *= ratio;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Draw and compress
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Try different quality levels until file size is acceptable
+        let quality = 0.8;
+        const compress = () => {
+          canvas.toBlob((blob) => {
+            if (blob && blob.size <= maxSizeMB * 1024 * 1024) {
+              resolve(blob);
+            } else if (quality > 0.1) {
+              quality -= 0.1;
+              compress();
+            } else {
+              resolve(blob); // Return even if still large
+            }
+          }, 'image/jpeg', quality);
+        };
+        compress();
+      };
+      
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  const handleProfilePhotoChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      setProfilePhoto(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setProfilePhotoPreview(e.target.result);
-      };
-      reader.readAsDataURL(file);
+      setError(''); // Clear any existing errors
+      setLoading(true);
+      try {
+        // Check file size first
+        const maxSize = 50 * 1024 * 1024; // 50MB
+        if (file.size > maxSize) {
+          setError('File too large. Please select a file smaller than 50MB.');
+          return;
+        }
+
+        // Compress the image
+        const compressedFile = await compressImage(file, 5); // Compress to max 5MB
+        const processedFile = new File([compressedFile], file.name, { type: 'image/jpeg' });
+        
+        setProfilePhoto(processedFile);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setProfilePhotoPreview(e.target.result);
+        };
+        reader.readAsDataURL(processedFile);
+      } catch (error) {
+        console.error('Error processing image:', error);
+        setError('Error processing image. Please try a different file.');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
-  const handleGalleryPhotosChange = (e) => {
+  const handleGalleryPhotosChange = async (e) => {
     const files = Array.from(e.target.files);
-    setGalleryPhotos(files);
     
-    // Create previews
-    const previews = [];
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        previews.push(e.target.result);
-        if (previews.length === files.length) {
-          setGalleryPreviews(previews);
+    // Limit number of files
+    if (files.length > 10) {
+      setError('Too many files. Maximum 10 gallery photos allowed.');
+      return;
+    }
+    
+    setError(''); // Clear any existing errors
+    setLoading(true);
+    try {
+      const processedFiles = [];
+      const previews = [];
+      
+      for (const file of files) {
+        // Check file size
+        const maxSize = 50 * 1024 * 1024; // 50MB
+        if (file.size > maxSize) {
+          setError(`File "${file.name}" is too large. Please select files smaller than 50MB.`);
+          return;
         }
-      };
-      reader.readAsDataURL(file);
-    });
+        
+        // Compress the image
+        const compressedFile = await compressImage(file, 3); // Compress to max 3MB for gallery
+        const processedFile = new File([compressedFile], file.name, { type: 'image/jpeg' });
+        processedFiles.push(processedFile);
+        
+        // Create preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          previews.push(e.target.result);
+          if (previews.length === files.length) {
+            setGalleryPreviews(previews);
+          }
+        };
+        reader.readAsDataURL(processedFile);
+      }
+      
+      setGalleryPhotos(processedFiles);
+    } catch (error) {
+      console.error('Error processing gallery images:', error);
+      setError('Error processing images. Please try different files.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSocialLinkToggle = (platform) => {
@@ -174,6 +269,17 @@ export default function PublicProfileModal({ show, onHide, profile, accountType,
         body: formDataToSend
       });
 
+      if (response.status === 413) {
+        setError('Files are too large. Please reduce image file sizes and try again.');
+        return;
+      }
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        setError('Server error. Please try again with smaller image files.');
+        return;
+      }
+
       const result = await response.json();
 
       if (response.ok) {
@@ -197,6 +303,7 @@ export default function PublicProfileModal({ show, onHide, profile, accountType,
       </Modal.Header>
       <Modal.Body>
         {error && <Alert variant="danger">{error}</Alert>}
+        {loading && <Alert variant="info">Processing images, please wait...</Alert>}
         
         <Form onSubmit={handleSubmit}>
           {/* Profile Photo */}
