@@ -43,8 +43,8 @@ export default function PublicProfileModal({ show, onHide, profile, accountType,
       });
 
       // Set profile photo preview
-      if (currentPhoto) {
-        setProfilePhotoPreview(`${API_BASE_URL.replace('/api', '')}/uploads/${currentPhoto}`);
+      if (currentPhoto && currentPhoto.trim()) {
+        setProfilePhotoPreview(`${API_BASE_URL.replace('/api', '')}/uploads/${currentPhoto.trim()}`);
       } else {
         setProfilePhotoPreview('');
       }
@@ -52,7 +52,7 @@ export default function PublicProfileModal({ show, onHide, profile, accountType,
       // Set gallery previews
       if (publicData.galleryPhotos && publicData.galleryPhotos.length > 0) {
         setGalleryPreviews(publicData.galleryPhotos.map(photo => 
-          `${API_BASE_URL.replace('/api', '')}/uploads/${photo}`
+          `${API_BASE_URL.replace('/api', '')}/uploads/${photo.trim()}`
         ));
         setGalleryEnabled(true);
       } else {
@@ -219,6 +219,10 @@ export default function PublicProfileModal({ show, onHide, profile, accountType,
                     width={150}
                     height={150}
                     className="rounded-4 object-fit-cover"
+                    onError={(e) => {
+                      console.error('Failed to load profile photo:', profilePhotoPreview);
+                      setProfilePhotoPreview('');
+                    }}
                   />
                   <Button
                     variant="light"
@@ -350,6 +354,9 @@ export default function PublicProfileModal({ show, onHide, profile, accountType,
                           width={200}
                           height={150}
                           className="rounded-3 object-fit-cover w-100"
+                          onError={(e) => {
+                            console.error('Failed to load gallery photo:', preview);
+                          }}
                         />
                         <Button
                           variant="light"

@@ -79,10 +79,10 @@ export default function Profile() {
   // Get current profile photo for the selected account type
   const getCurrentProfilePhoto = () => {
     const profilePhoto = profile.profilePhotos?.[accountType];
-    if (profilePhoto) {
-      return `${API_BASE_URL.replace('/api', '')}/uploads/${profilePhoto}`;
+    if (profilePhoto && profilePhoto.trim()) {
+      return `${API_BASE_URL.replace('/api', '')}/uploads/${profilePhoto.trim()}`;
     }
-    return "/images/img.png";
+    return "/images/placeholder-Avatar.png";
   };
 
   return (
@@ -93,10 +93,13 @@ export default function Profile() {
           <div className="position-relative mb-3">
             <Image
               src={getCurrentProfilePhoto()}
-              alt="Avatar"
+              alt="Profile Photo"
               width={80}
               height={80}
               className="rounded-circle border-dark object-fit-cover"
+              onError={(e) => {
+                e.target.src = "/images/placeholder-Avatar.png";
+              }}
             />
             <span
               className="position-absolute bottom-0 end-0 bg-light rounded-circle p-1"

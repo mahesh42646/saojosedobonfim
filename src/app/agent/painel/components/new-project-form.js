@@ -63,15 +63,6 @@ function NewProjectForm({ onClose, onSuccess }) {
   const handlePhotoAdd = (e) => {
     const files = Array.from(e.target.files);
     if (files.length > 0) {
-      // Check file sizes
-      const maxSize = 150 * 1024 * 1024; // 150MB
-      const oversizedFiles = files.filter(file => file.size > maxSize);
-      
-      if (oversizedFiles.length > 0) {
-        alert(`Os seguintes arquivos são muito grandes (máximo 150MB): ${oversizedFiles.map(f => f.name).join(', ')}`);
-        return;
-      }
-
       const newPhotos = files.map(file => ({
         file,
         preview: URL.createObjectURL(file)
@@ -83,13 +74,6 @@ function NewProjectForm({ onClose, onSuccess }) {
   const handleCoverPhotoAdd = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Check file size
-      const maxSize = 150 * 1024 * 1024; // 150MB
-      if (file.size > maxSize) {
-        alert(`Arquivo muito grande. Tamanho máximo: 150MB`);
-        return;
-      }
-
       setCoverPhoto({
         file,
         preview: URL.createObjectURL(file)

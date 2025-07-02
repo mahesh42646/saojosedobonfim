@@ -24,10 +24,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ 
   storage: storage,
-  limits: {
-    fileSize: 150 * 1024 * 1024, // 150MB limit per file
-    files: 111 // 1 cover photo + 110 gallery photos
-  },
+  // Remove all file size and count limits
   fileFilter: function (req, file, cb) {
     const filetypes = /jpeg|jpg|png/;
     const mimetype = filetypes.test(file.mimetype);
@@ -43,16 +40,6 @@ const upload = multer({
 // Error handling middleware for multer
 const handleMulterError = (error, req, res, next) => {
   if (error instanceof multer.MulterError) {
-    if (error.code === 'LIMIT_FILE_SIZE') {
-      return res.status(413).json({ 
-        error: 'File too large. Maximum file size is 150MB per file.' 
-      });
-    }
-    if (error.code === 'LIMIT_FILE_COUNT') {
-      return res.status(413).json({ 
-        error: 'Too many files. Maximum 111 files allowed (1 cover + 110 gallery).' 
-      });
-    }
     if (error.code === 'LIMIT_UNEXPECTED_FILE') {
       return res.status(400).json({ 
         error: 'Unexpected file field.' 
@@ -679,8 +666,8 @@ router.put('/agent/profile/:cpf/photo', [authMiddleware, upload.single('profileP
 
 // Update Agent Public Profile with file uploads
 router.put('/agent/profile/:cpf/public', [authMiddleware, upload.fields([
-  { name: 'profilePhoto', maxCount: 1 },
-  { name: 'galleryPhotos', maxCount: 10 }
+  { name: 'profilePhoto' },
+  { name: 'galleryPhotos' }
 ])], async (req, res) => {
   try {
     const profile = await AgentProfile.findOne({ cpf: req.params.cpf });
@@ -1248,8 +1235,8 @@ router.patch('/space/:id/status', authMiddleware, async (req, res) => {
 router.post('/project', [
   authMiddleware, 
   upload.fields([
-    { name: 'coverPhoto', maxCount: 1 },
-    { name: 'photos', maxCount: 100 }
+    { name: 'coverPhoto' },
+    { name: 'photos' }
   ]),
   handleMulterError
 ], async (req, res) => {
