@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { FaCamera, FaChevronRight, FaUser, FaLock, FaSignOutAlt, FaPlus, FaUsers, FaShieldAlt, FaTimesCircle, FaArrowRight } from "react-icons/fa";
 import { useAccountType } from '../accountTypeContext';
+import PublicProfileModal from './PublicProfileModal';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://teste.mapadacultura.com/api';
 
@@ -35,6 +36,7 @@ const TYPE_DISPLAY = {
 export default function Profile() {
   const [profile, setProfile] = useState(null);
   const { accountType, updateAccountType } = useAccountType();
+  const [showPublicProfileModal, setShowPublicProfileModal] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -64,11 +66,24 @@ export default function Profile() {
     fetchProfile();
   }, []);
 
+  const handleProfileUpdate = (updatedProfile) => {
+    setProfile(updatedProfile);
+  };
+
   if (!profile) {
     return <div>Loading...</div>;
   }
 
   const currentType = TYPE_DISPLAY[accountType];
+  
+  // Get current profile photo for the selected account type
+  const getCurrentProfilePhoto = () => {
+    const profilePhoto = profile.profilePhotos?.[accountType];
+    if (profilePhoto) {
+      return `${API_BASE_URL.replace('/api', '')}/uploads/${profilePhoto}`;
+    }
+    return "/images/img.png";
+  };
 
   return (
     <div className="d-lg-flex justify-content-center align-items-start gap-5 p-5" >
@@ -77,7 +92,7 @@ export default function Profile() {
         <div className="bg-body-secondary rounded-4 p-4 d-flex flex-column align-items-center mb-4">
           <div className="position-relative mb-3">
             <Image
-              src={profile.avatarUrl || "/images/img.png"}
+              src={getCurrentProfilePhoto()}
               alt="Avatar"
               width={80}
               height={80}
@@ -85,7 +100,8 @@ export default function Profile() {
             />
             <span
               className="position-absolute bottom-0 end-0 bg-light rounded-circle p-1"
-              style={{ border: "2px solid #fff" }}
+              style={{ border: "2px solid #fff", cursor: "pointer" }}
+              onClick={() => setShowPublicProfileModal(true)}
             >
               <FaCamera color="#2E7D32" />
             </span>
@@ -142,7 +158,11 @@ export default function Profile() {
       <div  className="col-lg-6">
         <h2 className="fw-bold mb-4" >Configurações</h2>
         <div className="d-flex flex-column gap-2">
-          <div className="d-flex align-items-center bg-body-secondary rounded-pill p-3 mb-2" style={{ minHeight: 60 }}>
+          <div 
+            className="d-flex align-items-center bg-body-secondary rounded-pill p-3 mb-2" 
+            style={{ minHeight: 60, cursor: "pointer" }}
+            onClick={() => setShowPublicProfileModal(true)}
+          >
             <span className="bg-body rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: 44, height: 44 }}>
               <FaUser size={20} />
             </span>
@@ -184,6 +204,15 @@ export default function Profile() {
           </div>
         </div>
       </div>
+
+      {/* Public Profile Modal */}
+      <PublicProfileModal
+        show={showPublicProfileModal}
+        onHide={() => setShowPublicProfileModal(false)}
+        profile={profile}
+        accountType={accountType}
+        onProfileUpdate={handleProfileUpdate}
+      />
     </div>
   );
 }

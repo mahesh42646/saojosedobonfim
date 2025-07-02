@@ -81,6 +81,44 @@ const agentProfileSchema = new mongoose.Schema({
     }
   },
   
+  // Profile photos for each type
+  profilePhotos: {
+    personal: { type: String },
+    business: { type: String },
+    collective: { type: String }
+  },
+
+  // Public profile data for each type
+  publicProfile: {
+    personal: {
+      aboutText: { type: String },
+      socialLinks: {
+        instagram: { type: String },
+        youtube: { type: String },
+        facebook: { type: String }
+      },
+      galleryPhotos: [{ type: String }]
+    },
+    business: {
+      aboutText: { type: String },
+      socialLinks: {
+        instagram: { type: String },
+        youtube: { type: String },
+        facebook: { type: String }
+      },
+      galleryPhotos: [{ type: String }]
+    },
+    collective: {
+      aboutText: { type: String },
+      socialLinks: {
+        instagram: { type: String },
+        youtube: { type: String },
+        facebook: { type: String }
+      },
+      galleryPhotos: [{ type: String }]
+    }
+  },
+
   // Business-specific fields
   businessData: {
     cnpjType: { type: String },

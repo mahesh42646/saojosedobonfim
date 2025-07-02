@@ -631,6 +631,136 @@ router.put('/agent/profile/:cpf', authMiddleware, async (req, res) => {
   }
 });
 
+// Update Agent Profile Photo only
+router.put('/agent/profile/:cpf/photo', [authMiddleware, upload.single('profilePhoto')], async (req, res) => {
+  try {
+    const profile = await AgentProfile.findOne({ cpf: req.params.cpf });
+    
+    if (!profile) {
+      return res.status(404).json({ error: 'Agent profile not found' });
+    }
+
+    const { accountType } = req.body;
+    
+    if (!accountType || !['personal', 'business', 'collective'].includes(accountType)) {
+      return res.status(400).json({ error: 'Valid accountType is required' });
+    }
+
+    // Initialize profilePhotos if they don't exist
+    if (!profile.profilePhotos) {
+      profile.profilePhotos = {};
+    }
+
+    // Handle profile photo upload
+    if (req.file) {
+      // Delete old profile photo if exists
+      if (profile.profilePhotos[accountType]) {
+        const oldPhotoPath = path.join('./uploads', profile.profilePhotos[accountType]);
+        if (fs.existsSync(oldPhotoPath)) {
+          fs.unlinkSync(oldPhotoPath);
+        }
+      }
+      profile.profilePhotos[accountType] = req.file.filename;
+    }
+
+    profile.updatedAt = new Date();
+    await profile.save();
+    
+    res.json({ 
+      message: 'Profile photo updated successfully', 
+      profile,
+      photoUrl: req.file ? `/uploads/${req.file.filename}` : null
+    });
+  } catch (error) {
+    console.error('Error updating profile photo:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update Agent Public Profile with file uploads
+router.put('/agent/profile/:cpf/public', [authMiddleware, upload.fields([
+  { name: 'profilePhoto', maxCount: 1 },
+  { name: 'galleryPhotos', maxCount: 10 }
+])], async (req, res) => {
+  try {
+    const profile = await AgentProfile.findOne({ cpf: req.params.cpf });
+    
+    if (!profile) {
+      return res.status(404).json({ error: 'Agent profile not found' });
+    }
+
+    const { accountType, aboutText, socialLinks } = req.body;
+    
+    if (!accountType || !['personal', 'business', 'collective'].includes(accountType)) {
+      return res.status(400).json({ error: 'Valid accountType is required' });
+    }
+
+    // Initialize publicProfile and profilePhotos if they don't exist
+    if (!profile.publicProfile) {
+      profile.publicProfile = {
+        personal: { socialLinks: {}, galleryPhotos: [] },
+        business: { socialLinks: {}, galleryPhotos: [] },
+        collective: { socialLinks: {}, galleryPhotos: [] }
+      };
+    }
+    
+    if (!profile.profilePhotos) {
+      profile.profilePhotos = {};
+    }
+
+    // Handle profile photo upload
+    if (req.files && req.files.profilePhoto) {
+      // Delete old profile photo if exists
+      if (profile.profilePhotos[accountType]) {
+        const oldPhotoPath = path.join('./uploads', profile.profilePhotos[accountType]);
+        if (fs.existsSync(oldPhotoPath)) {
+          fs.unlinkSync(oldPhotoPath);
+        }
+      }
+      profile.profilePhotos[accountType] = req.files.profilePhoto[0].filename;
+    }
+
+    // Handle gallery photos upload
+    if (req.files && req.files.galleryPhotos) {
+      // Delete old gallery photos if exists
+      if (profile.publicProfile[accountType].galleryPhotos) {
+        profile.publicProfile[accountType].galleryPhotos.forEach(photo => {
+          const oldPhotoPath = path.join('./uploads', photo);
+          if (fs.existsSync(oldPhotoPath)) {
+            fs.unlinkSync(oldPhotoPath);
+          }
+        });
+      }
+      profile.publicProfile[accountType].galleryPhotos = req.files.galleryPhotos.map(file => file.filename);
+    }
+
+    // Update about text
+    if (aboutText !== undefined) {
+      profile.publicProfile[accountType].aboutText = aboutText;
+    }
+
+    // Update social links
+    if (socialLinks) {
+      const parsedSocialLinks = typeof socialLinks === 'string' ? JSON.parse(socialLinks) : socialLinks;
+      profile.publicProfile[accountType].socialLinks = {
+        ...profile.publicProfile[accountType].socialLinks,
+        ...parsedSocialLinks
+      };
+    }
+
+    profile.updatedAt = new Date();
+    await profile.save();
+    
+    res.json({ 
+      message: 'Public profile updated successfully', 
+      profile 
+    });
+  } catch (error) {
+    console.error('Error updating public profile:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Delete Agent Profile
 router.delete('/agent/profile/:cpf', authMiddleware, async (req, res) => {
   try {

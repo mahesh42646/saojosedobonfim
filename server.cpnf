@@ -101,7 +101,6 @@ server {
     server_name mapacultural.saojosedobonfim.pb.gov.br;
     return 404; # managed by Certbot
 
-
 }
 
 
