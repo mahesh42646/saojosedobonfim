@@ -32,7 +32,7 @@ export default function Header() {
                         <div className="col text-center desktop-nav">
                             <ul className="nav justify-content-center align-items-center gap-4">
                                 <li className="nav-item d-flex flex-column align-items-center">
-                                    <Link href="/PTBR" className="fw-bold text-decoration-none" style={{ color: "#005100" }}>
+                                    <Link href="/" className="fw-bold text-decoration-none" style={{ color: "#005100" }}>
                                         <i className="bi bi-house-door pe-1" style={{ fontSize: 20 }}></i> Página inicial
                                     </Link>
                                 </li>
@@ -151,7 +151,7 @@ export default function Header() {
                         gap: 0
                     }}>
                         <li>
-                            <Link href="/PTBR" onClick={closeSidebar} style={{
+                            <Link href="/" onClick={closeSidebar} style={{
                                 display: "flex",
                                 alignItems: "center",
                                 padding: "15px 20px",
