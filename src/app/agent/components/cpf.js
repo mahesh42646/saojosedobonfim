@@ -67,7 +67,8 @@ const fetchCitiesByState = async (stateId) => {
 };
 
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://teste.mapadacultura.com/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4001/api';
+// const API_BASE_URL = 'http://localhost:4001/api';
 
 // CPF validation function (works on unformatted CPF)
 function validateCPF(cpf) {
@@ -131,6 +132,77 @@ function CPFExistsModal({ show, onHide, cpf, fullName, accountType, isSameType }
         <div className="d-flex gap-2 p-2 justify-content-between">
           <Button className="btn btn-secondary text-white" onClick={onHide}>Cancelar</Button>
           <Button className="text-dark border-0 px-3" onClick={handleLogin} style={{ background: '#A8EB7D' }}>Entrar</Button>
+        </div>
+      </Modal.Body>
+    </Modal>
+  );
+}
+
+// Login Modal Component
+function LoginModal({ show, onHide, onLogin, error }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    await onLogin(email, password);
+    setLoading(false);
+  };
+
+  return (
+    <Modal show={show} onHide={onHide}>
+      <Modal.Header closeButton>
+        <Modal.Title>Login Necessário</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <Form onSubmit={handleSubmit}>
+          <Form.Group className="mb-3" controlId="loginEmail">
+            <Form.Label>Email</Form.Label>
+            <Form.Control
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+              autoFocus
+            />
+          </Form.Group>
+          <Form.Group className="mb-3" controlId="loginPassword">
+            <Form.Label>Senha</Form.Label>
+            <Form.Control
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+            />
+          </Form.Group>
+          {error && <div className="text-danger mb-2">{error}</div>}
+          <div className="d-flex gap-2 justify-content-between">
+            <Button variant="secondary" onClick={onHide}>Cancelar</Button>
+            <Button type="submit" style={{ background: '#A8EB7D', color: '#222', border: 'none' }} disabled={loading}>
+              {loading ? 'Entrando...' : 'Entrar'}
+            </Button>
+          </div>
+        </Form>
+      </Modal.Body>
+    </Modal>
+  );
+}
+
+// Existing Type Modal Component
+function ExistingTypeModal({ show, onHide, agentType, onEdit, onGoToPainel }) {
+  return (
+    <Modal show={show} onHide={onHide}>
+      <Modal.Header closeButton>
+        <Modal.Title>{agentType} já existe</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <p>Você já possui uma conta do tipo <strong>{agentType}</strong> para este CPF.</p>
+        <div className="d-flex gap-2 justify-content-between mt-3">
+          <Button variant="secondary" onClick={onEdit}>Editar Conta</Button>
+          <Button style={{ background: '#A8EB7D', color: '#222', border: 'none' }}  onClick={onGoToPainel}>Ir para Painel</Button>
+
         </div>
       </Modal.Body>
     </Modal>
@@ -1127,6 +1199,15 @@ export default function CPF({ selectedType, onContinue }) {
     isSameType: false
   });
 
+  // Login states
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loginError, setLoginError] = useState("");
+  const [loginProfile, setLoginProfile] = useState(null); // profile for login context
+  const [loginTypeToRegister, setLoginTypeToRegister] = useState(null); // type user wants to register after login
+  const [loginValidatedCpf, setLoginValidatedCpf] = useState("");
+  const [showExistingTypeModal, setShowExistingTypeModal] = useState(false);
+  const [existingTypeDisplay, setExistingTypeDisplay] = useState("");
+
   // Navigation functions
   const handleBack = () => {
     router.push('/agent?view=type', { scroll: false });
@@ -1220,24 +1301,27 @@ export default function CPF({ selectedType, onContinue }) {
         // CPF exists, get completed types
         const completedTypes = getCompletedTypes(existingProfile);
         const fullName = existingProfile.fullname || 'Unknown';
+        const typeDisplayName = getTypeDisplayName(selectedType);
 
-        // Check if the selected type is already complete
         if (completedTypes.includes(selectedType)) {
-          // Same type already exists - show modal and prevent registration
-          const typeDisplayName = getTypeDisplayName(selectedType);
-          setModalData({
-            cpf: formatCPF(rawCpf),
-            fullName: fullName,
-            accountType: typeDisplayName,
-            isSameType: true
-          });
-          setShowModal(true);
+          // Type already completed: require login, then show modal with edit/go painel
+          setLoginProfile(existingProfile);
+          setLoginTypeToRegister(selectedType);
+          setLoginValidatedCpf(formatCPF(rawCpf));
+          setExistingTypeDisplay(typeDisplayName);
+          setShowLoginModal(true);
+          setShowForm(false);
+          setError("");
         } else {
-          // Different type exists - allow registration and pre-populate data
-          setValidatedCpf(formatCPF(rawCpf));
-          setExistingProfileData(existingProfile);
-          setShowForm(true);
+          // Type not completed: require login, then allow registration for new type
+          setLoginProfile(existingProfile);
+          setLoginTypeToRegister(selectedType);
+          setLoginValidatedCpf(formatCPF(rawCpf));
+          setShowLoginModal(true);
+          setShowForm(false);
+          setError("");
         }
+        return;
       } else {
         // CPF doesn't exist, show registration form
         setValidatedCpf(formatCPF(rawCpf));
@@ -1251,7 +1335,64 @@ export default function CPF({ selectedType, onContinue }) {
     }
   };
 
-  // Show registration form after CPF validation
+  // Login handler for LoginModal
+  const handleLogin = async (email, password) => {
+    setLoginError("");
+    try {
+      const response = await fetch(`${API_BASE_URL}/agent/profile/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          emailOrCpf: email || loginValidatedCpf,
+          password
+        })
+      });
+      if (response.ok) {
+        // Success: check if type is already completed
+        if (loginProfile && getCompletedTypes(loginProfile).includes(loginTypeToRegister)) {
+          // Type already completed: show modal with edit/go painel
+          setShowLoginModal(false);
+          setShowExistingTypeModal(true);
+        } else {
+          // Type not completed: allow registration for new type/profile
+          setShowLoginModal(false);
+          setValidatedCpf(loginValidatedCpf);
+          setExistingProfileData(loginProfile);
+          setShowForm(true);
+        }
+      } else {
+        let errorMsg = 'Email ou senha incorretos.';
+        try {
+          const result = await response.json();
+          errorMsg = result.error || errorMsg;
+        } catch (e) {}
+        setLoginError(errorMsg);
+      }
+    } catch (err) {
+      setLoginError('Network error. Please try again.');
+    }
+  };
+
+  // Handler for edit account in this type
+  const handleEditAccount = () => {
+    setShowExistingTypeModal(false);
+    setValidatedCpf(loginValidatedCpf);
+    setExistingProfileData(loginProfile);
+    setShowForm(true);
+    // Optionally, you can set an editMode flag if you want to distinguish edit vs create
+  };
+
+  // Handler for go to painel
+  const handleGoToPainel = () => {
+    setShowExistingTypeModal(false);
+    window.location.href = '/agent/painel';
+  };
+
+  // Show registration form after CPF validation and login or after clicking Editar Conta
   if (showForm) {
     return <RegistrationForm 
       cpf={validatedCpf} 
@@ -1354,6 +1495,21 @@ export default function CPF({ selectedType, onContinue }) {
         fullName={modalData.fullName}
         accountType={modalData.accountType}
         isSameType={modalData.isSameType}
+      />
+      {/* Login Modal for existing CPF */}
+      <LoginModal
+        show={showLoginModal}
+        onHide={() => setShowLoginModal(false)}
+        onLogin={handleLogin}
+        error={loginError}
+      />
+      {/* Existing Type Modal for already completed type */}
+      <ExistingTypeModal
+        show={showExistingTypeModal}
+        onHide={() => setShowExistingTypeModal(false)}
+        agentType={existingTypeDisplay}
+        onEdit={handleEditAccount}
+        onGoToPainel={handleGoToPainel}
       />
     </>
   );
