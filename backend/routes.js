@@ -1057,7 +1057,7 @@ router.patch('/tenants/:id/status', authMiddleware, async (req, res) => {
 // SPACE ROUTES
 
 // Create new space
-router.post('/space/addnew', [authMiddleware, upload.fields([
+router.post('/space/addnew', [upload.fields([
   { name: 'coverPhoto', maxCount: 1 },
   { name: 'photos', maxCount: 10 }
 ]), handleMulterError], async (req, res) => {
@@ -1071,7 +1071,8 @@ router.post('/space/addnew', [authMiddleware, upload.fields([
       operatingDays,
       socialLinks,
       accessibility,
-      location
+      location,
+      createdBy
     } = req.body;
 
     // Handle file uploads
@@ -1093,7 +1094,8 @@ router.post('/space/addnew', [authMiddleware, upload.fields([
     const parsedLocation = typeof location === 'string' ? JSON.parse(location) : location;
 
     const space = new Space({
-      agentId: req.user.id,
+      agentId: new mongoose.Types.ObjectId(),
+      createdBy: createdBy,
       type,
       title,
       description,
@@ -1121,9 +1123,9 @@ router.post('/space/addnew', [authMiddleware, upload.fields([
 });
 
 // Get all spaces (with optional filters)
-router.get('/spaces', authMiddleware, async (req, res) => {
+router.get('/spaces', async (req, res) => {
   try {
-    const { status, type, search } = req.query;
+    const { status, type, search, createdBy } = req.query;
     let query = {};
 
     // Add filters if provided
@@ -1140,9 +1142,9 @@ router.get('/spaces', authMiddleware, async (req, res) => {
       ];
     }
 
-    // If user is an agent, only show their spaces
-    if (req.user.role === 'agent') {
-      query.agentId = req.user.id;
+    // Filter by createdBy email
+    if (createdBy) {
+      query.createdBy = createdBy;
     }
 
     const spaces = await Space.find(query)
@@ -1257,8 +1259,9 @@ router.put('/space/:id', [authMiddleware, upload.fields([
 });
 
 // Delete space
-router.delete('/space/:id', authMiddleware, async (req, res) => {
+router.delete('/space/:id', async (req, res) => {
   try {
+    const { createdBy } = req.query;
     const space = await Space.findById(req.params.id);
     
     if (!space) {
@@ -1266,7 +1269,7 @@ router.delete('/space/:id', authMiddleware, async (req, res) => {
     }
 
     // Check if user has access to delete this space
-    if (req.user.role === 'agent' && space.agentId.toString() !== req.user.id) {
+    if (createdBy && space.createdBy !== createdBy) {
       return res.status(403).json({ error: 'Access denied' });
     }
 

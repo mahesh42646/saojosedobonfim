@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { FaCheck, FaExclamationCircle, FaTimes } from 'react-icons/fa';
 import NewSpaceForm from './new-Space-form.js';
 import { buildApiUrl } from '../../../config/api';
+import { useAuth } from '../authcontex';
 
 const SpaceStatus = {
     APPROVED: 'approved',
@@ -75,12 +76,11 @@ const SpaceDetails = ({ space, onBack, onDelete }) => {
         
         try {
             setLoading(true);
-            const token = localStorage.getItem('agentToken');
-            const response = await fetch(buildApiUrl(`/space/${space._id}`), {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': token
-                }
+            const userData = localStorage.getItem('agentUser');
+            const userEmail = userData ? JSON.parse(userData).email : '';
+            
+            const response = await fetch(buildApiUrl(`/space/${space._id}?createdBy=${encodeURIComponent(userEmail)}`), {
+                method: 'DELETE'
             });
 
             if (!response.ok) throw new Error('Failed to delete space');
@@ -200,6 +200,7 @@ const SpaceDetails = ({ space, onBack, onDelete }) => {
 };
 
 function Spaces() {
+    const { user } = useAuth();
     const [showNewSpaceForm, setShowNewSpaceForm] = useState(false);
     const [selectedSpace, setSelectedSpace] = useState(null);
     const [spaces, setSpaces] = useState([]);
@@ -212,12 +213,13 @@ function Spaces() {
         try {
             setLoading(true);
             setError(null);
-            const token = localStorage.getItem('agentToken');
-            const response = await fetch(buildApiUrl('/spaces'), {
-                headers: {
-                    'Authorization': token
-                }
-            });
+            
+            if (!user?.email) {
+                setSpaces([]);
+                return;
+            }
+            
+            const response = await fetch(buildApiUrl(`/spaces?createdBy=${encodeURIComponent(user.email)}`));
             
             if (!response.ok) throw new Error('Failed to fetch spaces');
             
@@ -233,7 +235,7 @@ function Spaces() {
 
     useEffect(() => {
         fetchSpaces();
-    }, []);
+    }, [user]);
 
     const handleSpaceDeleted = () => {
         setSelectedSpace(null);

@@ -6,8 +6,10 @@ import RichTextEditor from './RichTextEditor';
 import Dropdown from 'react-bootstrap/Dropdown'
 import Image from 'next/image';
 import { buildApiUrl } from '../../../config/api';
+import { useAuth } from '../authcontex';
 
 function NewSpaceForm({ onClose, onSuccess }) {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     type: '',
     title: '',
@@ -196,12 +198,12 @@ function NewSpaceForm({ onClose, onSuccess }) {
         mapLink: mapLink
       }));
 
+      // Add createdBy email
+      submitData.append('createdBy', user?.email || '');
+
       // Submit to API
       const response = await fetch(buildApiUrl('/space/addnew'), {
         method: 'POST',
-        headers: {
-          'Authorization': 'dummy-token-for-testing'
-        },
         body: submitData
       });
 

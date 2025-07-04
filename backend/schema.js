@@ -246,6 +246,12 @@ const spaceSchema = new mongoose.Schema({
     required: true 
   },
   
+  // Email of the user who created the space
+  createdBy: { 
+    type: String, 
+    required: true 
+  },
+  
   // Basic Information
   type: { 
     type: String, 
