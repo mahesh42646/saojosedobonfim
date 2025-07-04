@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(cors({
-  origin: ['https://mapacultural.saojosedobonfim.pb.gov.br','https://mapadacultura.com', 'http://localhost:3000', 'https://mapacultural.saojosedobonfim.pb.gov.br'],
+  origin: ['https://mapacultural.saojosedobonfim.pb.gov.br','https://mapadacultura.com', 'https://teste.mapadacultura.com', 'http://localhost:3000'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept']

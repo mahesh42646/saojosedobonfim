@@ -86,8 +86,11 @@ export default function Profile() {
       const baseUrl = API_BASE_URL.replace('/api', '');
       const photoUrl = `${baseUrl}/uploads/${profilePhoto.trim()}`;
       console.log('Profile photo URL:', photoUrl); // Debug log
+      console.log('Account type:', accountType); // Debug log
+      console.log('Profile photos object:', profile.profilePhotos); // Debug log
       return photoUrl;
     }
+    console.log('No profile photo found for account type:', accountType); // Debug log
     return "/images/placeholder-Avatar.png";
   };
 

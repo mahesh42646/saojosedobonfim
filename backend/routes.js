@@ -666,10 +666,13 @@ router.put('/agent/profile/:cpf/photo', [authMiddleware, upload.single('profileP
 
 // Update Agent Public Profile with file uploads
 router.put('/agent/profile/:cpf/public', [authMiddleware, upload.fields([
-  { name: 'profilePhoto' },
-  { name: 'galleryPhotos' }
-])], async (req, res) => {
+  { name: 'profilePhoto', maxCount: 1 },
+  { name: 'galleryPhotos', maxCount: 10 }
+]), handleMulterError], async (req, res) => {
   try {
+    console.log('Received request body:', req.body);
+    console.log('Received files:', req.files);
+    
     const profile = await AgentProfile.findOne({ cpf: req.params.cpf });
     
     if (!profile) {
@@ -696,25 +699,33 @@ router.put('/agent/profile/:cpf/public', [authMiddleware, upload.fields([
     }
 
     // Handle profile photo upload
-    if (req.files && req.files.profilePhoto) {
+    if (req.files && req.files.profilePhoto && req.files.profilePhoto.length > 0) {
       // Delete old profile photo if exists
       if (profile.profilePhotos[accountType]) {
         const oldPhotoPath = path.join('./uploads', profile.profilePhotos[accountType]);
         if (fs.existsSync(oldPhotoPath)) {
-          fs.unlinkSync(oldPhotoPath);
+          try {
+            fs.unlinkSync(oldPhotoPath);
+          } catch (err) {
+            console.log('Could not delete old profile photo:', err.message);
+          }
         }
       }
       profile.profilePhotos[accountType] = req.files.profilePhoto[0].filename;
     }
 
     // Handle gallery photos upload
-    if (req.files && req.files.galleryPhotos) {
+    if (req.files && req.files.galleryPhotos && req.files.galleryPhotos.length > 0) {
       // Delete old gallery photos if exists
-      if (profile.publicProfile[accountType].galleryPhotos) {
+      if (profile.publicProfile[accountType].galleryPhotos && profile.publicProfile[accountType].galleryPhotos.length > 0) {
         profile.publicProfile[accountType].galleryPhotos.forEach(photo => {
           const oldPhotoPath = path.join('./uploads', photo);
           if (fs.existsSync(oldPhotoPath)) {
-            fs.unlinkSync(oldPhotoPath);
+            try {
+              fs.unlinkSync(oldPhotoPath);
+            } catch (err) {
+              console.log('Could not delete old gallery photo:', err.message);
+            }
           }
         });
       }
@@ -728,11 +739,16 @@ router.put('/agent/profile/:cpf/public', [authMiddleware, upload.fields([
 
     // Update social links
     if (socialLinks) {
-      const parsedSocialLinks = typeof socialLinks === 'string' ? JSON.parse(socialLinks) : socialLinks;
-      profile.publicProfile[accountType].socialLinks = {
-        ...profile.publicProfile[accountType].socialLinks,
-        ...parsedSocialLinks
-      };
+      try {
+        const parsedSocialLinks = typeof socialLinks === 'string' ? JSON.parse(socialLinks) : socialLinks;
+        profile.publicProfile[accountType].socialLinks = {
+          ...profile.publicProfile[accountType].socialLinks,
+          ...parsedSocialLinks
+        };
+      } catch (err) {
+        console.error('Error parsing social links:', err);
+        return res.status(400).json({ error: 'Invalid social links format' });
+      }
     }
 
     profile.updatedAt = new Date();
