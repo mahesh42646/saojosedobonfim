@@ -226,10 +226,10 @@ export default function PasswordChangeModal({ show, onHide, profile, onShowForgo
           Cancelar
         </Button>
         <Button 
-          variant="light" 
+          style={{ backgroundColor: '#9FE870'}}
           onClick={handleSubmit}
           disabled={loading}
-          className="px-4 text-dark"
+          className="px-4 text-dark border btn "
         >
           {loading ? 'Alterando...' : 'Alterar Senha'}
         </Button>

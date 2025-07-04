@@ -37,17 +37,17 @@ export default function Header() {
                                     </Link>
                                 </li>
                                 <li className="nav-item d-flex flex-column align-items-center">
-                                    <Link href="/PTBR/Projetos-Culturais" className="fw-bold text-decoration-none" style={{ color: "#005100" }}>
+                                    <Link href="/Projetos-Culturais" className="fw-bold text-decoration-none" style={{ color: "#005100" }}>
                                         <i className="bi bi-puzzle pe-1" style={{ fontSize: 20 }}></i> Projetos
                                     </Link>
                                 </li>
                                 <li className="nav-item d-flex flex-column align-items-center px-3 py-1 rounded">
-                                    <Link href="/PTBR/Espacos-Culturais" className="fw-bold text-decoration-none" style={{ color: "#005100" }}>
+                                    <Link href="/Espacos-Culturais" className="fw-bold text-decoration-none" style={{ color: "#005100" }}>
                                         <i className="bi bi-bank pe-1" style={{ fontSize: 20 }}></i> Espaços
                                     </Link>
                                 </li>
                                 <li className="nav-item d-flex flex-column align-items-center">
-                                    <Link href="/PTBR/Agentes-Culturais" className="fw-bold text-decoration-none" style={{ color: "#005100"}}>
+                                    <Link href="/Agentes-Culturais" className="fw-bold text-decoration-none" style={{ color: "#005100"}}>
                                         <i className="bi bi-people-fill pe-1" style={{ fontSize: 20 }}></i> Agentes
                                     </Link>
                                 </li>
@@ -177,7 +177,7 @@ export default function Header() {
                             </Link>
                         </li>
                         <li>
-                            <Link href="/PTBR/Projetos-Culturais" onClick={closeSidebar} style={{
+                            <Link href="/Projetos-Culturais" onClick={closeSidebar} style={{
                                 display: "flex",
                                 alignItems: "center",
                                 padding: "15px 20px",
@@ -203,7 +203,7 @@ export default function Header() {
                             </Link>
                         </li>
                         <li>
-                            <Link href="/PTBR/Espacos-Culturais" onClick={closeSidebar} style={{
+                            <Link href="/Espacos-Culturais" onClick={closeSidebar} style={{
                                 display: "flex",
                                 alignItems: "center",
                                 padding: "15px 20px",
@@ -229,7 +229,7 @@ export default function Header() {
                             </Link>
                         </li>
                         <li>
-                            <Link href="/PTBR/Agentes-Culturais" onClick={closeSidebar} style={{
+                            <Link href="/Agentes-Culturais" onClick={closeSidebar} style={{
                                 display: "flex",
                                 alignItems: "center",
                                 padding: "15px 20px",

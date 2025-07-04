@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Headerpb from "../Header-pb";
-import { buildApiUrl } from '../../config/api';
+import { buildApiUrl } from '../config/api';
 import Link from 'next/link';
 
 // Base URL for images (without /api)
@@ -196,7 +196,7 @@ export default function CulturalAgentsPage() {
             </div>
             <div style={{ color: '#F2994A', fontSize: 18, marginTop: 2 }}>★★★★★</div>
             <Link 
-              href={`/brejodocruz-pb/agentcultural?id=${agent._id}&type=${agent.profileType.type.toLowerCase()}`}
+              href={`/public/agentcultural?id=${agent._id}&type=${agent.profileType.type.toLowerCase()}`}
               style={{ 
                 background: '#2CB34A',
                 color: '#fff',
@@ -275,7 +275,7 @@ export default function CulturalAgentsPage() {
             <div style={{ color: '#F2994A', fontSize: 18, marginTop: 2 }}>★★★★★</div>
           </div>
           <Link 
-            href={`/brejodocruz-pb/agentcultural?id=${agent._id}&type=${agent.profileType.type.toLowerCase()}`}
+            href={`/public/agentcultural?id=${agent._id}&type=${agent.profileType.type.toLowerCase()}`}
             style={{ 
               background: '#2CB34A',
               color: '#fff',
@@ -352,7 +352,7 @@ export default function CulturalAgentsPage() {
           <div style={{ color: '#F2994A', fontSize: 18, marginTop: 8 }}>★★★★★</div>
         </div>
         <Link 
-          href={`/brejodocruz-pb/agentcultural?id=${agent._id}&type=${agent.profileType.type.toLowerCase()}`}
+          href={`/public/agentcultural?id=${agent._id}&type=${agent.profileType.type.toLowerCase()}`}
           style={{ 
             background: '#2CB34A',
             color: '#fff',

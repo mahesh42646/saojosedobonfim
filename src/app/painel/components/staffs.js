@@ -22,9 +22,9 @@ function AgentDetails({ agent, onBack, onUpdate }) {
     const handleStatusChange = async (newStatus) => {
         // Confirmation messages for different status changes
         const confirmMessages = {
-            'active': 'Are you sure you want to activate this staff member?',
-            'inactive': 'Are you sure you want to deactivate this staff member?',
-            'deleted': 'Are you sure you want to delete this staff ?'
+            'active': 'Tem certeza que deseja ativar este funcionário?',
+            'inactive': 'Tem certeza que deseja desativar este funcionário?',
+            'deleted': 'Tem certeza que deseja excluir este funcionário?'
         };
 
         // Ask for confirmation
@@ -52,7 +52,7 @@ function AgentDetails({ agent, onBack, onUpdate }) {
             
         } catch (error) {
             console.error('Error updating status:', error);
-            alert('Failed to update status. Please try again.');
+            alert('Falha ao atualizar status. Tente novamente.');
         }
     };
 
@@ -60,7 +60,7 @@ function AgentDetails({ agent, onBack, onUpdate }) {
         <div>
             <h4 className="mt-2 fw-bold">
                 <button onClick={onBack} style={{ background: 'none', border: 'none', color: '#222', fontWeight: 600, fontSize: 16, cursor: 'pointer', marginRight: 36 }}>←</button>
-                Staff Details
+                Detalhes do Funcionário
             </h4>
             <div style={{ maxWidth: 874, margin: '0 auto', background: '#fff', borderRadius: 16, border: '2px solid #eee', padding: 0 }}>
                 {/* Header Card */}
@@ -70,7 +70,7 @@ function AgentDetails({ agent, onBack, onUpdate }) {
                     </div>
                     <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: 600, fontSize: 20 }}>{agent.fullName}</div>
-                        <div style={{ color: '#888', fontSize: 15, fontWeight: 500, marginTop: 2 }}>TYPE: {agent.employeeType}</div>
+                        <div style={{ color: '#888', fontSize: 15, fontWeight: 500, marginTop: 2 }}>TIPO: {agent.employeeType}</div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
                             <span style={{ 
                                 color: agent.status === 'active' ? '#7CFC00' : 
@@ -86,23 +86,23 @@ function AgentDetails({ agent, onBack, onUpdate }) {
 
                 {/* Details Tab */}
                 <div style={{ borderBottom: '1px solid #eee', paddingLeft: 24, paddingTop: 12 }}>
-                    <span style={{ color: '#222', fontWeight: 600, fontSize: 16, borderBottom: '2px solid #2ecc40', paddingBottom: 6 }}>Details</span>
+                    <span style={{ color: '#222', fontWeight: 600, fontSize: 16, borderBottom: '2px solid #2ecc40', paddingBottom: 6 }}>Detalhes</span>
                 </div>
 
                 {/* Form */}
                 <div style={{ padding: 32 }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                            <label style={{ fontWeight: 500 }}>Employee type</label>
+                            <label style={{ fontWeight: 500 }}>Tipo de funcionário</label>
                             <select 
                                 value={employeeType} 
                                 onChange={e => setEmployeeType(e.target.value)}
                                 disabled
                                 style={{ width: '100%', padding: 12, borderRadius: 8, border: '1px solid #ccc', fontSize: 16 }}>
-                                <option value="">Select</option>
-                                <option value="Evaluator">Evaluator</option>
-                                <option value="Manager">Manager</option>
-                                <option value="Other">Other</option>
+                                <option value="">Selecionar</option>
+                                <option value="Evaluator">Avaliador</option>
+                                <option value="Manager">Gerente</option>
+                                <option value="Other">Outro</option>
                             </select>
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -114,7 +114,7 @@ function AgentDetails({ agent, onBack, onUpdate }) {
                                 style={{ width: '100%', padding: 12, borderRadius: 8, border: '1px solid #ccc', fontSize: 16 }} />
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                            <label style={{ fontWeight: 500 }}>Full name *</label>
+                            <label style={{ fontWeight: 500 }}>Nome completo *</label>
                             <input 
                                 value={fullName} 
                                 onChange={e => setFullName(e.target.value)}
@@ -131,7 +131,7 @@ function AgentDetails({ agent, onBack, onUpdate }) {
                                     style={{ width: '100%', padding: 12, borderRadius: 8, border: '1px solid #ccc', fontSize: 16 }} />
                             </div>
                             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                                <label style={{ fontWeight: 500 }}>Password *</label>
+                                <label style={{ fontWeight: 500 }}>Senha *</label>
                                 <input 
                                     value={password} 
                                     onChange={e => setPassword(e.target.value)}
@@ -160,7 +160,7 @@ function AgentDetails({ agent, onBack, onUpdate }) {
                         cursor: agent.status === 'inactive' ? 'not-allowed' : 'pointer',
                         opacity: agent.status === 'inactive' ? 0.7 : 1
                     }}>
-                    Inactive
+                    Inativo
                 </button>
                 <button 
                     onClick={() => handleStatusChange('deleted')}
@@ -176,7 +176,7 @@ function AgentDetails({ agent, onBack, onUpdate }) {
                         cursor: agent.status === 'deleted' ? 'not-allowed' : 'pointer',
                         opacity: agent.status === 'deleted' ? 0.7 : 1
                     }}>
-                    Delete
+                    Excluir
                 </button>
                 <button 
                     onClick={() => handleStatusChange('active')}
@@ -192,7 +192,7 @@ function AgentDetails({ agent, onBack, onUpdate }) {
                         cursor: agent.status === 'active' ? 'not-allowed' : 'pointer',
                         opacity: agent.status === 'active' ? 0.7 : 1
                     }}>
-                    Active
+                    Ativo
                 </button>
             </div>
         </div>
@@ -294,7 +294,7 @@ export default function AgentsPage() {
                 await fetchStaffList();
                 setShowCreate(false);
             } catch (error) {
-                setError(error.response?.data?.error || 'Failed to create staff member');
+                setError(error.response?.data?.error || 'Falha ao criar funcionário');
             }
         };
 
@@ -316,20 +316,20 @@ export default function AgentsPage() {
                     <button onClick={() => setShowCreate(false)} style={{ background: 'none', border: 'none', fontSize: 32, color: '#222', cursor: 'pointer' }}>&times;</button>
                 </div>
                 <div style={{ maxWidth: 600, margin: '0 auto', width: '100%', padding: '32px 16px' }}>
-                    <h3 style={{ fontWeight: 600, fontSize: 18, marginBottom: 24 }}>New Employee</h3>
+                    <h3 style={{ fontWeight: 600, fontSize: 18, marginBottom: 24 }}>Novo Funcionário</h3>
                     {error && <div style={{ color: 'red', marginBottom: 16 }}>{error}</div>}
                     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                            <label style={{ fontWeight: 500 }}>Employee type</label>
+                            <label style={{ fontWeight: 500 }}>Tipo de funcionário</label>
                             <select 
                                 value={employeeType} 
                                 onChange={e => setEmployeeType(e.target.value)}
                                 required 
                                 style={{ width: '100%', padding: 12, borderRadius: 8, border: '1px solid #ccc', fontSize: 16 }}>
-                                <option value="">Select</option>
-                                <option value="Evaluator">Evaluator</option>
-                                <option value="Manager">Manager</option>
-                                <option value="Other">Other</option>
+                                <option value="">Selecionar</option>
+                                <option value="Evaluator">Avaliador</option>
+                                <option value="Manager">Gerente</option>
+                                <option value="Other">Outro</option>
                             </select>
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -342,7 +342,7 @@ export default function AgentsPage() {
                                 style={{ width: '100%', padding: 12, borderRadius: 8, border: '1px solid #ccc', fontSize: 16 }} />
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                            <label style={{ fontWeight: 500 }}>Full name *</label>
+                            <label style={{ fontWeight: 500 }}>Nome completo *</label>
                             <input 
                                 value={fullName} 
                                 onChange={e => setFullName(e.target.value)}
@@ -362,7 +362,7 @@ export default function AgentsPage() {
                                     style={{ width: '100%', padding: 12, borderRadius: 8, border: '1px solid #ccc', fontSize: 16 }} />
                             </div>
                             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                                <label style={{ fontWeight: 500 }}>Password *</label>
+                                <label style={{ fontWeight: 500 }}>Senha *</label>
                                 <input 
                                     value={password} 
                                     onChange={e => setPassword(e.target.value)}
@@ -375,7 +375,7 @@ export default function AgentsPage() {
                         <button 
                             type="submit" 
                             style={{ background: '#7CFC00', color: '#222', border: 'none', borderRadius: 24, padding: '16px 0', fontWeight: 600, fontSize: 20, marginTop: 24, width: '100%', cursor: 'pointer' }}>
-                            Create employee
+                            Criar funcionário
                         </button>
                     </form>
                 </div>
@@ -385,7 +385,7 @@ export default function AgentsPage() {
 
     // If not authenticated, you might want to show a message or redirect
     if (!isAuthenticated()) {
-        return <div>Please log in to access this page.</div>;
+        return <div>Por favor, faça login para acessar esta página.</div>;
     }
 
     return (
@@ -416,11 +416,11 @@ export default function AgentsPage() {
                                     fontSize: 14
                                 }}
                             >
-                                <option value="all">All Status</option>
-                                <option value="active">Active</option>
-                                <option value="pending">Pending</option>
-                                <option value="inactive">Inactive</option>
-                                <option value="deleted">Deleted</option>
+                                <option value="all">Todos os Status</option>
+                                <option value="active">Ativo</option>
+                                <option value="pending">Pendente</option>
+                                <option value="inactive">Inativo</option>
+                                <option value="deleted">Excluído</option>
                             </select>
 
                             {/* Sort Order */}
@@ -436,9 +436,9 @@ export default function AgentsPage() {
                                     fontSize: 14
                                 }}
                             >
-                                <option value="status">By Status</option>
-                                <option value="newest">Newest First</option>
-                                <option value="oldest">Oldest First</option>
+                                <option value="status">Por Status</option>
+                                <option value="newest">Mais Recentes</option>
+                                <option value="oldest">Mais Antigos</option>
                             </select>
 
                             {/* Search Input */}
@@ -446,7 +446,7 @@ export default function AgentsPage() {
                                 type="text"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                placeholder="Search Staff"
+                                placeholder="Buscar Funcionário"
                                 className="form-control"
                                 style={{ 
                                     border: '1px solid #ccc', 
@@ -462,7 +462,7 @@ export default function AgentsPage() {
                                 onClick={() => setShowCreate(true)} 
                                 className="btn rounded-5 "
                                 style={{   background: '#7CFC00', minWidth: '160px'  }}>
-                                New Staff
+                                Novo Funcionário
                             </button>
                         </div>
                     </div>

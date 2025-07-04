@@ -236,7 +236,7 @@ export default function BrejoDoCruzPage() {
       <div style={{ maxWidth: 1100, margin: '0 auto', marginBottom: 32, padding: '0 32px' }}>
         <div className="d-flex flex-wrap" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
           <div style={{ fontWeight: 600, fontSize: 20, color: '#215C2D', textAlign: 'left' }}>Nossos agentes</div>
-          <a href="/PTBR/Agentes-Culturais" style={{
+          <a href="/Agentes-Culturais" style={{
             textDecoration: 'none',
             color: '#215C2D',
             fontSize: 15,
@@ -366,7 +366,7 @@ export default function BrejoDoCruzPage() {
                 <button style={{ width: 48, height: 48, borderRadius: '50%', border: '1px solid #000', background: '#f1f1f1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, cursor: 'pointer' }}><i className="bi bi-chevron-left"></i></button>
                 <button style={{ width: 48, height: 48, borderRadius: '50%', border: '1px solid #000', background: '#f1f1f1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, cursor: 'pointer' }}><i className="bi bi-chevron-right"></i></button>
               </div>
-              <a href="/PTBR/Espacos-Culturais" style={{
+              <a href="/Espacos-Culturais" style={{
                 textDecoration: 'none',
                 color: '#215C2D',
                 fontSize: 15,
@@ -459,7 +459,7 @@ export default function BrejoDoCruzPage() {
       <div style={{ maxWidth: 1100, margin: '48px auto', padding: '0 32px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div style={{ fontWeight: 600, fontSize: 32, color: '#215C2D' }}>Projetos Culturais</div>
-          <a href="/PTBR/Projetos-Culturais" style={{
+          <a href="/Projetos-Culturais" style={{
             textDecoration: 'none',
             color: '#215C2D',
             fontSize: 15,
@@ -540,7 +540,7 @@ export default function BrejoDoCruzPage() {
                </div>
 
                 <a className="d-block"
-                  href={`/brejodocruz-pb/projetos?id=${project._id}`}
+                  href={`/public/projetos?id=${project._id}`}
                   style={{
                     background: '#2CB34A',
                     color: '#fff',

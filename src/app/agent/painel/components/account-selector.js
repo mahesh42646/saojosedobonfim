@@ -41,7 +41,7 @@ function AccountSelector({ onAccountSelect }) {
         const userData = localStorage.getItem('agentUser');
         const token = localStorage.getItem('agentToken');
         if (!userData || !token) {
-          setError('Not authenticated');
+          setError('Não autenticado');
           setLoading(false);
           return;
         }
@@ -55,14 +55,14 @@ function AccountSelector({ onAccountSelect }) {
           }
         });
         if (!response.ok) {
-          setError('Failed to fetch profile');
+          setError('Falha ao carregar perfil');
           setLoading(false);
           return;
         }
         const profileData = await response.json();
         setProfile(profileData);
       } catch (err) {
-        setError('Error fetching profile');
+        setError('Erro ao carregar perfil');
       } finally {
         setLoading(false);
       }
@@ -70,46 +70,48 @@ function AccountSelector({ onAccountSelect }) {
     fetchProfile();
   }, []);
 
-  const handleAccountClick = (type, isComplete) => {
-    if (isComplete) {
-      onAccountSelect(type);
-    }
+  const handleAccountClick = (type) => {
+    onAccountSelect(type);
   };
 
   if (loading) return <div className="text-center py-5"><Spinner animation="border" size="sm" /> Carregando...</div>;
-  if (error) return <div className="text-danger text-center py-5">{error === 'Not authenticated' ? 'Não autenticado' : 
-                                                                error === 'Failed to fetch profile' ? 'Falha ao carregar perfil' : 
-                                                                'Erro ao carregar perfil'}</div>;
+  if (error) return <div className="text-danger text-center py-5">{error}</div>;
   if (!profile || !profile.typeStatus) return null;
 
   return (
     <Container style={{ maxWidth: 700, margin: '0 auto', paddingTop: 40 }}>
       <h1 className="fw-bold text-center mb-4" style={{ fontSize: '2.2rem' }}>
-        Which account would you like to use?
+        Qual conta você gostaria de usar?
       </h1>
       <div className="d-flex flex-column align-items-center mb-4">
         
-        <div className="fw-semibold" style={{ fontSize: 18, color: '#444' }}>Your accounts</div>
+        <div className="fw-semibold" style={{ fontSize: 18, color: '#444' }}>Suas contas</div>
       </div>
       <hr />
       <div>
         {Object.keys(TYPE_DISPLAY).map((type) => {
           const display = TYPE_DISPLAY[type];
-          const isComplete = profile.typeStatus[type]?.isComplete;
+          const hasName = display.name(profile) !== 'Conta Pessoal' && 
+                         display.name(profile) !== 'Conta Empresarial' && 
+                         display.name(profile) !== 'Conta Coletiva';
+          
+          // Only show profiles that have actual names
+          if (!hasName) return null;
+          
           return (
             <Row
               key={type}
               className="align-items-center py-3 px-2 mb-2"
-              onClick={() => handleAccountClick(type, isComplete)}
+              onClick={() => handleAccountClick(type)}
               style={{
                 borderRadius: 16,
                 background: '#fff',
                 boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-                cursor: isComplete ? 'pointer' : 'not-allowed',
+                cursor: 'pointer',
                 transition: 'box-shadow 0.2s',
                 border: '1px solid #f2f2f2',
                 minHeight: 70,
-                opacity: isComplete ? 1 : 0.7
+                opacity: 1
               }}
             >
               <Col xs="auto" className="d-flex align-items-center justify-content-center">
@@ -132,8 +134,8 @@ function AccountSelector({ onAccountSelect }) {
                 <div className="fw-bold" style={{ fontSize: 20 }}>
                   {display.name(profile)}
                 </div>
-                <div style={{ color: isComplete ? '#444' : '#bbb', fontSize: 16 }}>
-                  {isComplete ? display.description : 'Incompleto'}
+                <div style={{ color: '#444', fontSize: 16 }}>
+                  {display.description}
                 </div>
               </Col>
               <Col xs="auto" className="d-flex align-items-center">

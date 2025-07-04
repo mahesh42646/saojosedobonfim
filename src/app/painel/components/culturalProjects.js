@@ -57,7 +57,7 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
   };
 
   const handleViewPublic = () => {
-    window.location.href = `/brejodocruz-pb/projetos?id=${space._id}`;
+    window.location.href = `/public/projetos?id=${space._id}`;
   };
 
   return (
@@ -348,8 +348,8 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
               </div>
               <div style={{ textAlign: "left", margin: "20px 0 30px 30px", fontSize: 14 }}>
                 This is the public page of the Cultural Project, which can be accessed by anyone. Example of a link in the system <br />
-                <a href="(https://mapadacultura.com/brejodocruz-pb/espacosculturais/999)" style={{ color: "#4af", textDecoration: "underline" }}>
-                  (https://mapadacultura.com/brejodocruz-pb/espacosculturais/999)
+                <a href="(https://mapadacultura.com/public/espacosculturais/999)" style={{ color: "#4af", textDecoration: "underline" }}>
+                  (https://mapadacultura.com/public/espacosculturais/999)
                 </a>
               </div>
             </section>

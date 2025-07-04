@@ -14,17 +14,17 @@ function SpaceDetails({ space, onBack, fetchSpaceDetails }) {
   const [tab, setTab] = useState("update");
 
   const handleViewPublic = () => {
-    window.location.href = `/brejodocruz-pb/espacos?id=${space._id}`;
+    window.location.href = `/public/espacos?id=${space._id}`;
   };
 
   // Add function to handle status updates
   const handleStatusUpdate = async (newStatus) => {
     // Show confirmation dialog
-    const action = newStatus === 'inactive' ? 'inactivate' :
-                  newStatus === 'rejected' ? 'reject' :
-                  'approve';
+    const action = newStatus === 'inactive' ? 'inativar' :
+                  newStatus === 'rejected' ? 'rejeitar' :
+                  'aprovar';
                   
-    const confirmed = window.confirm(`Are you sure you want to ${action} this space?`);
+    const confirmed = window.confirm(`Tem certeza que deseja ${action} este espaço?`);
     
     if (!confirmed) return;
 
@@ -46,14 +46,14 @@ function SpaceDetails({ space, onBack, fetchSpaceDetails }) {
       const data = await statusResponse.json();
       
       // Show success message
-      alert(data.message || `Space ${action}d successfully!`);
+      alert(data.message || `Espaço ${action === 'inativar' ? 'inativado' : action === 'rejeitar' ? 'rejeitado' : 'aprovado'} com sucesso!`);
       
       // Fetch updated space details
       await fetchSpaceDetails(space._id);
       
     } catch (error) {
       console.error('Error updating space status:', error);
-      alert(error.message || 'Failed to update space status. Please try again.');
+      alert(error.message || 'Falha ao atualizar status do espaço. Tente novamente.');
     }
   };
 
@@ -109,7 +109,7 @@ function SpaceDetails({ space, onBack, fetchSpaceDetails }) {
               className="btn ms-auto btn-light border"
               style={{ background: '#F5FFF0', color: '#222', border: '1px solid rgb(216, 251, 216)', borderRadius: 16, padding: '6px 18px', fontWeight: 500, fontSize: 15, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
             >
-              View Public Page <i className="bi bi-box-arrow-up-right"></i>
+              Ver Página Pública <i className="bi bi-box-arrow-up-right"></i>
             </button>
           </div>
         </div>
@@ -117,10 +117,10 @@ function SpaceDetails({ space, onBack, fetchSpaceDetails }) {
         {/* Tabs */}
         <div style={{ display: 'flex', borderBottom: '1px solid #eee', paddingLeft: 24, gap: 32, marginTop: 0 }}>
           <div onClick={() => setTab('update')} style={{ cursor: 'pointer', padding: '18px 0 10px 0', borderBottom: tab === 'update' ? '2px solid #2F5711' : 'none', color: tab === 'update' ? '#2F5711' : '#222', fontWeight: tab === 'update' ? 600 : 500, display: 'flex', alignItems: 'center', gap: 6 }}>
-            Update
+            Atualizar
           </div>
           <div onClick={() => setTab('details')} style={{ cursor: 'pointer', padding: '18px 0 10px 0', borderBottom: tab === 'details' ? '2px solid #2F5711' : 'none', color: tab === 'details' ? '#2F5711' : '#222', fontWeight: tab === 'details' ? 600 : 500, display: 'flex', alignItems: 'center', gap: 6 }}>
-            Details
+            Detalhes
           </div>
         </div>
 
@@ -153,7 +153,7 @@ function SpaceDetails({ space, onBack, fetchSpaceDetails }) {
               <div style={{ flex: 1 }}>
                 <div style={{ marginBottom: 24, minHeight: 24, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                   <div style={{ color: '#888', fontSize: 15 }}>
-                    {new Date(space.createdAt).toLocaleDateString('PTBR', {
+                    {new Date(space.createdAt).toLocaleDateString('pt-BR', {
                       weekday: 'long',
                       year: 'numeric',
                       month: 'long',
@@ -173,7 +173,7 @@ function SpaceDetails({ space, onBack, fetchSpaceDetails }) {
                     justifyContent: 'center'
                   }}>
                     <div style={{ color: '#888', fontSize: 15 }}>
-                      {new Date(history.changedAt).toLocaleDateString('PTBR', {
+                      {new Date(history.changedAt).toLocaleDateString('pt-BR', {
                         weekday: 'long',
                         year: 'numeric',
                         month: 'long',
@@ -281,7 +281,7 @@ function SpaceDetails({ space, onBack, fetchSpaceDetails }) {
 
             {/* Social Links */}
             <div style={{ background: '#F2F5F2', borderRadius: 12, padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div style={{ fontWeight: 600, marginBottom: 8 }}>Social Links</div>
+              <div style={{ fontWeight: 600, marginBottom: 8 }}>Links Sociais</div>
               {/* Facebook */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ color: '#2F5711', fontSize: 22 }}><i className="bi bi-facebook"></i></span>
@@ -343,7 +343,7 @@ function SpaceDetails({ space, onBack, fetchSpaceDetails }) {
 
             {/* Photo gallery */}
             <div>
-              <div style={{ fontWeight: 600, marginBottom: 8 }}>Photo gallery</div>
+              <div style={{ fontWeight: 600, marginBottom: 8 }}>Galeria de Fotos</div>
               <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
                 {/* Cover Photo */}
                 {space.coverPhoto && (
@@ -356,7 +356,7 @@ function SpaceDetails({ space, onBack, fetchSpaceDetails }) {
                       style={{ objectFit: 'cover' }}
                     />
                     <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0,0,0,0.7)', color: '#fff', padding: '4px 8px', fontSize: 12 }}>
-                      Cover Photo
+                      Foto de Capa
                     </div>
                   </div>
                 )}
@@ -487,7 +487,7 @@ export default function CspacePage() {
       setSpaces(data || []);
     } catch (err) {
       console.error('Error fetching spaces:', err);
-      setError('Failed to load spaces. Please try again.');
+      setError('Falha ao carregar espaços. Tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -513,7 +513,7 @@ export default function CspacePage() {
       setSelectedSpace(data);
     } catch (err) {
       console.error('Error fetching space details:', err);
-      setError('Failed to load space details. Please try again.');
+      setError('Falha ao carregar detalhes do espaço. Tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -558,18 +558,18 @@ export default function CspacePage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
             <h2 style={{ margin: 0, fontWeight: 600, fontSize: 22 }}>Lista de Espaços Culturais</h2>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <input
+                              <input
                 type="text"
-                placeholder="Search space"
+                placeholder="Buscar espaço"
                 value={searchTerm}
                 onChange={handleSearch}
                 style={{ border: '1px solid #ccc', borderRadius: 24, padding: '6px 24px', outline: 'none', width: 200 }}
               />
-              <button
+                              <button
                 onClick={() => setShowCreate(true)}
                 style={{ background: '#7CFC00', border: 'none', borderRadius: 24, padding: '8px 24px', fontWeight: 600, color: '#fff', cursor: 'pointer' }}
               >
-                New Culture
+                Nova Cultura
               </button>
             </div>
           </div>

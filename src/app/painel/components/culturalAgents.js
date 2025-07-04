@@ -253,29 +253,29 @@ function AgentDetails({ agent, onBack, user }) {
             <input placeholder="" className="form-control p-2" value={agent.cpf || ''} readOnly />
           </div>
           <div className="d-flex flex-column w-100 gap-2">
-            <label className="form-lable">Full name *</label>
+            <label className="form-lable">Nome completo *</label>
             <input placeholder="" className="form-control p-2" value={agent.fullname || ''} readOnly />
           </div>
           <div className="d-flex flex-column w-100 gap-2">
-            <label className="form-lable">Social name</label>
+            <label className="form-lable">Nome social</label>
             <input placeholder="" className="form-control p-2" value={agent.socialname || ''} readOnly />
           </div>
           <div className="d-lg-flex gap-4">
             <div className="d-flex flex-column gap-2 w-50">
-              <label className="form-lable">Gender *</label>
+              <label className="form-lable">Gênero *</label>
               <input placeholder="" className="form-control p-2" value={agent.gender || ''} readOnly />
             </div>
             <div className="d-flex flex-column gap-2 w-50">
-              <label className="form-lable">Breed *</label>
+              <label className="form-lable">Raça *</label>
               <input placeholder="" className="form-control p-2" value={agent.breed || ''} readOnly />
             </div>
           </div>
           <div className="d-flex flex-column w-100 gap-2">
-            <label className="form-lable">Are you LGBTQIAPN+? *</label>
+            <label className="form-lable">Você é LGBTQIAPN+? *</label>
             <input placeholder="" className="form-control p-2" value={agent.lgbtq || ''} readOnly />
           </div>
           <div className="d-flex flex-column w-100 gap-2">
-            <label className="form-lable">Date of birth *</label>
+            <label className="form-lable">Data de nascimento *</label>
             <input type="date" className="form-control p-2" value={formatDateForInput(agent.dob)} readOnly />
           </div>
           <div className="d-flex flex-column w-100 gap-2">
@@ -290,12 +290,12 @@ function AgentDetails({ agent, onBack, user }) {
         <div className="fw-bold h5 pt-3 pb-2">Informações de Acessibilidade</div>
         <div className="d-grid w-100 gap-3">
           <div className="d-flex flex-column w-100 gap-2">
-            <label className="form-lable">Do you have a PCD disability? *</label>
+            <label className="form-lable">Você possui deficiência PCD? *</label>
             <input placeholder="" className="form-control p-2" value={agent.pcd || ''} readOnly />
           </div>
           {agent.pcd !== 'Não' && (
             <div className="d-flex flex-column w-100 gap-2">
-              <label className="form-lable">In case without PCD which one?</label>
+              <label className="form-lable">Em caso de não ter PCD, qual?</label>
               <input placeholder="" className="form-control p-2" value={agent.withoutPcd || ''} readOnly />
             </div>
           )}
@@ -307,19 +307,19 @@ function AgentDetails({ agent, onBack, user }) {
         <div className="fw-bold h5 pt-3 pb-2">Informações Socioeconômicas e Educacionais</div>
         <div className="d-grid w-100 gap-3">
           <div className="d-flex flex-column gap-2">
-            <label className="form-lable">Education *</label>
+            <label className="form-lable">Educação *</label>
             <input placeholder="" className="form-control p-2" value={agent.education || ''} readOnly />
           </div>
           <div className="d-flex flex-column gap-2">
-            <label className="form-lable">Individual income *</label>
+            <label className="form-lable">Renda individual *</label>
             <input placeholder="" className="form-control p-2" value={agent.income || ''} readOnly />
           </div>
           <div className="d-flex flex-column w-100 gap-2">
-            <label className="form-lable">Beneficiary of any social program?</label>
+            <label className="form-lable">Beneficiário de algum programa social?</label>
             <input placeholder="" className="form-control p-2" value={agent.socialProgramBeneficiary || ''} readOnly />
           </div>
           <div className="d-flex flex-column w-100 gap-2">
-            <label className="form-lable">Name of the social program</label>
+            <label className="form-lable">Nome do programa social</label>
             <input placeholder="" className="form-control p-2" value={agent.socialProgramName || ''} readOnly />
           </div>
         </div>
@@ -330,16 +330,16 @@ function AgentDetails({ agent, onBack, user }) {
         <div className="fw-bold h5 pt-3 pb-2">Informações Profissionais</div>
         <div className="d-grid w-100 gap-3">
           <div className="d-flex flex-column w-100 gap-2">
-            <label className="form-lable">Main area of activity *</label>
+            <label className="form-lable">Área principal de atividade *</label>
             <input placeholder="" className="form-control p-2" value={agent.mainActivity || ''} readOnly />
           </div>
           <div className="d-flex flex-column w-100 gap-2">
-            <label className="form-lable">Do you belong to traditional communities?</label>
+            <label className="form-lable">Você pertence a comunidades tradicionais?</label>
             <input placeholder="" className="form-control p-2" value={agent.traditionalCommunities || ''} readOnly />
-            <span style={{ color: '#888', fontSize: 13, marginTop: 2 }}>(E.g.: quilombolas, indigenous people, riverside communities, etc.)</span>
+            <span style={{ color: '#888', fontSize: 13, marginTop: 2 }}>(Ex.: quilombolas, indígenas, comunidades ribeirinhas, etc.)</span>
           </div>
           <div className="d-flex flex-column w-100 gap-2">
-            <label className="form-lable">Other activity</label>
+            <label className="form-lable">Outra atividade</label>
             <input placeholder="" className="form-control p-2" value={agent.otherActivity || ''} readOnly />
           </div>
         </div>
@@ -350,15 +350,15 @@ function AgentDetails({ agent, onBack, user }) {
         <div className="fw-bold h5 pt-3 pb-2">Endereço</div>
         <div className="d-grid w-100 gap-3">
           <div className="d-flex flex-column w-100 gap-2">
-            <label className="form-lable">City</label>
+            <label className="form-lable">Cidade</label>
             <input placeholder="" className="form-control p-2" value={agent.city || ''} readOnly />
           </div>
           <div className="d-flex flex-column w-100 gap-2">
-            <label className="form-lable">District</label>
+            <label className="form-lable">Bairro</label>
             <input placeholder="" className="form-control p-2" value={agent.district || ''} readOnly />
           </div>
           <div className="d-flex flex-column w-100 gap-2">
-            <label className="form-lable">Street name and number</label>
+            <label className="form-lable">Nome da rua e número</label>
             <input placeholder="" className="form-control p-2" value={agent.street || ''} readOnly />
           </div>
         </div>
@@ -373,7 +373,7 @@ function AgentDetails({ agent, onBack, user }) {
             <input placeholder="" className="form-control p-2" value={agent.telephone || ''} readOnly />
           </div>
           <div className="d-flex flex-column w-100 gap-2">
-            <label className="form-lable">Email</label>
+            <label className="form-lable">E-mail</label>
             <input placeholder="" className="form-control p-2" value={agent.email || ''} readOnly />
           </div>
         </div>
@@ -383,7 +383,7 @@ function AgentDetails({ agent, onBack, user }) {
       <div>
         <div className="fw-bold h5 pt-3 pb-2">Responsável pela Inscrição</div>
         <div className="d-flex flex-column gap-2">
-          <label className="form-lable">Name of person responsible for registration (if not the person themselves)</label>
+          <label className="form-lable">Nome da pessoa responsável pela inscrição (se não for a própria pessoa)</label>
           <input placeholder="" className="form-control p-2" value={agent.responsible || ''} readOnly />
         </div>
       </div>
@@ -425,28 +425,28 @@ function AgentDetails({ agent, onBack, user }) {
         <div className="fw-bold h5 pt-3 pb-2">Insira os dados adicionais do grupo</div>
         <div className="d-grid w-100 gap-3">
           <div className="d-flex flex-column w-100 gap-2">
-            <label className="form-lable">Name of the Collective *</label>
+            <label className="form-lable">Nome do Coletivo *</label>
             <input placeholder="" className="form-control p-2" value={agent.collectiveData?.collectiveName || ''} readOnly />
           </div>
           <div>
-            <label className="form-lable">Date created *</label>
+            <label className="form-lable">Data de criação *</label>
             <div className="d-lg-flex gap-4 mt-2">
               <div className="d-flex flex-column gap-2 flex-fill">
-                <label className="form-lable small">Day</label>
+                <label className="form-lable small">Dia</label>
                 <input placeholder="16" className="form-control p-2" value={agent.collectiveData?.dayCreated || ''} readOnly />
               </div>
               <div className="d-flex flex-column gap-2 flex-fill">
-                <label className="form-lable small">Month</label>
-                <input placeholder="July" className="form-control p-2" value={agent.collectiveData?.monthCreated || ''} readOnly />
+                <label className="form-lable small">Mês</label>
+                <input placeholder="Julho" className="form-control p-2" value={agent.collectiveData?.monthCreated || ''} readOnly />
               </div>
               <div className="d-flex flex-column gap-2 flex-fill">
-                <label className="form-lable small">Year</label>
+                <label className="form-lable small">Ano</label>
                 <input placeholder="1998" className="form-control p-2" value={agent.collectiveData?.yearCreated || ''} readOnly />
               </div>
             </div>
           </div>
           <div className="d-flex flex-column w-100 gap-2">
-            <label className="form-lable">How many people participate in the collective? *</label>
+            <label className="form-lable">Quantas pessoas participam do coletivo? *</label>
             <textarea placeholder="" className="form-control p-2" rows="3" value={agent.collectiveData?.participants || ''} readOnly />
           </div>
         </div>
@@ -475,8 +475,8 @@ function AgentDetails({ agent, onBack, user }) {
           <h2 style={{ margin: 0, fontWeight: 600, fontSize: 22 }}> Detalhes do Agente Cultural</h2>
         </div>
         <div className="d-flex me-2 gap-2">
-          <button className="rounded-5" style={{ background: '#eee', color: '#888', border: 'none', padding: '6px 36px', fontWeight: 600, fontSize: 16, cursor: 'pointer' }}>Disable</button>
-          <button className="rounded-5" style={{ background: '#7CFC00', color: '#222', border: 'none', borderRadius: 16, padding: '6px 36px', fontWeight: 600, fontSize: 16, cursor: 'pointer' }}>Active</button>
+          <button className="rounded-5" style={{ background: '#eee', color: '#888', border: 'none', padding: '6px 36px', fontWeight: 600, fontSize: 16, cursor: 'pointer' }}>Desativar</button>
+          <button className="rounded-5" style={{ background: '#7CFC00', color: '#222', border: 'none', borderRadius: 16, padding: '6px 36px', fontWeight: 600, fontSize: 16, cursor: 'pointer' }}>Ativar</button>
         </div>
       </div>
       <div className="border my-lg-3 my-1 rounded-4">
@@ -500,7 +500,7 @@ function AgentDetails({ agent, onBack, user }) {
               <div>
                 <div style={{ fontWeight: 600, fontSize: 20 }}>{agent.fullname || 'Unnamed Agent'}</div>
                 <div style={{ color: '#222', fontSize: 15, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ color: '#2ecc40', fontSize: 18 }}>●</span> {getAgentType(agent)} Agent
+                  <span style={{ color: '#2ecc40', fontSize: 18 }}>●</span> {agent.typeStatus?.personal?.isComplete ? 'Conta Pessoal' : agent.typeStatus?.business?.isComplete ? 'Conta Empresarial' : agent.typeStatus?.collective?.isComplete ? 'Conta Coletiva' : 'Incompleto'}
                 </div>
               </div>
             </div>
@@ -510,7 +510,7 @@ function AgentDetails({ agent, onBack, user }) {
                 onClick={generatePDF}
                 style={{ background: '#F5FFF0', color: '#222', border: '1px solid rgb(216, 251, 216)', borderRadius: 16, padding: '6px 18px', fontWeight: 500, fontSize: 15, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
               >
-                Download Agent Details <span style={{ fontSize: 18 }}><i className="bi bi-download"></i></span>
+                Baixar Detalhes do Agente <span style={{ fontSize: 18 }}><i className="bi bi-download"></i></span>
               </button>
             </div>
           </div>
@@ -825,7 +825,7 @@ export default function AgentsPage() {
                       {agent.fullname || 'Unnamed Agent'}
                     </div>
                     <div style={{ color: '#888', fontSize: 14 }}>
-                      Type: {getAgentType(agent)} 
+                      Tipo: {getAgentType(agent)} 
                     </div>
                   </div>
                   {/* <div style={{ color: '#666', fontSize: 12 }}>

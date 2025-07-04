@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Headerpb from "../Header-pb";
-import { buildApiUrl } from '../../config/api';
+import { buildApiUrl } from '../config/api';
 import Link from 'next/link';
 
 // Base URL for images (without /api)
@@ -126,7 +126,7 @@ export default function CulturalSpacesPage() {
               {description?.length > 100 ? `${description.substring(0, 100)}...` : description}
             </div>
             <Link 
-              href={`/brejodocruz-pb/espacos?id=${space._id}`}
+              href={`/public/espacos?id=${space._id}`}
               style={{ 
                 background: '#2CB34A',
                 color: '#fff',
@@ -188,7 +188,7 @@ export default function CulturalSpacesPage() {
             </div>
           </div>
           <Link 
-            href={`/brejodocruz-pb/espacos?id=${space._id}`}
+            href={`/public/espacos?id=${space._id}`}
             style={{ 
               background: '#2CB34A',
               color: '#fff',
@@ -241,7 +241,7 @@ export default function CulturalSpacesPage() {
           </div>
         </div>
         <Link 
-          href={`/brejodocruz-pb/espacos?id=${space._id}`}
+          href={`/public/espacos?id=${space._id}`}
           style={{ 
             background: '#2CB34A',
             color: '#fff',
