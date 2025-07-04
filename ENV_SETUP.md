@@ -9,7 +9,7 @@ This project now uses environment variables for API URLs instead of hardcoded va
 
    ```bash
    # API Configuration
-   NEXT_PUBLIC_API_BASE_URL=https://teste.mapadacultura.com/api
+   NEXT_PUBLIC_API_BASE_URL=https://mapacultural.saojosedobonfim.pb.gov.br/api
    ```
 
 2. **Environment Variables**
@@ -21,7 +21,7 @@ This project now uses environment variables for API URLs instead of hardcoded va
 Each component now uses the environment variable directly:
 
 ```javascript
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://teste.mapadacultura.com/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://mapacultural.saojosedobonfim.pb.gov.br/api';
 
 // Use the base URL directly
 const response = await fetch(`${API_BASE_URL}/endpoint`);
@@ -51,7 +51,7 @@ The following files have been updated to use environment variables directly:
 Each component now follows this pattern:
 
 ```javascript
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://teste.mapadacultura.com/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://mapacultural.saojosedobonfim.pb.gov.br/api';
 
 // Example usage
 const response = await fetch(`${API_BASE_URL}/agent/profile/login`, {

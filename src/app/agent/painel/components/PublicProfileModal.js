@@ -4,7 +4,7 @@ import { Modal, Form, Button, Row, Col, Alert } from "react-bootstrap";
 import { FaCamera, FaTrash, FaPlus } from "react-icons/fa";
 import Image from "next/image";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://teste.mapadacultura.com/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://mapacultural.saojosedobonfim.pb.gov.br/api';
 
 export default function PublicProfileModal({ show, onHide, profile, accountType, onProfileUpdate }) {
   const [formData, setFormData] = useState({

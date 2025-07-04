@@ -5,7 +5,7 @@ import { FaCamera, FaChevronRight, FaUser, FaLock, FaSignOutAlt, FaPlus, FaUsers
 import { useAccountType } from '../accountTypeContext';
 import PublicProfileModal from './PublicProfileModal';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://teste.mapadacultura.com/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://mapacultural.saojosedobonfim.pb.gov.br/api';
 
 const TYPE_DISPLAY = {
   personal: {
@@ -78,7 +78,7 @@ export default function Profile() {
   
   // Get current profile photo for the selected account type
   const getCurrentProfilePhoto = () => {
-    const profilePhoto = profile.profilePhotos?.[accountType];
+    const profilePhoto = profile.profilePhoto;
     if (profilePhoto && profilePhoto.trim()) {
       return `${API_BASE_URL.replace('/api', '')}/uploads/${profilePhoto.trim()}`;
     }

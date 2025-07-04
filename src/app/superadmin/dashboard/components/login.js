@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useAuth } from '../authContex';
 import { useRouter } from 'next/navigation';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://teste.mapadacultura.com/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://mapacultural.saojosedobonfim.pb.gov.br/api';
 
 const Login = () => {
   const [formData, setFormData] = useState({
