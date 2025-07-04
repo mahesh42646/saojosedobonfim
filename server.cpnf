@@ -2,13 +2,14 @@
 
 
 
-on local
+# on local
 git add .
 git commit -m "live commit"
 git branch -M main
 git push -u origin main
 
 # on live
+
 git pull
 npm run build
 pm2 restart all
