@@ -48,7 +48,7 @@ export default function Profile() {
         const user = JSON.parse(userData);
         const response = await fetch(
           `${API_BASE_URL}/agent/profile/${user.cpf}`,
-          // `https://mapacultural.gestorcultural.com.br/api/agent/profile/${user.cpf}`,
+          // `https://mapacultural.saojosedobonfim.pb.gov.br/api/agent/profile/${user.cpf}`,
 
           {
             headers: { Authorization: token },

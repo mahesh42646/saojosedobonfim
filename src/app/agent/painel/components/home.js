@@ -19,7 +19,7 @@ const ProjectSpaceCard = ({ item, onClose }) => (
     </h3>
     <div className="d-flex justify-content-center align-items-center" style={{ height: '180px' }}>
       <Image
-        src={item.coverPhoto ? `https://mapacultural.gestorcultural.com.br/uploads/${item.coverPhoto}` : '/images/card.png'}
+        src={item.coverPhoto ? `https://mapacultural.saojosedobonfim.pb.gov.br/uploads/${item.coverPhoto}` : '/images/card.png'}
         alt={item.title}
         width={200}
         height={180}

@@ -47,7 +47,7 @@ export default function Login() {
 
     try {
       const response = await fetch(`${API_BASE_URL}/agent/profile/login`, {
-        // const response = await fetch('https://mapacultural.gestorcultural.com.br/api/agent/profile/login', {
+        // const response = await fetch('https://mapacultural.saojosedobonfim.pb.gov.br/api/agent/profile/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

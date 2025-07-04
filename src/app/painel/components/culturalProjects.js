@@ -295,7 +295,7 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
                 {space.coverPhoto && (
                   <div style={{ width: 160, height: 170, borderRadius: 12, overflow: 'hidden', position: 'relative' }}>
                     <Image 
-                      src={`https://mapacultural.gestorcultural.com.br/uploads/${space.coverPhoto}`}
+                      src={`https://mapacultural.saojosedobonfim.pb.gov.br/uploads/${space.coverPhoto}`}
                       alt="Cover"
                       width={160}
                       height={170}
@@ -310,7 +310,7 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
                 {space.photos?.map((photo, index) => (
                   <div key={index} style={{ width: 160, height: 170, borderRadius: 12, overflow: 'hidden' }}>
                     <Image 
-                      src={`https://mapacultural.gestorcultural.com.br/uploads/${photo}`}
+                      src={`https://mapacultural.saojosedobonfim.pb.gov.br/uploads/${photo}`}
                       alt={`Photo ${index + 1}`}
                       width={160}
                       height={170}
@@ -575,7 +575,7 @@ export default function CspacePage() {
                   <div style={{ width: 48, height: 48, borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {project.coverPhoto ? (
                       <Image 
-                        src={`https://mapacultural.gestorcultural.com.br/uploads/${project.coverPhoto}`}
+                        src={`https://mapacultural.saojosedobonfim.pb.gov.br/uploads/${project.coverPhoto}`}
                         alt={project.title}
                         width={48}
                         height={48}

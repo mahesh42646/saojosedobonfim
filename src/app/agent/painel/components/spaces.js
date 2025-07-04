@@ -46,7 +46,7 @@ const SpaceCard = ({ space }) => {
     style={{ border: '0.01px solid rgb(255, 255, 255)' }}
     >
         <Image
-                src={!imgError && space.coverPhoto ? `https://mapacultural.gestorcultural.com.br/uploads/${space.coverPhoto}` : '/images/card.png'}
+                src={!imgError && space.coverPhoto ? `https://mapacultural.saojosedobonfim.pb.gov.br/uploads/${space.coverPhoto}` : '/images/card.png'}
                 alt={space.title}
             width={70}
             height={70}
@@ -118,7 +118,7 @@ const SpaceDetails = ({ space, onBack, onDelete }) => {
           </div>
             <div className="d-flex align-items-center p-1 rounded-3 mb-4" style={{ border: '0.01px solid rgb(255, 255, 255)', backgroundColor: 'rgba(79, 182, 0, 0.1)' }}>
                 <Image
-                    src={space.coverPhoto ? `https://mapacultural.gestorcultural.com.br/uploads/${space.coverPhoto}` : '/images/card.png'}
+                    src={space.coverPhoto ? `https://mapacultural.saojosedobonfim.pb.gov.br/uploads/${space.coverPhoto}` : '/images/card.png'}
                     alt={space.title}
                     width={70}
                     height={70}

@@ -45,7 +45,7 @@ const ProjectCard = ({ project }) => {
         <div className={`d-flex align-items-center p-2 rounded-4 bg-secondary-lite ${project.status === ProjectStatus.PENDING ? 'bg-' : 'bg-'}`}
         style={{ border: '0.01px solid rgb(255, 255, 255)'}}>
             <Image
-                src={!imgError && project.coverPhoto ? `https://mapacultural.gestorcultural.com.br/uploads/${project.coverPhoto}` : '/images/card.png'}
+                src={!imgError && project.coverPhoto ? `https://mapacultural.saojosedobonfim.pb.gov.br/uploads/${project.coverPhoto}` : '/images/card.png'}
                 alt={project.title}
                 width={70}
                 height={70}
@@ -118,7 +118,7 @@ const ProjectDetails = ({ project, onBack, onDelete }) => {
             </div>
             <div className="d-flex align-items-center p-2 rounded-4" style={{ border: '1px solid #e0e0e0', backgroundColor: '#fff' }}>
                 <Image
-                    src={project.coverPhoto ? `https://mapacultural.gestorcultural.com.br/uploads/${project.coverPhoto}` : '/images/card.png'}
+                    src={project.coverPhoto ? `https://mapacultural.saojosedobonfim.pb.gov.br/uploads/${project.coverPhoto}` : '/images/card.png'}
                     alt={project.title}
                     width={70}
                     height={70}
@@ -219,7 +219,7 @@ const ProjectDetails = ({ project, onBack, onDelete }) => {
                                             {project.photos.map((photo, index) => (
                                                 <Image
                                                     key={index}
-                                                    src={`https://mapacultural.gestorcultural.com.br/uploads/${photo}`}
+                                                    src={`https://mapacultural.saojosedobonfim.pb.gov.br/uploads/${photo}`}
                                                     alt={`Gallery photo ${index + 1}`}
                                                     width={150}
                                                     height={150}

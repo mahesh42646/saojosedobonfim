@@ -4,7 +4,7 @@ import Image from 'next/image';
 import axios from 'axios';
 import { useAuth } from '../authContex';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mapacultural.gestorcultural.com.br/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mapacultural.saojosedobonfim.pb.gov.br/api';
 
 const agents = [
 

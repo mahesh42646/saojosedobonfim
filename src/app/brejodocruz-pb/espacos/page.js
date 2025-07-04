@@ -72,7 +72,7 @@ function SpaceDetailsContent() {
                 <div>
                     {space.coverPhoto ? (
                         <Image
-                            src={`https://mapacultural.gestorcultural.com.br/uploads/${space.coverPhoto}`}
+                            src={`https://mapacultural.saojosedobonfim.pb.gov.br/uploads/${space.coverPhoto}`}
                             alt={space.title}
                             width={1200}
                             height={300}
@@ -181,7 +181,7 @@ function SpaceDetailsContent() {
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 18, marginBottom: 10 }}>
                             {space.coverPhoto && (
                                 <Image
-                                    src={`https://mapacultural.gestorcultural.com.br/uploads/${space.coverPhoto}`}
+                                    src={`https://mapacultural.saojosedobonfim.pb.gov.br/uploads/${space.coverPhoto}`}
                                     alt="Cover Photo"
                                     width={160}
                                     height={160}
@@ -191,7 +191,7 @@ function SpaceDetailsContent() {
                             {space.photos?.map((photo, index) => (
                                 <Image
                                     key={index}
-                                    src={`https://mapacultural.gestorcultural.com.br/uploads/${photo}`}
+                                    src={`https://mapacultural.saojosedobonfim.pb.gov.br/uploads/${photo}`}
                                     alt={`Gallery ${index + 1}`}
                                     width={160}
                                     height={160}

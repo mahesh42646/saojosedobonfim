@@ -536,7 +536,7 @@ function RegistrationForm({ cpf, selectedType, existingProfile }) {
 
         // Submit to backend
         const response = await fetch(`${API_BASE_URL}/agent/profile`, {
-          // const response = await fetch('https://mapacultural.gestorcultural.com.br/api/agent/profile', {
+          // const response = await fetch('https://mapacultural.saojosedobonfim.pb.gov.br/api/agent/profile', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -1227,7 +1227,7 @@ export default function CPF({ selectedType, onContinue }) {
   const checkCPFExists = async (cpfToCheck) => {
     try {
       const response = await fetch(`${API_BASE_URL}/agent/profile/${cpfToCheck}`, {
-        // const response = await fetch(`https://mapacultural.gestorcultural.com.br/api/agent/profile/${cpfToCheck}`, {
+        // const response = await fetch(`https://mapacultural.saojosedobonfim.pb.gov.br/api/agent/profile/${cpfToCheck}`, {
         method: 'GET',
         headers: {
           'Authorization': 'dummy-token-for-testing'

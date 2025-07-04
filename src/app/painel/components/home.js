@@ -122,7 +122,7 @@ export default function HomePage() {
                                                      item.itemType.charAt(0).toUpperCase() + item.itemType.slice(1)}</div>
               </div>
               <Image
-                src={item.coverPhoto ? `https://mapacultural.gestorcultural.com.br/uploads/${item.coverPhoto}` : '/images/card.png'}
+                src={item.coverPhoto ? `https://mapacultural.saojosedobonfim.pb.gov.br/uploads/${item.coverPhoto}` : '/images/card.png'}
                 alt={item.title}
                 width={144}
                 height={144}

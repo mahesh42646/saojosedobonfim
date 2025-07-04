@@ -414,7 +414,7 @@ export default function BrejoDoCruzPage() {
                     <div style={{ width: '100%', height: 159, position: 'relative', padding: '  10px 1px 1px 1px' }}>
                       {space.coverPhoto ? (
                         <Image
-                          src={`https://mapacultural.gestorcultural.com.br/uploads/${space.coverPhoto}`}
+                          src={`https://mapacultural.saojosedobonfim.pb.gov.br/uploads/${space.coverPhoto}`}
                           alt={space.title}
                           width={100}
                           height={100}
@@ -507,7 +507,7 @@ export default function BrejoDoCruzPage() {
                <div className="d-flex  gap-4 ">
                {project.coverPhoto ? (
                   <Image
-                    src={`https://mapacultural.gestorcultural.com.br/uploads/${project.coverPhoto}`}
+                    src={`https://mapacultural.saojosedobonfim.pb.gov.br/uploads/${project.coverPhoto}`}
                     alt={project.title}
                     width={150}
                     height={150}
