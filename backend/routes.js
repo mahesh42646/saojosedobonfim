@@ -789,6 +789,77 @@ router.delete('/agent/profile/:cpf', authMiddleware, async (req, res) => {
   }
 });
 
+// Change Agent Profile Password
+router.put('/agent/profile/:cpf/password', authMiddleware, async (req, res) => {
+  try {
+    const { cpf } = req.params;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'Current password and new password are required' });
+    }
+
+    // Find the agent profile
+    const profile = await AgentProfile.findOne({ cpf });
+    if (!profile) {
+      return res.status(404).json({ error: 'Agent profile not found' });
+    }
+
+    // Verify current password
+    if (profile.password !== currentPassword) {
+      return res.status(400).json({ error: 'Current password is incorrect' });
+    }
+
+    // Update password
+    profile.password = newPassword;
+    profile.updatedAt = new Date();
+    await profile.save();
+
+    res.json({ 
+      message: 'Password updated successfully' 
+    });
+  } catch (error) {
+    console.error('Error changing password:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Forgot Password - Send reset email (placeholder for future implementation)
+router.post('/agent/forgot-password', async (req, res) => {
+  try {
+    const { emailOrCpf } = req.body;
+
+    if (!emailOrCpf) {
+      return res.status(400).json({ error: 'Email or CPF is required' });
+    }
+
+    // Format CPF if it looks like a CPF
+    const cleanInput = emailOrCpf.replace(/[^\w@.-]/g, '');
+    const isCpf = /^\d{11}$/.test(cleanInput);
+    
+    let query;
+    if (isCpf) {
+      const formattedCpf = cleanInput.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+      query = { cpf: formattedCpf };
+    } else {
+      query = { email: emailOrCpf.toLowerCase() };
+    }
+
+    const profile = await AgentProfile.findOne(query);
+    if (!profile) {
+      return res.status(404).json({ error: 'No account found with this email or CPF' });
+    }
+
+    // For now, just return success (email functionality would be implemented here)
+    res.json({ 
+      message: 'If an account exists with this email/CPF, a password reset link will be sent' 
+    });
+  } catch (error) {
+    console.error('Error in forgot password:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // TENANT ROUTES
 
 // Get all tenants with optional filters

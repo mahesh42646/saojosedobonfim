@@ -4,6 +4,8 @@ import Image from "next/image";
 import { FaCamera, FaChevronRight, FaUser, FaLock, FaSignOutAlt, FaPlus, FaUsers, FaShieldAlt, FaTimesCircle, FaArrowRight } from "react-icons/fa";
 import { useAccountType } from '../accountTypeContext';
 import PublicProfileModal from './PublicProfileModal';
+import PasswordChangeModal from './PasswordChangeModal';
+import ForgotPasswordModal from './ForgotPasswordModal';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://teste.mapadacultura.com/api';
 
@@ -37,6 +39,8 @@ export default function Profile() {
   const [profile, setProfile] = useState(null);
   const { accountType, updateAccountType } = useAccountType();
   const [showPublicProfileModal, setShowPublicProfileModal] = useState(false);
+  const [showPasswordChangeModal, setShowPasswordChangeModal] = useState(false);
+  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -156,7 +160,11 @@ export default function Profile() {
         })}
 
         {/* Open another account */}
-        <div className="border border-dashed rounded-4 p-3 d-flex align-items-center mb-4" style={{ minHeight: 70 }}>
+        <div 
+          className="border border-dashed rounded-4 p-3 d-flex align-items-center mb-4" 
+          style={{ minHeight: 70, cursor: "pointer" }}
+          onClick={() => router.push('/agent')}
+        >
           <div className="rounded-circle bg-body text-dark d-flex align-items-center justify-content-center me-3" style={{ width: 48, height: 48, fontSize: 20, border: "1.5px solid #9FE870" }}>
             <FaPlus color="#7AC142" />
           </div>
@@ -188,7 +196,11 @@ export default function Profile() {
             </div>
             <FaChevronRight className="ms-auto text-secondary" />
           </div>
-          <div className="d-flex align-items-center bg-body-secondary rounded-pill p-3">
+          <div 
+            className="d-flex align-items-center bg-body-secondary rounded-pill p-3 mb-2" 
+            style={{ minHeight: 60, cursor: "pointer" }}
+            onClick={() => setShowPublicProfileModal(true)}
+          >
             <span className="bg-body rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: 44, height: 44 }}>
               <FaUsers size={20} />
             </span>
@@ -198,7 +210,11 @@ export default function Profile() {
             </div>
             <FaChevronRight className="ms-auto text-secondary" />
           </div>
-          <div className="d-flex align-items-center bg-body-secondary rounded-pill p-3">
+          <div 
+            className="d-flex align-items-center bg-body-secondary rounded-pill p-3" 
+            style={{ minHeight: 60, cursor: "pointer" }}
+            onClick={() => setShowPasswordChangeModal(true)}
+          >
             <span className="bg-body rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: 44, height: 44 }}>
               <FaShieldAlt size={20} />
             </span>
@@ -228,6 +244,23 @@ export default function Profile() {
         profile={profile}
         accountType={accountType}
         onProfileUpdate={handleProfileUpdate}
+      />
+
+      {/* Password Change Modal */}
+      <PasswordChangeModal
+        show={showPasswordChangeModal}
+        onHide={() => setShowPasswordChangeModal(false)}
+        profile={profile}
+        onShowForgotPassword={() => {
+          setShowPasswordChangeModal(false);
+          setShowForgotPasswordModal(true);
+        }}
+      />
+
+      {/* Forgot Password Modal */}
+      <ForgotPasswordModal
+        show={showForgotPasswordModal}
+        onHide={() => setShowForgotPasswordModal(false)}
       />
     </div>
   );
