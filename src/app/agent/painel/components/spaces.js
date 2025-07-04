@@ -75,10 +75,11 @@ const SpaceDetails = ({ space, onBack, onDelete }) => {
         
         try {
             setLoading(true);
+            const token = localStorage.getItem('agentToken');
             const response = await fetch(buildApiUrl(`/space/${space._id}`), {
                 method: 'DELETE',
                 headers: {
-                    'Authorization': 'dummy-token-for-testing'
+                    'Authorization': token
                 }
             });
 
@@ -211,9 +212,10 @@ function Spaces() {
         try {
             setLoading(true);
             setError(null);
+            const token = localStorage.getItem('agentToken');
             const response = await fetch(buildApiUrl('/spaces'), {
                 headers: {
-                    'Authorization': 'dummy-token-for-testing'
+                    'Authorization': token
                 }
             });
             
