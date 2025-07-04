@@ -14,8 +14,20 @@ const nextConfig = {
         port: '4000',
         pathname: '/uploads/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'mapacultural.saojosedobonfim.pb.gov.br',
+        port: '',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'teste.mapadacultura.com',
+        port: '',
+        pathname: '/uploads/**',
+      },
     ],
-    domains: ['localhost'],
+    domains: ['localhost', 'mapacultural.saojosedobonfim.pb.gov.br', 'teste.mapadacultura.com'],
   },
   async rewrites() {
     return [

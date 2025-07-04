@@ -5,7 +5,7 @@ import { FaCamera, FaChevronRight, FaUser, FaLock, FaSignOutAlt, FaPlus, FaUsers
 import { useAccountType } from '../accountTypeContext';
 import PublicProfileModal from './PublicProfileModal';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://mapacultural.saojosedobonfim.pb.gov.br/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://teste.mapadacultura.com/api';
 
 const TYPE_DISPLAY = {
   personal: {
@@ -57,6 +57,8 @@ export default function Profile() {
 
         if (response.ok) {
           const profileData = await response.json();
+          console.log('Profile data:', profileData); // Debug log
+          console.log('Profile photos:', profileData.profilePhotos); // Debug log
           setProfile(profileData);
         }
       } catch (err) {
@@ -78,9 +80,13 @@ export default function Profile() {
   
   // Get current profile photo for the selected account type
   const getCurrentProfilePhoto = () => {
-    const profilePhoto = profile.profilePhoto;
+    const profilePhoto = profile.profilePhotos?.[accountType];
     if (profilePhoto && profilePhoto.trim()) {
-      return `${API_BASE_URL.replace('/api', '')}/uploads/${profilePhoto.trim()}`;
+      // Construct the correct URL for profile photos
+      const baseUrl = API_BASE_URL.replace('/api', '');
+      const photoUrl = `${baseUrl}/uploads/${profilePhoto.trim()}`;
+      console.log('Profile photo URL:', photoUrl); // Debug log
+      return photoUrl;
     }
     return "/images/placeholder-Avatar.png";
   };
@@ -98,7 +104,11 @@ export default function Profile() {
               height={80}
               className="rounded-circle border-dark object-fit-cover"
               onError={(e) => {
+                console.log('Image load error:', e.target.src); // Debug log
                 e.target.src = "/images/placeholder-Avatar.png";
+              }}
+              onLoad={() => {
+                console.log('Image loaded successfully:', getCurrentProfilePhoto()); // Debug log
               }}
             />
             <span
