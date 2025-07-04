@@ -24,7 +24,10 @@ const storage = multer.diskStorage({
 
 const upload = multer({ 
   storage: storage,
-  // Remove all file size and count limits
+  limits: {
+    fileSize: 256 * 1024 * 1024, // 256MB limit
+    files: 20 // Maximum 20 files
+  },
   fileFilter: function (req, file, cb) {
     const filetypes = /jpeg|jpg|png/;
     const mimetype = filetypes.test(file.mimetype);
@@ -43,6 +46,16 @@ const handleMulterError = (error, req, res, next) => {
     if (error.code === 'LIMIT_UNEXPECTED_FILE') {
       return res.status(400).json({ 
         error: 'Unexpected file field.' 
+      });
+    }
+    if (error.code === 'LIMIT_FILE_SIZE') {
+      return res.status(413).json({ 
+        error: 'File too large. Maximum file size is 256MB.' 
+      });
+    }
+    if (error.code === 'LIMIT_FILE_COUNT') {
+      return res.status(400).json({ 
+        error: 'Too many files. Maximum 20 files allowed.' 
       });
     }
   }
@@ -92,7 +105,7 @@ router.post('/superadmin/login', async (req, res) => {
 });
 
 // Admin Signup/Login
-router.post('/admin/signup', upload.single('profilePhoto'), async (req, res) => {
+router.post('/admin/signup', [upload.single('profilePhoto'), handleMulterError], async (req, res) => {
   try {
     const { email, password, name, title, description } = req.body;
     
@@ -151,7 +164,7 @@ router.get('/admin/profile', authMiddleware, async (req, res) => {
 });
 
 // New route for updating admin profile
-router.put('/admin/profile/:id', [authMiddleware, upload.single('profilePhoto')], async (req, res) => {
+router.put('/admin/profile/:id', [authMiddleware, upload.single('profilePhoto'), handleMulterError], async (req, res) => {
   try {
     const { id } = req.params;
     const { name, title, description, currentPassword, newPassword } = req.body;
@@ -619,7 +632,7 @@ router.put('/agent/profile/:cpf', authMiddleware, async (req, res) => {
 });
 
 // Update Agent Profile Photo only
-router.put('/agent/profile/:cpf/photo', [authMiddleware, upload.single('profilePhoto')], async (req, res) => {
+router.put('/agent/profile/:cpf/photo', [authMiddleware, upload.single('profilePhoto'), handleMulterError], async (req, res) => {
   try {
     const profile = await AgentProfile.findOne({ cpf: req.params.cpf });
     
@@ -670,9 +683,6 @@ router.put('/agent/profile/:cpf/public', [authMiddleware, upload.fields([
   { name: 'galleryPhotos', maxCount: 10 }
 ]), handleMulterError], async (req, res) => {
   try {
-    console.log('Received request body:', req.body);
-    console.log('Received files:', req.files);
-    
     const profile = await AgentProfile.findOne({ cpf: req.params.cpf });
     
     if (!profile) {
@@ -979,7 +989,7 @@ router.patch('/tenants/:id/status', authMiddleware, async (req, res) => {
 router.post('/space/addnew', [authMiddleware, upload.fields([
   { name: 'coverPhoto', maxCount: 1 },
   { name: 'photos', maxCount: 10 }
-])], async (req, res) => {
+]), handleMulterError], async (req, res) => {
   try {
     const {
       type,
@@ -1099,7 +1109,7 @@ router.get('/space/:id', authMiddleware, async (req, res) => {
 router.put('/space/:id', [authMiddleware, upload.fields([
   { name: 'coverPhoto', maxCount: 1 },
   { name: 'photos', maxCount: 10 }
-])], async (req, res) => {
+]), handleMulterError], async (req, res) => {
   try {
     const space = await Space.findById(req.params.id);
     
@@ -1251,8 +1261,8 @@ router.patch('/space/:id/status', authMiddleware, async (req, res) => {
 router.post('/project', [
   authMiddleware, 
   upload.fields([
-    { name: 'coverPhoto' },
-    { name: 'photos' }
+    { name: 'coverPhoto', maxCount: 1 },
+    { name: 'photos', maxCount: 10 }
   ]),
   handleMulterError
 ], async (req, res) => {
