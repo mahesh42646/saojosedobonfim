@@ -103,7 +103,7 @@ export default function PasswordChangeModal({ show, onHide, profile, onShowForgo
   };
 
   return (
-    <Modal show={show} onHide={handleClose} centered>
+    <Modal show={show} onHide={handleClose} centered size="lg">
       <Modal.Header closeButton>
         <Modal.Title className="d-flex align-items-center gap-2">
           <FaLock />
@@ -118,16 +118,16 @@ export default function PasswordChangeModal({ show, onHide, profile, onShowForgo
           {/* User Info Display */}
           <div className="mb-4 p-3 bg-light rounded">
             <h6 className="mb-2">Informações da Conta</h6>
-            <Row>
-              <Col md={6}>
-                <small className="text-muted">CPF:</small>
-                <div className="fw-bold">{profile?.cpf || 'N/A'}</div>
-              </Col>
-              <Col md={6}>
-                <small className="text-muted">Email:</small>
-                <div className="fw-bold">{profile?.email || 'N/A'}</div>
-              </Col>
-            </Row>
+            <div>
+              <div className="d-flex flex-wrap gap-2">
+                <span className="text-muted">CPF:</span>
+                <span className="fw-bold">{profile?.cpf || 'N/A'}</span>
+              </div>
+              <div className="d-flex flex-wrap gap-2">
+                <span className="text-muted">Email:</span>
+                <span className="fw-bold">{profile?.email || 'N/A'}</span>
+              </div>
+            </div>
           </div>
 
           {/* Current Password */}
@@ -210,7 +210,7 @@ export default function PasswordChangeModal({ show, onHide, profile, onShowForgo
           </div>
 
           {/* Forgot Password Link */}
-          <div className="text-center">
+          {/* <div className="text-center">
             <Button 
               variant="link" 
               onClick={onShowForgotPassword}
@@ -218,7 +218,7 @@ export default function PasswordChangeModal({ show, onHide, profile, onShowForgo
             >
               Esqueci minha senha
             </Button>
-          </div>
+          </div> */}
         </Form>
       </Modal.Body>
       <Modal.Footer>
@@ -226,10 +226,10 @@ export default function PasswordChangeModal({ show, onHide, profile, onShowForgo
           Cancelar
         </Button>
         <Button 
-          variant="success" 
+          variant="light" 
           onClick={handleSubmit}
           disabled={loading}
-          className="px-4"
+          className="px-4 text-dark"
         >
           {loading ? 'Alterando...' : 'Alterar Senha'}
         </Button>
