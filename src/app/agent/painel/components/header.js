@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Container, Navbar, Dropdown } from 'react-bootstrap';
 import { useAccountType } from '../accountTypeContext';
-import { FaChevronDown } from 'react-icons/fa';
+import { useAuth } from '../authcontex'; 
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://mapacultural.saojosedobonfim.pb.gov.br/api';
 
@@ -30,6 +30,7 @@ const TYPE_DISPLAY = {
 
 function Header() {
     const { accountType, updateAccountType } = useAccountType();
+    const { logout } = useAuth();
     const [profile, setProfile] = useState(null);
 
     useEffect(() => {
@@ -81,7 +82,7 @@ function Header() {
 
                 <div className="d-flex align-items-center gap-3">
                     <span className="bg-success-subtle text-dark d-none d-lg-block rounded-pill px-3 py-1">
-                        15 mensagens
+                        15 mensagenss
                     </span>
 
                     <Dropdown align="end">
@@ -104,7 +105,23 @@ function Header() {
                         <Dropdown.Menu className="p-0 my-2 rounded-3 shadow">
                             {profile && Object.keys(TYPE_DISPLAY).map((type) => {
                                 const isComplete = profile.typeStatus[type]?.isComplete;
-                                if (!isComplete) return null; // Skip incomplete accounts
+                                
+                                // Check if account has actual name data (not just fallbacks)
+                                const hasActualName = () => {
+                                    switch(type) {
+                                        case 'personal':
+                                            return profile.fullname;
+                                        case 'business':
+                                            return profile.businessData?.razaoSocial;
+                                        case 'collective':
+                                            return profile.collectiveData?.collectiveName;
+                                        default:
+                                            return false;
+                                    }
+                                };
+                                
+                                // Show if complete OR has actual name data
+                                if (!isComplete && !hasActualName()) return null;
 
                                 return (
                                     <Dropdown.Item key={type} onClick={() => updateAccountType(type)} active={accountType === type} className="d-flex align-items-center gap-2 py-2 text-dark rounded-3"
@@ -120,6 +137,19 @@ function Header() {
                                     </Dropdown.Item>
                                 );
                             })}
+                            <Dropdown.Divider />
+                            <Dropdown.Item 
+                                onClick={logout}
+                                className="d-flex align-items-center gap-2 py-2 text-danger rounded-3"
+                            >
+                                <div className="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center" style={{ width: '44px', height: '44px', fontSize: '14px' }}>
+                                    <i className="fas fa-sign-out-alt"></i>
+                                </div>
+                                <div>
+                                    <p className="m-0">Logout</p>
+                                    <p className="m-0 text-muted">Exit your account</p>
+                                </div>
+                            </Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown>
                 </div>

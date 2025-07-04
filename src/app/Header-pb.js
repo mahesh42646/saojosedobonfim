@@ -59,22 +59,22 @@ export default function Header() {
                         <div className="col text-center desktop-nav">
                             <ul className="nav justify-content-center align-items-center gap-4">
                                 <li className="nav-item d-flex flex-column align-items-center">
-                                    <Link href="/" className="fw-bold text-decoration-none" style={{ color: "#005100" }}>
+                                    <Link href="/PTBR" className="fw-bold text-decoration-none" style={{ color: "#005100" }}>
                                         <i className="bi bi-house-door pe-1" style={{ fontSize: 20 }}></i> Página inicial
                                     </Link>
                                 </li>
                                 <li className="nav-item d-flex flex-column align-items-center">
-                                    <Link href="/Projetos-Culturais" className="fw-bold text-decoration-none" style={{ color: "#005100" }}>
+                                    <Link href="/PTBR/Projetos-Culturais" className="fw-bold text-decoration-none" style={{ color: "#005100" }}>
                                         <i className="bi bi-puzzle pe-1" style={{ fontSize: 20 }}></i> Projetos
                                     </Link>
                                 </li>
                                 <li className="nav-item d-flex flex-column align-items-center px-3 py-1 rounded">
-                                    <Link href="/Espacos-Culturais" className="fw-bold text-decoration-none" style={{ color: "#005100" }}>
+                                    <Link href="/PTBR/Espacos-Culturais" className="fw-bold text-decoration-none" style={{ color: "#005100" }}>
                                         <i className="bi bi-bank pe-1" style={{ fontSize: 20 }}></i> Espaços
                                     </Link>
                                 </li>
                                 <li className="nav-item d-flex flex-column align-items-center">
-                                    <Link href="/Agentes-Culturais" className="fw-bold text-decoration-none" style={{ color: "#005100"}}>
+                                    <Link href="/PTBR/Agentes-Culturais" className="fw-bold text-decoration-none" style={{ color: "#005100"}}>
                                         <i className="bi bi-people-fill pe-1" style={{ fontSize: 20 }}></i> Agentes
                                     </Link>
                                 </li>
@@ -238,7 +238,7 @@ export default function Header() {
                         gap: 0
                     }}>
                         <li>
-                            <Link href="/" onClick={closeSidebar} style={{
+                            <Link href="/PTBR" onClick={closeSidebar} style={{
                                 display: "flex",
                                 alignItems: "center",
                                 padding: "15px 20px",
@@ -264,7 +264,7 @@ export default function Header() {
                             </Link>
                         </li>
                         <li>
-                            <Link href="/Projetos-Culturais" onClick={closeSidebar} style={{
+                            <Link href="/PTBR/Projetos-Culturais" onClick={closeSidebar} style={{
                                 display: "flex",
                                 alignItems: "center",
                                 padding: "15px 20px",
@@ -290,7 +290,7 @@ export default function Header() {
                             </Link>
                         </li>
                         <li>
-                            <Link href="/Espacos-Culturais" onClick={closeSidebar} style={{
+                            <Link href="/PTBR/Espacos-Culturais" onClick={closeSidebar} style={{
                                 display: "flex",
                                 alignItems: "center",
                                 padding: "15px 20px",
@@ -316,7 +316,7 @@ export default function Header() {
                             </Link>
                         </li>
                         <li>
-                            <Link href="/Agentes-Culturais" onClick={closeSidebar} style={{
+                            <Link href="/PTBR/Agentes-Culturais" onClick={closeSidebar} style={{
                                 display: "flex",
                                 alignItems: "center",
                                 padding: "15px 20px",
