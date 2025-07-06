@@ -6,7 +6,7 @@ import Image from "next/image";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://mapacultural.saojosedobonfim.pb.gov.br/api';
 
-export default function PublicProfileModal({ show, onHide, profile, accountType, onProfileUpdate }) {
+export default function PublicProfileModal({ show, onHide, profile, accountType, onProfileUpdate, photoOnly = false }) {
   const [formData, setFormData] = useState({
     aboutText: '',
     socialLinks: {
@@ -143,27 +143,36 @@ export default function PublicProfileModal({ show, onHide, profile, accountType,
       const formDataToSend = new FormData();
       
       formDataToSend.append('accountType', accountType);
-      formDataToSend.append('aboutText', formData.aboutText);
-
-      // Add social links (only enabled ones)
-      const socialLinksToSend = {};
-      Object.keys(enabledSocialLinks).forEach(platform => {
-        if (enabledSocialLinks[platform]) {
-          socialLinksToSend[platform] = formData.socialLinks[platform];
+      
+      // For photo-only mode, only send profile photo
+      if (photoOnly) {
+        if (profilePhoto) {
+          formDataToSend.append('profilePhoto', profilePhoto);
         }
-      });
-      formDataToSend.append('socialLinks', JSON.stringify(socialLinksToSend));
+      } else {
+        // Full profile update
+        formDataToSend.append('aboutText', formData.aboutText);
 
-      // Add profile photo if selected
-      if (profilePhoto) {
-        formDataToSend.append('profilePhoto', profilePhoto);
-      }
-
-      // Add gallery photos if enabled and selected
-      if (galleryEnabled && galleryPhotos.length > 0) {
-        galleryPhotos.forEach(photo => {
-          formDataToSend.append('galleryPhotos', photo);
+        // Add social links (only enabled ones)
+        const socialLinksToSend = {};
+        Object.keys(enabledSocialLinks).forEach(platform => {
+          if (enabledSocialLinks[platform]) {
+            socialLinksToSend[platform] = formData.socialLinks[platform];
+          }
         });
+        formDataToSend.append('socialLinks', JSON.stringify(socialLinksToSend));
+
+        // Add profile photo if selected
+        if (profilePhoto) {
+          formDataToSend.append('profilePhoto', profilePhoto);
+        }
+
+        // Add gallery photos if enabled and selected
+        if (galleryEnabled && galleryPhotos.length > 0) {
+          galleryPhotos.forEach(photo => {
+            formDataToSend.append('galleryPhotos', photo);
+          });
+        }
       }
 
       const response = await fetch(`${API_BASE_URL}/agent/profile/${user.cpf}/public`, {
@@ -193,7 +202,7 @@ export default function PublicProfileModal({ show, onHide, profile, accountType,
   return (
     <Modal show={show} onHide={onHide} size="lg" centered>
       <Modal.Header closeButton>
-        <Modal.Title>Perfil Público</Modal.Title>
+        <Modal.Title>{photoOnly ? 'Alterar Foto do Perfil' : 'Perfil Público'}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {error && <Alert variant="danger">{error}</Alert>}
@@ -204,20 +213,20 @@ export default function PublicProfileModal({ show, onHide, profile, accountType,
             <div className="d-flex align-items-center justify-content-between mb-3">
               <h6 className="mb-0 d-flex align-items-center">
                 <FaCamera className="me-2" />
-                Capa
+                {photoOnly ? 'Foto do Perfil' : 'Capa'}
               </h6>
             </div>
             <div 
               className="border border-dashed rounded-4 p-4 text-center position-relative"
-              style={{ minHeight: 200, backgroundColor: '#f8f9fa' }}
+              style={{ minHeight: photoOnly ? 250 : 200, backgroundColor: '#f8f9fa' }}
             >
               {profilePhotoPreview ? (
                 <div className="position-relative">
                   <Image
                     src={profilePhotoPreview}
                     alt="Profile"
-                    width={150}
-                    height={150}
+                    width={photoOnly ? 180 : 150}
+                    height={photoOnly ? 180 : 150}
                     className="rounded-4 object-fit-cover"
                     onError={(e) => {
                       console.error('Failed to load profile photo:', profilePhotoPreview);
@@ -240,6 +249,7 @@ export default function PublicProfileModal({ show, onHide, profile, accountType,
                 <div>
                   <FaPlus size={30} className="text-muted mb-2" />
                   <p className="text-muted">Novo</p>
+                  {photoOnly && <p className="text-muted">Escolha uma foto para o perfil {accountType}</p>}
                 </div>
               )}
               <input
@@ -252,183 +262,188 @@ export default function PublicProfileModal({ show, onHide, profile, accountType,
             </div>
           </div>
 
-          {/* About Text */}
-          <div className="mb-4">
-            <div className="d-flex align-items-center justify-content-between mb-3">
-              <h6 className="mb-0">Sobre *</h6>
-              <Button variant="outline-secondary" size="sm">
-                Editar
-              </Button>
-            </div>
-            <Form.Control
-              as="textarea"
-              rows={4}
-              value={formData.aboutText}
-              onChange={(e) => setFormData(prev => ({ ...prev, aboutText: e.target.value }))}
-              placeholder="Lorem Ipsum is simply dummy text of the printing and typesetting industry..."
-            />
-          </div>
-
-          {/* Social Links */}
-          <div className="mb-4">
-            <h6 className="mb-3">Links do projeto</h6>
-            
-            {/* Instagram */}
-            <div className="d-flex align-items-center justify-content-between p-3 mb-2 rounded-3" style={{ backgroundColor: '#f8f9fa' }}>
-              <span>Instagram</span>
-              <Form.Check
-                type="switch"
-                checked={enabledSocialLinks.instagram}
-                onChange={() => handleSocialLinkToggle('instagram')}
-              />
-            </div>
-            {enabledSocialLinks.instagram && (
-              <Form.Control
-                type="url"
-                placeholder="https://www.instagram.com/mapadacultura/"
-                value={formData.socialLinks.instagram}
-                onChange={(e) => handleSocialLinkChange('instagram', e.target.value)}
-                className="mb-3"
-              />
-            )}
-
-            {/* YouTube */}
-            <div className="d-flex align-items-center justify-content-between p-3 mb-2 rounded-3" style={{ backgroundColor: '#f8f9fa' }}>
-              <span>Youtube</span>
-              <Form.Check
-                type="switch"
-                checked={enabledSocialLinks.youtube}
-                onChange={() => handleSocialLinkToggle('youtube')}
-              />
-            </div>
-            {enabledSocialLinks.youtube && (
-              <Form.Control
-                type="url"
-                placeholder="https://www.youtube.com/mapadacultura"
-                value={formData.socialLinks.youtube}
-                onChange={(e) => handleSocialLinkChange('youtube', e.target.value)}
-                className="mb-3"
-              />
-            )}
-
-            {/* Facebook */}
-            <div className="d-flex align-items-center justify-content-between p-3 mb-2 rounded-3" style={{ backgroundColor: '#f8f9fa' }}>
-              <span>Facebook</span>
-              <Form.Check
-                type="switch"
-                checked={enabledSocialLinks.facebook}
-                onChange={() => handleSocialLinkToggle('facebook')}
-              />
-            </div>
-            {enabledSocialLinks.facebook && (
-              <Form.Control
-                type="url"
-                placeholder="https://www.facebook.com/mapadacultura/"
-                value={formData.socialLinks.facebook}
-                onChange={(e) => handleSocialLinkChange('facebook', e.target.value)}
-                className="mb-3"
-              />
-            )}
-          </div>
-
-          {/* Gallery */}
-          <div className="mb-4">
-            <div className="d-flex align-items-center justify-content-between p-3 mb-3 rounded-3" style={{ backgroundColor: '#f8f9fa' }}>
-              <span>Galeria de fotos</span>
-              <Form.Check
-                type="switch"
-                checked={galleryEnabled}
-                onChange={() => setGalleryEnabled(!galleryEnabled)}
-              />
-            </div>
-            
-            {galleryEnabled && (
-              <div>
-                <Row>
-                  {galleryPreviews.map((preview, index) => (
-                    <Col md={4} key={index} className="mb-3">
-                      <div className="position-relative">
-                        <Image
-                          src={preview}
-                          alt={`Gallery ${index + 1}`}
-                          width={200}
-                          height={150}
-                          className="rounded-3 object-fit-cover w-100"
-                          onError={(e) => {
-                            console.error('Failed to load gallery photo:', preview);
-                          }}
-                        />
-                        <Button
-                          variant="light"
-                          size="sm"
-                          className="position-absolute top-0 end-0 rounded-circle m-2"
-                          onClick={() => {
-                            setGalleryPreviews(prev => prev.filter((_, i) => i !== index));
-                            setGalleryPhotos(prev => prev.filter((_, i) => i !== index));
-                          }}
-                        >
-                          <FaTrash />
-                        </Button>
-                      </div>
-                    </Col>
-                  ))}
-                  <Col md={4} className="mb-3">
-                    <div 
-                      className="border border-dashed rounded-3 d-flex align-items-center justify-content-center position-relative"
-                      style={{ height: 150, backgroundColor: '#f8f9fa' }}
-                    >
-                      <div className="text-center">
-                        <FaPlus size={24} className="text-muted mb-1" />
-                        <p className="text-muted mb-0">Novo</p>
-                      </div>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        onChange={handleGalleryPhotosChange}
-                        className="position-absolute w-100 h-100 opacity-0"
-                        style={{ cursor: 'pointer' }}
-                      />
-                    </div>
-                  </Col>
-                </Row>
+          {/* Show other sections only if not in photo-only mode */}
+          {!photoOnly && (
+            <>
+              {/* About Text */}
+              <div className="mb-4">
+                <div className="d-flex align-items-center justify-content-between mb-3">
+                  <h6 className="mb-0">Sobre *</h6>
+                  <Button variant="outline-secondary" size="sm">
+                    Editar
+                  </Button>
+                </div>
+                <Form.Control
+                  as="textarea"
+                  rows={4}
+                  value={formData.aboutText}
+                  onChange={(e) => setFormData(prev => ({ ...prev, aboutText: e.target.value }))}
+                  placeholder="Lorem Ipsum is simply dummy text of the printing and typesetting industry..."
+                />
               </div>
-            )}
-          </div>
 
-          {/* Contact Info */}
-          <Row>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label>Telefone *</Form.Label>
-                <Form.Control
-                  type="tel"
-                  value={profile?.telephone || ''}
-                  readOnly
-                />
-              </Form.Group>
-            </Col>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label>E-mail *</Form.Label>
-                <Form.Control
-                  type="email"
-                  value={profile?.email || ''}
-                  readOnly
-                />
-              </Form.Group>
-            </Col>
-          </Row>
+              {/* Social Links */}
+              <div className="mb-4">
+                <h6 className="mb-3">Links do projeto</h6>
+                
+                {/* Instagram */}
+                <div className="d-flex align-items-center justify-content-between p-3 mb-2 rounded-3" style={{ backgroundColor: '#f8f9fa' }}>
+                  <span>Instagram</span>
+                  <Form.Check
+                    type="switch"
+                    checked={enabledSocialLinks.instagram}
+                    onChange={() => handleSocialLinkToggle('instagram')}
+                  />
+                </div>
+                {enabledSocialLinks.instagram && (
+                  <Form.Control
+                    type="url"
+                    placeholder="https://www.instagram.com/mapadacultura/"
+                    value={formData.socialLinks.instagram}
+                    onChange={(e) => handleSocialLinkChange('instagram', e.target.value)}
+                    className="mb-3"
+                  />
+                )}
+
+                {/* YouTube */}
+                <div className="d-flex align-items-center justify-content-between p-3 mb-2 rounded-3" style={{ backgroundColor: '#f8f9fa' }}>
+                  <span>Youtube</span>
+                  <Form.Check
+                    type="switch"
+                    checked={enabledSocialLinks.youtube}
+                    onChange={() => handleSocialLinkToggle('youtube')}
+                  />
+                </div>
+                {enabledSocialLinks.youtube && (
+                  <Form.Control
+                    type="url"
+                    placeholder="https://www.youtube.com/mapadacultura"
+                    value={formData.socialLinks.youtube}
+                    onChange={(e) => handleSocialLinkChange('youtube', e.target.value)}
+                    className="mb-3"
+                  />
+                )}
+
+                {/* Facebook */}
+                <div className="d-flex align-items-center justify-content-between p-3 mb-2 rounded-3" style={{ backgroundColor: '#f8f9fa' }}>
+                  <span>Facebook</span>
+                  <Form.Check
+                    type="switch"
+                    checked={enabledSocialLinks.facebook}
+                    onChange={() => handleSocialLinkToggle('facebook')}
+                  />
+                </div>
+                {enabledSocialLinks.facebook && (
+                  <Form.Control
+                    type="url"
+                    placeholder="https://www.facebook.com/mapadacultura/"
+                    value={formData.socialLinks.facebook}
+                    onChange={(e) => handleSocialLinkChange('facebook', e.target.value)}
+                    className="mb-3"
+                  />
+                )}
+              </div>
+
+              {/* Gallery */}
+              <div className="mb-4">
+                <div className="d-flex align-items-center justify-content-between p-3 mb-3 rounded-3" style={{ backgroundColor: '#f8f9fa' }}>
+                  <span>Galeria de fotos</span>
+                  <Form.Check
+                    type="switch"
+                    checked={galleryEnabled}
+                    onChange={() => setGalleryEnabled(!galleryEnabled)}
+                  />
+                </div>
+                
+                {galleryEnabled && (
+                  <div>
+                    <Row>
+                      {galleryPreviews.map((preview, index) => (
+                        <Col md={4} key={index} className="mb-3">
+                          <div className="position-relative">
+                            <Image
+                              src={preview}
+                              alt={`Gallery ${index + 1}`}
+                              width={200}
+                              height={150}
+                              className="rounded-3 object-fit-cover w-100"
+                              onError={(e) => {
+                                console.error('Failed to load gallery photo:', preview);
+                              }}
+                            />
+                            <Button
+                              variant="light"
+                              size="sm"
+                              className="position-absolute top-0 end-0 rounded-circle m-2"
+                              onClick={() => {
+                                setGalleryPreviews(prev => prev.filter((_, i) => i !== index));
+                                setGalleryPhotos(prev => prev.filter((_, i) => i !== index));
+                              }}
+                            >
+                              <FaTrash />
+                            </Button>
+                          </div>
+                        </Col>
+                      ))}
+                      <Col md={4} className="mb-3">
+                        <div 
+                          className="border border-dashed rounded-3 d-flex align-items-center justify-content-center position-relative"
+                          style={{ height: 150, backgroundColor: '#f8f9fa' }}
+                        >
+                          <div className="text-center">
+                            <FaPlus size={24} className="text-muted mb-1" />
+                            <p className="text-muted mb-0">Novo</p>
+                          </div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            onChange={handleGalleryPhotosChange}
+                            className="position-absolute w-100 h-100 opacity-0"
+                            style={{ cursor: 'pointer' }}
+                          />
+                        </div>
+                      </Col>
+                    </Row>
+                  </div>
+                )}
+              </div>
+
+              {/* Contact Info */}
+              <Row>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Telefone *</Form.Label>
+                    <Form.Control
+                      type="tel"
+                      value={profile?.telephone || ''}
+                      readOnly
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>E-mail *</Form.Label>
+                    <Form.Control
+                      type="email"
+                      value={profile?.email || ''}
+                      readOnly
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+            </>
+          )}
         </Form>
       </Modal.Body>
       <Modal.Footer>
         <Button
           variant="success"
           onClick={handleSubmit}
-          disabled={loading}
+          disabled={loading || (photoOnly && !profilePhoto)}
           className="rounded-pill px-4"
         >
-          {loading ? 'Salvando...' : 'Salvar'}
+          {loading ? 'Salvando...' : (photoOnly ? 'Salvar Foto' : 'Salvar')}
         </Button>
       </Modal.Footer>
     </Modal>
