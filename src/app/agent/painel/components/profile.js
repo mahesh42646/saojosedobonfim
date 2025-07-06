@@ -7,7 +7,7 @@ import PublicProfileModal from './PublicProfileModal';
 import PasswordChangeModal from './PasswordChangeModal';
 import ForgotPasswordModal from './ForgotPasswordModal';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://teste.mapadacultura.com/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://mapacultural.saojosedobonfim.pb.gov.br/api';
 
 const TYPE_DISPLAY = {
   personal: {
@@ -192,7 +192,7 @@ export default function Profile() {
             </span>
             <div>
               <div className="fw-bold">Perfil Público</div>
-              <div className="text-secondary" style={{ fontSize: 15 }}>Atualize os seus dados público.</div>
+              <div className="text-secondary"  style={{ fontSize: 15 }}>Atualize os seus dados público.</div>
             </div>
             <FaChevronRight className="ms-auto text-secondary" />
           </div>

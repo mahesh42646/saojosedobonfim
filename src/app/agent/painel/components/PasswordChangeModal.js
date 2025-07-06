@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Modal, Form, Button, Alert, Row, Col } from "react-bootstrap";
 import { FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://teste.mapadacultura.com/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://mapacultural.saojosedobonfim.pb.gov.br/api';
 
 export default function PasswordChangeModal({ show, onHide, profile, onShowForgotPassword }) {
   const [formData, setFormData] = useState({

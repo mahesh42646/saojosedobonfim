@@ -67,8 +67,8 @@ const fetchCitiesByState = async (stateId) => {
 };
 
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4001/api';
-// const API_BASE_URL = 'http://localhost:4001/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://mapacultural.saojosedobonfim.pb.gov.br/api';
+// const API_BASE_URL = 'https://mapacultural.saojosedobonfim.pb.gov.br/api';
 
 // CPF validation function (works on unformatted CPF)
 function validateCPF(cpf) {

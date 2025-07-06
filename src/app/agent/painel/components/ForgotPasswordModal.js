@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Modal, Form, Button, Alert } from "react-bootstrap";
 import { FaLock, FaEnvelope } from "react-icons/fa";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://teste.mapadacultura.com/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://mapacultural.saojosedobonfim.pb.gov.br/api';
 
 export default function ForgotPasswordModal({ show, onHide }) {
   const [emailOrCpf, setEmailOrCpf] = useState('');

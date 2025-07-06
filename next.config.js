@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['randomuser.me', 'localhost', 'mapacultural.saojosedobonfim.pb.gov.br', 'mapacultural.saojosedobonfim.pb.gov.br', 'teste.mapadacultura.com'],
+    domains: ['randomuser.me', 'localhost', 'mapacultural.saojosedobonfim.pb.gov.br', 'mapacultural.saojosedobonfim.pb.gov.br'],
     dangerouslyAllowSVG: true,
     remotePatterns: [
       {

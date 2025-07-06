@@ -67,6 +67,78 @@ function Header() {
         return TYPE_DISPLAY[accountType]?.initials(profile);
     };
 
+    // Get profile photo URL for a specific account type
+    const getProfilePhotoUrl = (type) => {
+        const profilePhoto = profile?.profilePhotos?.[type];
+        if (profilePhoto && profilePhoto.trim()) {
+            const baseUrl = API_BASE_URL.replace('/api', '');
+            return `${baseUrl}/uploads/${profilePhoto.trim()}`;
+        }
+        return null;
+    };
+
+    // Render profile display (photo or initials) for current account
+    const renderCurrentProfileDisplay = () => {
+        const photoUrl = getProfilePhotoUrl(accountType);
+        
+        if (photoUrl) {
+            return (
+                <Image
+                    src={photoUrl}
+                    alt="Profile Photo"
+                    width={40}
+                    height={40}
+                    className="rounded-circle object-fit-cover"
+                    onError={(e) => {
+                        // Fallback to initials on error
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'flex';
+                    }}
+                />
+            );
+        }
+        
+        return (
+            <div
+                className="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center"
+                style={{ width: '40px', height: '40px', fontSize: '16px' }}
+            >
+                {getCurrentInitials()}
+            </div>
+        );
+    };
+
+    // Render profile display (photo or initials) for dropdown items
+    const renderDropdownProfileDisplay = (type) => {
+        const photoUrl = getProfilePhotoUrl(type);
+        
+        if (photoUrl) {
+            return (
+                <Image
+                    src={photoUrl}
+                    alt="Profile Photo"
+                    width={44}
+                    height={44}
+                    className="rounded-circle object-fit-cover"
+                    onError={(e) => {
+                        // Fallback to initials on error
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'flex';
+                    }}
+                />
+            );
+        }
+        
+        return (
+            <div 
+                className="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center" 
+                style={{ width: '44px', height: '44px', fontSize: '14px' }}
+            >
+                {TYPE_DISPLAY[type].initials(profile)}
+            </div>
+        );
+    };
+
     return (
         <Navbar className="bg-white border-bottom py-2">
             <Container fluid className="px-5">
@@ -82,7 +154,7 @@ function Header() {
 
                 <div className="d-flex align-items-center gap-3">
                     <span className="bg-success-subtle text-dark d-none d-lg-block rounded-pill px-3 py-1">
-                        15 mensagenss
+                        15 mensagens
                     </span>
 
                     <Dropdown align="end">
@@ -91,12 +163,7 @@ function Header() {
                             className="d-flex align-items-center gap-2 cursor-pointer"
                         >
                             <div className="d-flex align-items-center">
-                                <div
-                                    className="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center"
-                                    style={{ width: '40px', height: '40px', fontSize: '16px' }}
-                                >
-                                    {getCurrentInitials()}
-                                </div>
+                                {renderCurrentProfileDisplay()}
                                 <span className="ms-2 fw-medium d-none d-lg-block">{getCurrentDisplayName()}</span>
                                 {/* <FaChevronDown className="ms-2" size={12} /> */}
                             </div>
@@ -127,9 +194,7 @@ function Header() {
                                     <Dropdown.Item key={type} onClick={() => updateAccountType(type)} active={accountType === type} className="d-flex align-items-center gap-2 py-2 text-dark rounded-3"
                                         style={{ backgroundColor: accountType === type ? '#9FE870' : 'transparent' }}
                                     >
-                                        <div className="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center" style={{ width: '44px', height: '44px', fontSize: '14px' }} >
-                                            {TYPE_DISPLAY[type].initials(profile)}
-                                        </div>
+                                        {renderDropdownProfileDisplay(type)}
                                         <div>
                                             <p className="m-0">{TYPE_DISPLAY[type].name(profile)}</p>
                                             <p className="m-0">{type}</p>
@@ -138,17 +203,10 @@ function Header() {
                                 );
                             })}
                             <Dropdown.Divider />
-                            <Dropdown.Item 
-                                onClick={logout}
-                                className="d-flex align-items-center gap-2 py-2 text-danger rounded-3"
-                            >
-                                <div className="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center" style={{ width: '44px', height: '44px', fontSize: '14px' }}>
-                                    <i className="fas fa-sign-out-alt"></i>
-                                </div>
-                                <div>
-                                    <p className="m-0">Logout</p>
-                                    <p className="m-0 text-muted">Exit your account</p>
-                                </div>
+                            <Dropdown.Item   onClick={logout}
+                                className="d-flex fw-bold align-items-center btn p-1text-danger rounded-3" > 
+                                <p className="fw-bold">Sair</p>
+                              
                             </Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown>
