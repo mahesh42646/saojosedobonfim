@@ -9,8 +9,7 @@ git branch -M main
 git push -u origin main
 
 # on live
- 
-git pull
+ git pull
 npm run build
 pm2 restart all
 systemctl reload nginx
@@ -24,7 +23,7 @@ sudo nano /etc/nginx/sites-available/saojosedobonfim
 
 
 
-  GNU nano 7.2                                                               /etc/nginx/sites-available/saojosedobonfim                                                                         
+  /etc/nginx/sites-available/saojosedobonfim                                                                         
 server {
     server_name mapacultural.saojosedobonfim.pb.gov.br;
 

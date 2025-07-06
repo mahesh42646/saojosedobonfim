@@ -206,7 +206,18 @@ function Header() {
                             <Dropdown.Divider />
                             <Dropdown.Item onClick={logout}
                                 className="d-flex align-items-center gap-2 py-2 text-dark rounded-3" >
-                                {renderDropdownProfileDisplay(type)}
+                                <Image
+                                    src={photoUrl}
+                                    alt="Profile Photo"
+                                    width={44}
+                                    height={44}
+                                    className="rounded-circle object-fit-cover"
+                                    onError={(e) => {
+                                        // Fallback to initials on error
+                                        e.target.style.display = 'none';
+                                        e.target.nextSibling.style.display = 'flex';
+                                    }}
+                                />
                                 <p className="fw-bold">Sair</p>
 
                             </Dropdown.Item>
