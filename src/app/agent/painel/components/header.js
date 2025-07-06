@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { Container, Navbar, Dropdown } from 'react-bootstrap';
 import { useAccountType } from '../accountTypeContext';
 import { useAuth } from '../authcontex';
+import { FaSignOutAlt } from 'react-icons/fa';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://mapacultural.saojosedobonfim.pb.gov.br/api';
 
@@ -205,21 +206,12 @@ function Header() {
                             })}
                             <Dropdown.Divider />
                             <Dropdown.Item onClick={logout}
-                                className="d-flex align-items-center gap-2 py-2 text-dark rounded-3" >
-                                <Image
-                                    src={photoUrl}
-                                    alt="Profile Photo"
-                                    width={44}
-                                    height={44}
-                                    className="rounded-circle object-fit-cover"
-                                    onError={(e) => {
-                                        // Fallback to initials on error
-                                        e.target.style.display = 'none';
-                                        e.target.nextSibling.style.display = 'flex';
-                                    }}
-                                />
-                                <p className="fw-bold">Sair</p>
-
+                                className="d-flex fw-bold align-items-center btn  text-danger rounded-3" > 
+                                <div className="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center" style={{ width: '44px', height: '44px', fontSize: '14px' }}>
+                                    <FaSignOutAlt />
+                                </div>
+                                <p className="fw-bold p-2 my-auto">Sair</p>
+                              
                             </Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown>
