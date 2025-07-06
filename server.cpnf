@@ -9,11 +9,8 @@ git branch -M main
 git push -u origin main
 
 # on live
+ 
 
-git pull
-npm run build
-pm2 restart all
-systemctl reload nginx
 
 
  nano /etc/nginx/sites-available/mapacultural.saojosedobonfim.pb.gov.br

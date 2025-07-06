@@ -9,130 +9,6 @@ import ForgotPasswordModal from './ForgotPasswordModal';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://mapacultural.saojosedobonfim.pb.gov.br/api';
 
-// Profile Photo Modal Component
-const ProfilePhotoModal = ({ show, onHide, profile, accountType, onProfileUpdate }) => {
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
-  const [isUploading, setIsUploading] = useState(false);
-
-  const handleFileSelect = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-      const reader = new FileReader();
-      reader.onload = (e) => setPreviewUrl(e.target.result);
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleUpload = async () => {
-    if (!selectedFile) return;
-
-    setIsUploading(true);
-    try {
-      const userData = localStorage.getItem("agentUser");
-      const token = localStorage.getItem("agentToken");
-      if (!userData || !token) return;
-
-      const user = JSON.parse(userData);
-      const formData = new FormData();
-      formData.append('profilePhoto', selectedFile);
-      formData.append('accountType', accountType);
-
-      const response = await fetch(`${API_BASE_URL}/agent/profile/${user.cpf}/photo`, {
-        method: 'POST',
-        headers: { 'Authorization': token },
-        body: formData
-      });
-
-      if (response.ok) {
-        const updatedProfile = await response.json();
-        onProfileUpdate(updatedProfile);
-        onHide();
-        setSelectedFile(null);
-        setPreviewUrl(null);
-      }
-    } catch (error) {
-      console.error('Error uploading photo:', error);
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const getCurrentProfilePhoto = () => {
-    const profilePhoto = profile?.profilePhotos?.[accountType];
-    if (profilePhoto && profilePhoto.trim()) {
-      const baseUrl = API_BASE_URL.replace('/api', '');
-      return `${baseUrl}/uploads/${profilePhoto.trim()}`;
-    }
-    return "/images/placeholder-Avatar.png";
-  };
-
-  if (!show) return null;
-
-  return (
-    <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-      <div className="modal-dialog modal-dialog-centered">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title">Alterar Foto do Perfil</h5>
-            <button type="button" className="btn-close" onClick={onHide}></button>
-          </div>
-          <div className="modal-body text-center">
-            <div className="mb-4">
-              <Image
-                src={previewUrl || getCurrentProfilePhoto()}
-                alt="Profile Photo"
-                width={120}
-                height={120}
-                className="rounded-circle object-fit-cover mb-3"
-              />
-              <p className="text-muted">Foto atual do perfil {accountType}</p>
-            </div>
-            
-            <div className="mb-3">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileSelect}
-                className="form-control"
-                id="profilePhotoInput"
-              />
-              <label htmlFor="profilePhotoInput" className="form-label mt-2">
-                Escolha uma nova foto
-              </label>
-            </div>
-
-            {selectedFile && (
-              <div className="alert alert-info">
-                <strong>Arquivo selecionado:</strong> {selectedFile.name}
-              </div>
-            )}
-          </div>
-          <div className="modal-footer">
-            <button 
-              type="button" 
-              className="btn btn-secondary" 
-              onClick={onHide}
-              disabled={isUploading}
-            >
-              Cancelar
-            </button>
-            <button 
-              type="button" 
-              className="btn btn-primary" 
-              onClick={handleUpload}
-              disabled={!selectedFile || isUploading}
-            >
-              {isUploading ? 'Enviando...' : 'Salvar Foto'}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const TYPE_DISPLAY = {
   personal: {
     label: "Conta pessoa física",
@@ -165,7 +41,7 @@ export default function Profile() {
   const [showPublicProfileModal, setShowPublicProfileModal] = useState(false);
   const [showPasswordChangeModal, setShowPasswordChangeModal] = useState(false);
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
-  const [showProfilePhotoModal, setShowProfilePhotoModal] = useState(false);
+  const [isPhotoOnlyMode, setIsPhotoOnlyMode] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -177,8 +53,6 @@ export default function Profile() {
         const user = JSON.parse(userData);
         const response = await fetch(
           `${API_BASE_URL}/agent/profile/${user.cpf}`,
-          // `https://mapacultural.saojosedobonfim.pb.gov.br/api/agent/profile/${user.cpf}`,
-
           {
             headers: { Authorization: token },
           }
@@ -199,6 +73,21 @@ export default function Profile() {
 
   const handleProfileUpdate = (updatedProfile) => {
     setProfile(updatedProfile);
+  };
+
+  const handleOpenPhotoModal = () => {
+    setIsPhotoOnlyMode(true);
+    setShowPublicProfileModal(true);
+  };
+
+  const handleOpenFullProfileModal = () => {
+    setIsPhotoOnlyMode(false);
+    setShowPublicProfileModal(true);
+  };
+
+  const handleCloseProfileModal = () => {
+    setShowPublicProfileModal(false);
+    setIsPhotoOnlyMode(false);
   };
 
   if (!profile) {
@@ -246,7 +135,7 @@ export default function Profile() {
             <span
               className="position-absolute bottom-0 end-0 bg-light rounded-circle p-1"
               style={{ border: "2px solid #fff", cursor: "pointer" }}
-              onClick={() => setShowProfilePhotoModal(true)}
+              onClick={handleOpenPhotoModal}
             >
               <FaCamera color="#2E7D32" />
             </span>
@@ -310,7 +199,7 @@ export default function Profile() {
           <div 
             className="d-flex align-items-center bg-body-secondary rounded-pill p-3 mb-2" 
             style={{ minHeight: 60, cursor: "pointer" }}
-            onClick={() => setShowPublicProfileModal(true)}
+            onClick={handleOpenFullProfileModal}
           >
             <span className="bg-body rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: 44, height: 44 }}>
               <FaUser size={20} />
@@ -324,7 +213,7 @@ export default function Profile() {
           <div 
             className="d-flex align-items-center bg-body-secondary rounded-pill p-3 mb-2" 
             style={{ minHeight: 60, cursor: "pointer" }}
-            onClick={() => setShowPublicProfileModal(true)}
+            onClick={handleOpenFullProfileModal}
           >
             <span className="bg-body rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: 44, height: 44 }}>
               <FaUsers size={20} />
@@ -362,22 +251,14 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Profile Photo Modal */}
-      <ProfilePhotoModal
-        show={showProfilePhotoModal}
-        onHide={() => setShowProfilePhotoModal(false)}
-        profile={profile}
-        accountType={accountType}
-        onProfileUpdate={handleProfileUpdate}
-      />
-
       {/* Public Profile Modal */}
       <PublicProfileModal
         show={showPublicProfileModal}
-        onHide={() => setShowPublicProfileModal(false)}
+        onHide={handleCloseProfileModal}
         profile={profile}
         accountType={accountType}
         onProfileUpdate={handleProfileUpdate}
+        photoOnly={isPhotoOnlyMode}
       />
 
       {/* Password Change Modal */}
