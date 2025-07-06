@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Container, Navbar, Dropdown } from 'react-bootstrap';
 import { useAccountType } from '../accountTypeContext';
-import { useAuth } from '../authcontex'; 
+import { useAuth } from '../authcontex';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://mapacultural.saojosedobonfim.pb.gov.br/api';
 
@@ -42,7 +42,7 @@ function Header() {
 
                 const user = JSON.parse(userData);
                 const response = await fetch(`${API_BASE_URL}/agent/profile/${user.cpf}`, {
-                // const response = await fetch(`https://mapacultural.saojosedobonfim.pb.gov.br/api/agent/profile/${user.cpf}`, {
+                    // const response = await fetch(`https://mapacultural.saojosedobonfim.pb.gov.br/api/agent/profile/${user.cpf}`, {
                     headers: { 'Authorization': token }
                 });
 
@@ -80,7 +80,7 @@ function Header() {
     // Render profile display (photo or initials) for current account
     const renderCurrentProfileDisplay = () => {
         const photoUrl = getProfilePhotoUrl(accountType);
-        
+
         if (photoUrl) {
             return (
                 <Image
@@ -97,7 +97,7 @@ function Header() {
                 />
             );
         }
-        
+
         return (
             <div
                 className="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center"
@@ -111,7 +111,7 @@ function Header() {
     // Render profile display (photo or initials) for dropdown items
     const renderDropdownProfileDisplay = (type) => {
         const photoUrl = getProfilePhotoUrl(type);
-        
+
         if (photoUrl) {
             return (
                 <Image
@@ -128,10 +128,10 @@ function Header() {
                 />
             );
         }
-        
+
         return (
-            <div 
-                className="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center" 
+            <div
+                className="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center"
                 style={{ width: '44px', height: '44px', fontSize: '14px' }}
             >
                 {TYPE_DISPLAY[type].initials(profile)}
@@ -172,10 +172,10 @@ function Header() {
                         <Dropdown.Menu className="p-0 my-2 rounded-3 shadow">
                             {profile && Object.keys(TYPE_DISPLAY).map((type) => {
                                 const isComplete = profile.typeStatus[type]?.isComplete;
-                                
+
                                 // Check if account has actual name data (not just fallbacks)
                                 const hasActualName = () => {
-                                    switch(type) {
+                                    switch (type) {
                                         case 'personal':
                                             return profile.fullname;
                                         case 'business':
@@ -186,12 +186,13 @@ function Header() {
                                             return false;
                                     }
                                 };
-                                
+
                                 // Show if complete OR has actual name data
                                 if (!isComplete && !hasActualName()) return null;
 
                                 return (
-                                    <Dropdown.Item key={type} onClick={() => updateAccountType(type)} active={accountType === type} className="d-flex align-items-center gap-2 py-2 text-dark rounded-3"
+                                    <Dropdown.Item key={type} onClick={() => updateAccountType(type)} active={accountType === type}
+                                        className="d-flex align-items-center gap-2 py-2 text-dark rounded-3"
                                         style={{ backgroundColor: accountType === type ? '#9FE870' : 'transparent' }}
                                     >
                                         {renderDropdownProfileDisplay(type)}
@@ -203,10 +204,11 @@ function Header() {
                                 );
                             })}
                             <Dropdown.Divider />
-                            <Dropdown.Item   onClick={logout}
-                                className="d-flex fw-bold align-items-center btn p-1text-danger rounded-3" > 
+                            <Dropdown.Item onClick={logout}
+                                className="d-flex align-items-center gap-2 py-2 text-dark rounded-3" >
+                                {renderDropdownProfileDisplay(type)}
                                 <p className="fw-bold">Sair</p>
-                              
+
                             </Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown>
