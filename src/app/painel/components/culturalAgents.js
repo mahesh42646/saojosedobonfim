@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import Image from 'next/image';
-import { buildApiUrl } from '../../config/api';
+import { buildApiUrl, buildStaticUrl } from '../../config/api';
 import { useAuth } from '../authContex';
 import jsPDF from 'jspdf';
 
@@ -251,6 +251,21 @@ function AgentDetails({ agent, onBack, user }) {
     const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8'];
     const index = agent.fullname?.charCodeAt(0) % colors.length || 0;
     return colors[index];
+  };
+
+  // Get active agent type key for profile photo
+  const getActiveAgentTypeKey = (agent) => {
+    if (agent.typeStatus?.personal?.isComplete) return 'personal';
+    if (agent.typeStatus?.business?.isComplete) return 'business';
+    if (agent.typeStatus?.collective?.isComplete) return 'collective';
+    return 'personal'; // default fallback
+  };
+
+  // Get agent profile photo URL
+  const getAgentProfilePhoto = (agent) => {
+    const activeType = getActiveAgentTypeKey(agent);
+    const photoFilename = agent.profilePhotos?.[activeType];
+    return photoFilename ? buildStaticUrl(`/uploads/${photoFilename}`) : null;
   };
 
   // Check which tabs should be available based on completed types
@@ -516,7 +531,7 @@ function AgentDetails({ agent, onBack, user }) {
           <h2 style={{ margin: 0, fontWeight: 600, fontSize: 22 }}> Detalhes do Agente Cultural</h2>
         </div>
         <div className="d-flex me-2 gap-2">
-          {currentAgent.status === 'active' ? (
+          {(currentAgent.status || 'active') === 'active' ? (
             <button 
               className="rounded-5" 
               onClick={() => handleStatusUpdate('inactive')}
@@ -560,9 +575,9 @@ function AgentDetails({ agent, onBack, user }) {
         <div style={{ background: '#f7f7f7', borderBottom: '1px solid #eee', padding: 24, borderTopLeftRadius: 16, borderTopRightRadius: 16 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              {agent.avatar ? (
+              {getAgentProfilePhoto(agent) ? (
                 <Image 
-                  src={agent.avatar} 
+                  src={getAgentProfilePhoto(agent)} 
                   alt={agent.fullname || 'Agent'} 
                   width={56}
                   height={56}
@@ -576,18 +591,18 @@ function AgentDetails({ agent, onBack, user }) {
               <div>
                 <div style={{ fontWeight: 600, fontSize: 20 }}>{agent.fullname || 'Unnamed Agent'}</div>
                 <div style={{ color: '#222', fontSize: 15, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ color: currentAgent.status === 'active' ? '#2ecc40' : '#ff6b6b', fontSize: 18 }}>●</span> 
+                  <span style={{ color: (currentAgent.status || 'active') === 'active' ? '#2ecc40' : '#ff6b6b', fontSize: 18 }}>●</span> 
                   {currentAgent.typeStatus?.personal?.isComplete ? 'Conta Pessoal' : currentAgent.typeStatus?.business?.isComplete ? 'Conta Empresarial' : currentAgent.typeStatus?.collective?.isComplete ? 'Conta Coletiva' : 'Incompleto'}
                   <span style={{ 
-                    background: currentAgent.status === 'active' ? '#e8f5e8' : '#ffe8e8', 
-                    color: currentAgent.status === 'active' ? '#2ecc40' : '#ff6b6b', 
+                    background: (currentAgent.status || 'active') === 'active' ? '#e8f5e8' : '#ffe8e8', 
+                    color: (currentAgent.status || 'active') === 'active' ? '#2ecc40' : '#ff6b6b', 
                     padding: '2px 8px', 
                     borderRadius: 12, 
                     fontSize: 12, 
                     fontWeight: 600,
                     marginLeft: 8
                   }}>
-                    {currentAgent.status === 'active' ? 'Ativo' : 'Inativo'}
+                    {(currentAgent.status || 'active') === 'active' ? 'Ativo' : 'Inativo'}
                   </span>
                 </div>
               </div>
@@ -773,6 +788,21 @@ export default function AgentsPage() {
     return colors[index];
   };
 
+  // Get active agent type key for profile photo
+  const getActiveAgentTypeKey = (agent) => {
+    if (agent.typeStatus?.personal?.isComplete) return 'personal';
+    if (agent.typeStatus?.business?.isComplete) return 'business';
+    if (agent.typeStatus?.collective?.isComplete) return 'collective';
+    return 'personal'; // default fallback
+  };
+
+  // Get agent profile photo URL
+  const getAgentProfilePhoto = (agent) => {
+    const activeType = getActiveAgentTypeKey(agent);
+    const photoFilename = agent.profilePhotos?.[activeType];
+    return photoFilename ? buildStaticUrl(`/uploads/${photoFilename}`) : null;
+  };
+
   // Fetch agents on component mount
   useEffect(() => {
     fetchAgents(searchTerm, selectedType, selectedStatus);
@@ -796,7 +826,7 @@ export default function AgentsPage() {
                   style={{ border: '1px solid #ccc', borderRadius: 24, padding: '6px 24px', outline: 'none', width: 400 }}
                 />
                                   <div className="position-relative">
-                    <button 
+                    {/* <button 
                       type="button"
                       className="btn rounded-5 px-4 py-2"
                       style={{ background: '#F5FFF0', border: '1px solid rgb(216, 251, 216)' }}
@@ -804,7 +834,7 @@ export default function AgentsPage() {
                     >
                       {selectedType === 'all' ? 'Todos os Tipos' : selectedType === 'personal' ? 'Pessoal' : selectedType === 'business' ? 'Empresarial' : selectedType.charAt(0).toUpperCase() + selectedType.slice(1)} 
                       <i className="bi bi-chevron-down ms-2"></i>
-                    </button>
+                    </button> */}
                     {showFilter && (
                       <div 
                         className="position-absolute end-0 mt-1 bg-white rounded-3 shadow-sm"
@@ -938,9 +968,9 @@ export default function AgentsPage() {
                   }}
                   onClick={() => setSelectedAgent(agent)}
                 >
-                  {agent.avatar ? (
+                  {getAgentProfilePhoto(agent) ? (
                     <Image 
-                      src={agent.avatar} 
+                      src={getAgentProfilePhoto(agent)} 
                       alt={agent.fullname || 'Agent'} 
                       width={36}
                       height={36}
@@ -971,14 +1001,14 @@ export default function AgentsPage() {
                     <div style={{ color: '#888', fontSize: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                       Tipo: {getAgentType(agent)}
                       <span style={{ 
-                        background: agent.status === 'active' ? '#e8f5e8' : '#ffe8e8', 
-                        color: agent.status === 'active' ? '#2ecc40' : '#ff6b6b', 
+                        background: (agent.status || 'active') === 'active' ? '#e8f5e8' : '#ffe8e8', 
+                        color: (agent.status || 'active') === 'active' ? '#2ecc40' : '#ff6b6b', 
                         padding: '1px 6px', 
                         borderRadius: 8, 
                         fontSize: 11, 
                         fontWeight: 600
                       }}>
-                        {agent.status === 'active' ? 'Ativo' : 'Inativo'}
+                        {(agent.status || 'active') === 'active' ? 'Ativo' : 'Inativo'}
                       </span>
                     </div>
                   </div>

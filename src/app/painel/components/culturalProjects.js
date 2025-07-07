@@ -524,6 +524,7 @@ export default function CspacePage() {
                 style={{ border: '1px solid #ccc', borderRadius: 24, padding: '6px 24px', outline: 'none', width: 200 }}
               />
             </div>
+            <button className="btn btn-primary">  Adicionar Projeto</button>
           </div>
 
           {loading ? (
