@@ -26,6 +26,20 @@ export default function BrejoDoCruzPage() {
     return 'Incomplete';
   };
 
+  // Get agent profile photo based on completed type
+  const getAgentProfilePhoto = (agent) => {
+    if (agent.typeStatus?.personal?.isComplete && agent.profilePhotos?.personal) {
+      return agent.profilePhotos.personal;
+    }
+    if (agent.typeStatus?.business?.isComplete && agent.profilePhotos?.business) {
+      return agent.profilePhotos.business;
+    }
+    if (agent.typeStatus?.collective?.isComplete && agent.profilePhotos?.collective) {
+      return agent.profilePhotos.collective;
+    }
+    return null;
+  };
+
   // Get agent avatar color
   const getAgentColor = (agent) => {
     const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8'];
@@ -280,77 +294,83 @@ export default function BrejoDoCruzPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
             {/* First row */}
             <div style={{ display: 'flex', justifyContent: 'center', gap: 56 }}>
-              {agents.slice(0, 4).map((agent, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 16, minWidth: 210 }}>
-                  {agent.avatar ? (
-                    <Image
-                      src={agent.avatar}
-                      alt={agent.fullname || 'Agent'}
-                      width={64}
-                      height={64}
-                      style={{ borderRadius: '50%', objectFit: 'cover' }}
-                    />
-                  ) : (
-                    <div style={{
-                      width: 64,
-                      height: 64,
-                      borderRadius: '50%',
-                      background: getAgentColor(agent),
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#fff',
-                      fontWeight: 700,
-                      fontSize: 24
-                    }}>
-                      {(agent.fullname || 'A').split(' ').length > 1
-                        ? (agent.fullname || 'A').split(' ').map(n => n[0]).join('')
-                        : (agent.fullname || 'A')[0]}
+              {agents.slice(0, 4).map((agent, i) => {
+                const profilePhoto = getAgentProfilePhoto(agent);
+                return (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 16, minWidth: 210 }}>
+                    {profilePhoto ? (
+                      <Image
+                        src={`${process.env.NEXT_PUBLIC_API_BASE_URL.replace('/api', '')}/uploads/${profilePhoto}`}
+                        alt={agent.fullname || 'Agent'}
+                        width={64}
+                        height={64}
+                        style={{ borderRadius: '50%', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <div style={{
+                        width: 64,
+                        height: 64,
+                        borderRadius: '50%',
+                        background: getAgentColor(agent),
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#fff',
+                        fontWeight: 700,
+                        fontSize: 24
+                      }}>
+                        {(agent.fullname || 'A').split(' ').length > 1
+                          ? (agent.fullname || 'A').split(' ').map(n => n[0]).join('')
+                          : (agent.fullname || 'A')[0]}
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start' }}>
+                      <div style={{ fontWeight: 500, fontSize: 16 }}>{agent.fullname || 'Unnamed Agent'}</div>
+                      <div style={{ color: '#F2994A', fontSize: 18, marginTop: 2 }}>★★★★★</div>
                     </div>
-                  )}
-                  <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start' }}>
-                    <div style={{ fontWeight: 500, fontSize: 16 }}>{agent.fullname || 'Unnamed Agent'}</div>
-                    <div style={{ color: '#F2994A', fontSize: 18, marginTop: 2 }}>★★★★★</div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
             {/* Second row */}
             <div style={{ display: 'flex', justifyContent: 'center', gap: 56 }}>
-              {agents.slice(4, 8).map((agent, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 16, minWidth: 210 }}>
-                  {agent.avatar ? (
-                    <Image
-                      src={agent.avatar}
-                      alt={agent.fullname || 'Agent'}
-                      width={64}
-                      height={64}
-                      style={{ borderRadius: '50%', objectFit: 'cover' }}
-                    />
-                  ) : (
-                    <div style={{
-                      width: 64,
-                      height: 64,
-                      borderRadius: '50%',
-                      background: getAgentColor(agent),
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#fff',
-                      fontWeight: 700,
-                      fontSize: 24
-                    }}>
-                      {(agent.fullname || 'A').split(' ').length > 1
-                        ? (agent.fullname || 'A').split(' ').map(n => n[0]).join('')
-                        : (agent.fullname || 'A')[0]}
+              {agents.slice(4, 8).map((agent, i) => {
+                const profilePhoto = getAgentProfilePhoto(agent);
+                return (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 16, minWidth: 210 }}>
+                    {profilePhoto ? (
+                      <Image
+                        src={`${process.env.NEXT_PUBLIC_API_BASE_URL.replace('/api', '')}/uploads/${profilePhoto}`}
+                        alt={agent.fullname || 'Agent'}
+                        width={64}
+                        height={64}
+                        style={{ borderRadius: '50%', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <div style={{
+                        width: 64,
+                        height: 64,
+                        borderRadius: '50%',
+                        background: getAgentColor(agent),
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#fff',
+                        fontWeight: 700,
+                        fontSize: 24
+                      }}>
+                        {(agent.fullname || 'A').split(' ').length > 1
+                          ? (agent.fullname || 'A').split(' ').map(n => n[0]).join('')
+                          : (agent.fullname || 'A')[0]}
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start' }}>
+                      <div style={{ fontWeight: 500, fontSize: 16 }}>{agent.fullname || 'Unnamed Agent'}</div>
+                      <div style={{ color: '#F2994A', fontSize: 18, marginTop: 2 }}>★★★★★</div>
                     </div>
-                  )}
-                  <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start' }}>
-                    <div style={{ fontWeight: 500, fontSize: 16 }}>{agent.fullname || 'Unnamed Agent'}</div>
-                    <div style={{ color: '#F2994A', fontSize: 18, marginTop: 2 }}>★★★★★</div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

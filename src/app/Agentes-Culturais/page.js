@@ -24,6 +24,20 @@ export default function CulturalAgentsPage() {
     return colors[index];
   };
 
+  // Get agent profile photo based on completed type
+  const getAgentProfilePhoto = (agent) => {
+    if (agent.typeStatus?.personal?.isComplete && agent.profilePhotos?.personal) {
+      return agent.profilePhotos.personal;
+    }
+    if (agent.typeStatus?.business?.isComplete && agent.profilePhotos?.business) {
+      return agent.profilePhotos.business;
+    }
+    if (agent.typeStatus?.collective?.isComplete && agent.profilePhotos?.collective) {
+      return agent.profilePhotos.collective;
+    }
+    return null;
+  };
+
   // Get agent type status - Updated to handle multiple types as separate profiles
   const getAgentProfiles = (agents) => {
     const profiles = [];
@@ -138,6 +152,8 @@ export default function CulturalAgentsPage() {
   }, [searchTerm]);
 
   const renderAgentCard = (agent) => {
+    const profilePhoto = getAgentProfilePhoto(agent);
+    
     if (viewMode === 'grid') {
       return (
         <div key={`${agent._id}-${agent.profileType.type}`} style={{ 
@@ -151,9 +167,9 @@ export default function CulturalAgentsPage() {
           gap: 16,
           alignItems: 'center'
         }}>
-          {agent.avatar ? (
+          {profilePhoto ? (
             <Image 
-              src={agent.avatar}
+              src={`${process.env.NEXT_PUBLIC_API_BASE_URL.replace('/api', '')}/uploads/${profilePhoto}`}
               alt={agent.profileType.displayName}
               width={200}
               height={200}
@@ -229,9 +245,9 @@ export default function CulturalAgentsPage() {
           alignItems: 'flex-start',
           gap: 16
         }}>
-          {agent.avatar ? (
+          {profilePhoto ? (
             <Image 
-              src={agent.avatar}
+              src={`${process.env.NEXT_PUBLIC_API_BASE_URL.replace('/api', '')}/uploads/${profilePhoto}`}
               alt={agent.profileType.displayName}
               width={100}
               height={100}
@@ -306,9 +322,9 @@ export default function CulturalAgentsPage() {
         padding: 24, 
         boxShadow: '0 0 8px 0 #0001' 
       }}>
-        {agent.avatar ? (
+        {profilePhoto ? (
           <Image 
-            src={agent.avatar}
+            src={`${process.env.NEXT_PUBLIC_API_BASE_URL.replace('/api', '')}/uploads/${profilePhoto}`}
             alt={agent.profileType.displayName}
             width={150}
             height={150}

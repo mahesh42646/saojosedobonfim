@@ -21,7 +21,7 @@ function SpaceDetails({ space, onBack, fetchSpaceDetails }) {
   const handleStatusUpdate = async (newStatus) => {
     // Show confirmation dialog
     const action = newStatus === 'inactive' ? 'inativar' :
-                  newStatus === 'rejected' ? 'rejeitar' :
+                  newStatus === 'rejected' ? 'Excluir' :
                   'aprovar';
                   
     const confirmed = window.confirm(`Tem certeza que deseja ${action} este espaço?`);
@@ -184,7 +184,7 @@ function SpaceDetails({ space, onBack, fetchSpaceDetails }) {
                     </div>
                     <div style={{ color: '#222', fontWeight: 600, fontSize: 15 }}>
                       {history.status === 'approved' ? 'Espaço aprovado e publicado' :
-                       history.status === 'rejected' ? 'Espaço rejeitado' :
+                       history.status === 'rejected' ? 'Espaço Excluir' :
                        history.status === 'inactive' ? 'Espaço definido como inativo' :
                        'Status do espaço atualizado'}
                     </div>
@@ -434,7 +434,7 @@ function SpaceDetails({ space, onBack, fetchSpaceDetails }) {
             }}
             disabled={space.status === 'rejected'}
           >
-            Rejeitar
+            Excluir
           </button>
           <button 
             onClick={() => handleStatusUpdate('approved')}
