@@ -564,17 +564,22 @@ router.get('/agent/profiles', authMiddleware, async (req, res) => {
       ];
     }
 
+    // Filter by activation status
+    if (status && status !== 'all') {
+      query.status = status;
+    }
+
     let profiles = await AgentProfile.find(query)
       .populate('agentId', 'email')
       .select('-password')
       .sort({ createdAt: -1 });
 
-    // Filter by type and status if specified
-    if (type && status) {
+    // Filter by type completion status if specified
+    if (type && type !== 'all') {
       profiles = profiles.filter(profile => {
-        if (type === 'personal') return profile.typeStatus.personal.isComplete === (status === 'complete');
-        if (type === 'business') return profile.typeStatus.business.isComplete === (status === 'complete');
-        if (type === 'collective') return profile.typeStatus.collective.isComplete === (status === 'complete');
+        if (type === 'personal') return profile.typeStatus.personal.isComplete;
+        if (type === 'business') return profile.typeStatus.business.isComplete;
+        if (type === 'collective') return profile.typeStatus.collective.isComplete;
         return true;
       });
     }
@@ -820,6 +825,41 @@ router.put('/agent/profile/:cpf/password', authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error('Error changing password:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update Agent Profile Status (activate/deactivate)
+router.patch('/agent/profile/:cpf/status', authMiddleware, async (req, res) => {
+  try {
+    const { cpf } = req.params;
+    const { status } = req.body;
+
+    if (!['active', 'inactive'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status. Must be "active" or "inactive"' });
+    }
+
+    const profile = await AgentProfile.findOne({ cpf });
+    if (!profile) {
+      return res.status(404).json({ error: 'Agent profile not found' });
+    }
+
+    // Update status
+    profile.status = status;
+    profile.updatedAt = new Date();
+    await profile.save();
+
+    res.json({ 
+      message: `Agent profile ${status === 'active' ? 'activated' : 'deactivated'} successfully`,
+      profile: {
+        cpf: profile.cpf,
+        fullname: profile.fullname,
+        email: profile.email,
+        status: profile.status
+      }
+    });
+  } catch (error) {
+    console.error('Error updating agent status:', error);
     res.status(500).json({ error: error.message });
   }
 });

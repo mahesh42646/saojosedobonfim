@@ -36,6 +36,13 @@ const agentProfileSchema = new mongoose.Schema({
     required: true 
   },
   
+  // Status field for activation/deactivation
+  status: {
+    type: String,
+    enum: ['active', 'inactive'],
+    default: 'active'
+  },
+  
   // Common fields shared across all types
   cpf: { type: String, required: true, unique: true },
   dob: { type: Date },

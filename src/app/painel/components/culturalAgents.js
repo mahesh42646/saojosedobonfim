@@ -7,7 +7,48 @@ import jsPDF from 'jspdf';
 
 function AgentDetails({ agent, onBack, user }) {
   const [tab, setTab] = React.useState("individual");
+  const [statusLoading, setStatusLoading] = React.useState(false);
+  const [currentAgent, setCurrentAgent] = React.useState(agent);
+  const { token } = useAuth();
   
+  // Handle status update (activate/deactivate)
+  const handleStatusUpdate = async (newStatus) => {
+    try {
+      setStatusLoading(true);
+      
+      const response = await fetch(buildApiUrl(`/agent/profile/${currentAgent.cpf}/status`), {
+        method: 'PATCH',
+        headers: {
+          'Authorization': token,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update agent status');
+      }
+
+      const data = await response.json();
+      
+      // Update local agent data
+      setCurrentAgent(prev => ({
+        ...prev,
+        status: newStatus
+      }));
+
+      // Show success message (you can replace this with a toast notification)
+      alert(data.message);
+      
+    } catch (error) {
+      console.error('Error updating agent status:', error);
+      alert(`Error: ${error.message}`);
+    } finally {
+      setStatusLoading(false);
+    }
+  };
+
   // Format date from ISO string to YYYY-MM-DD format for HTML date input
   const formatDateForInput = (dateString) => {
     if (!dateString) return '';
@@ -475,8 +516,43 @@ function AgentDetails({ agent, onBack, user }) {
           <h2 style={{ margin: 0, fontWeight: 600, fontSize: 22 }}> Detalhes do Agente Cultural</h2>
         </div>
         <div className="d-flex me-2 gap-2">
-          <button className="rounded-5" style={{ background: '#eee', color: '#888', border: 'none', padding: '6px 36px', fontWeight: 600, fontSize: 16, cursor: 'pointer' }}>Desativar</button>
-          <button className="rounded-5" style={{ background: '#7CFC00', color: '#222', border: 'none', borderRadius: 16, padding: '6px 36px', fontWeight: 600, fontSize: 16, cursor: 'pointer' }}>Ativar</button>
+          {currentAgent.status === 'active' ? (
+            <button 
+              className="rounded-5" 
+              onClick={() => handleStatusUpdate('inactive')}
+              disabled={statusLoading}
+              style={{ 
+                background: statusLoading ? '#ccc' : '#ff6b6b', 
+                color: '#fff', 
+                border: 'none', 
+                borderRadius: 16, 
+                padding: '6px 36px', 
+                fontWeight: 600, 
+                fontSize: 16, 
+                cursor: statusLoading ? 'not-allowed' : 'pointer' 
+              }}
+            >
+              {statusLoading ? 'Processando...' : 'Desativar'}
+            </button>
+          ) : (
+            <button 
+              className="rounded-5" 
+              onClick={() => handleStatusUpdate('active')}
+              disabled={statusLoading}
+              style={{ 
+                background: statusLoading ? '#ccc' : '#7CFC00', 
+                color: '#222', 
+                border: 'none', 
+                borderRadius: 16, 
+                padding: '6px 36px', 
+                fontWeight: 600, 
+                fontSize: 16, 
+                cursor: statusLoading ? 'not-allowed' : 'pointer' 
+              }}
+            >
+              {statusLoading ? 'Processando...' : 'Ativar'}
+            </button>
+          )}
         </div>
       </div>
       <div className="border my-lg-3 my-1 rounded-4">
@@ -500,7 +576,19 @@ function AgentDetails({ agent, onBack, user }) {
               <div>
                 <div style={{ fontWeight: 600, fontSize: 20 }}>{agent.fullname || 'Unnamed Agent'}</div>
                 <div style={{ color: '#222', fontSize: 15, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ color: '#2ecc40', fontSize: 18 }}>●</span> {agent.typeStatus?.personal?.isComplete ? 'Conta Pessoal' : agent.typeStatus?.business?.isComplete ? 'Conta Empresarial' : agent.typeStatus?.collective?.isComplete ? 'Conta Coletiva' : 'Incompleto'}
+                  <span style={{ color: currentAgent.status === 'active' ? '#2ecc40' : '#ff6b6b', fontSize: 18 }}>●</span> 
+                  {currentAgent.typeStatus?.personal?.isComplete ? 'Conta Pessoal' : currentAgent.typeStatus?.business?.isComplete ? 'Conta Empresarial' : currentAgent.typeStatus?.collective?.isComplete ? 'Conta Coletiva' : 'Incompleto'}
+                  <span style={{ 
+                    background: currentAgent.status === 'active' ? '#e8f5e8' : '#ffe8e8', 
+                    color: currentAgent.status === 'active' ? '#2ecc40' : '#ff6b6b', 
+                    padding: '2px 8px', 
+                    borderRadius: 12, 
+                    fontSize: 12, 
+                    fontWeight: 600,
+                    marginLeft: 8
+                  }}>
+                    {currentAgent.status === 'active' ? 'Ativo' : 'Inativo'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -550,11 +638,13 @@ export default function AgentsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredAgents, setFilteredAgents] = useState([]);
   const [selectedType, setSelectedType] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState('all');
   const [showFilter, setShowFilter] = useState(false);
+  const [showStatusFilter, setShowStatusFilter] = useState(false);
   const { token, isAuthenticated, user } = useAuth();
 
   // Fetch agents from API
-  const fetchAgents = useCallback(async (search = '', type = 'all') => {
+  const fetchAgents = useCallback(async (search = '', type = 'all', status = 'all') => {
     try {
       setLoading(true);
       setError(null);
@@ -576,6 +666,10 @@ export default function AgentsPage() {
       
       if (type !== 'all') {
         params.push(`type=${encodeURIComponent(type)}`);
+      }
+      
+      if (status !== 'all') {
+        params.push(`status=${encodeURIComponent(status)}`);
       }
       
       if (params.length > 0) {
@@ -628,7 +722,7 @@ export default function AgentsPage() {
   // Handle search
   const handleSearch = (e) => {
     e.preventDefault();
-    fetchAgents(searchTerm, selectedType);
+    fetchAgents(searchTerm, selectedType, selectedStatus);
   };
 
   // Filter agents locally for instant search
@@ -654,7 +748,14 @@ export default function AgentsPage() {
   const handleTypeChange = (type) => {
     setSelectedType(type);
     setShowFilter(false);
-    fetchAgents(searchTerm, type);
+    fetchAgents(searchTerm, type, selectedStatus);
+  };
+
+  // Handle status filter change
+  const handleStatusChange = (status) => {
+    setSelectedStatus(status);
+    setShowStatusFilter(false);
+    fetchAgents(searchTerm, selectedType, status);
   };
 
   // Get agent type status
@@ -674,8 +775,8 @@ export default function AgentsPage() {
 
   // Fetch agents on component mount
   useEffect(() => {
-    fetchAgents(searchTerm, selectedType);
-  }, [fetchAgents, searchTerm, selectedType]);
+    fetchAgents(searchTerm, selectedType, selectedStatus);
+  }, [fetchAgents, searchTerm, selectedType, selectedStatus]);
 
   return (
     <div className="ps-lg-5 pe-lg-2 px-2 py-lg-4 py-3" >
@@ -694,56 +795,99 @@ export default function AgentsPage() {
                   onChange={handleSearchChange}
                   style={{ border: '1px solid #ccc', borderRadius: 24, padding: '6px 24px', outline: 'none', width: 400 }}
                 />
-                <div className="position-relative">
-                  <button 
-                    type="button"
-                    className="btn rounded-5 px-4 py-2"
-                    style={{ background: '#F5FFF0', border: '1px solid rgb(216, 251, 216)' }}
-                    onClick={() => setShowFilter(!showFilter)}
-                  >
-                    {selectedType === 'all' ? 'Todos os Tipos' : selectedType === 'personal' ? 'Pessoal' : selectedType === 'business' ? 'Empresarial' : selectedType.charAt(0).toUpperCase() + selectedType.slice(1)} 
-                    <i className="bi bi-chevron-down ms-2"></i>
-                  </button>
-                  {showFilter && (
-                    <div 
-                      className="position-absolute end-0 mt-1 bg-white rounded-3 shadow-sm"
-                      style={{ 
-                        zIndex: 1000,
-                        minWidth: '200px',
-                        border: '1px solid #eee'
-                      }}
+                                  <div className="position-relative">
+                    <button 
+                      type="button"
+                      className="btn rounded-5 px-4 py-2"
+                      style={{ background: '#F5FFF0', border: '1px solid rgb(216, 251, 216)' }}
+                      onClick={() => setShowFilter(!showFilter)}
                     >
+                      {selectedType === 'all' ? 'Todos os Tipos' : selectedType === 'personal' ? 'Pessoal' : selectedType === 'business' ? 'Empresarial' : selectedType.charAt(0).toUpperCase() + selectedType.slice(1)} 
+                      <i className="bi bi-chevron-down ms-2"></i>
+                    </button>
+                    {showFilter && (
                       <div 
-                        className="px-3 py-2 cursor-pointer hover-bg-light"
-                        onClick={() => handleTypeChange('all')}
-                        style={{ cursor: 'pointer' }}
+                        className="position-absolute end-0 mt-1 bg-white rounded-3 shadow-sm"
+                        style={{ 
+                          zIndex: 1000,
+                          minWidth: '200px',
+                          border: '1px solid #eee'
+                        }}
                       >
-                        Todos os Tipos
+                        <div 
+                          className="px-3 py-2 cursor-pointer hover-bg-light"
+                          onClick={() => handleTypeChange('all')}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          Todos os Tipos
+                        </div>
+                        <div 
+                          className="px-3 py-2 cursor-pointer hover-bg-light"
+                          onClick={() => handleTypeChange('personal')}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          Pessoal
+                        </div>
+                        <div 
+                          className="px-3 py-2 cursor-pointer hover-bg-light"
+                          onClick={() => handleTypeChange('business')}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          Empresarial
+                        </div>
+                        <div 
+                          className="px-3 py-2 cursor-pointer hover-bg-light"
+                          onClick={() => handleTypeChange('collective')}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          Coletivo
+                        </div>
                       </div>
+                    )}
+                  </div>
+                  <div className="position-relative">
+                    <button 
+                      type="button"
+                      className="btn rounded-5 px-4 py-2 ms-2"
+                      style={{ background: '#F0F8FF', border: '1px solid rgb(173, 216, 230)' }}
+                      onClick={() => setShowStatusFilter(!showStatusFilter)}
+                    >
+                      {selectedStatus === 'all' ? 'Todos os Status' : selectedStatus === 'active' ? 'Ativos' : 'Inativos'} 
+                      <i className="bi bi-chevron-down ms-2"></i>
+                    </button>
+                    {showStatusFilter && (
                       <div 
-                        className="px-3 py-2 cursor-pointer hover-bg-light"
-                        onClick={() => handleTypeChange('personal')}
-                        style={{ cursor: 'pointer' }}
+                        className="position-absolute end-0 mt-1 bg-white rounded-3 shadow-sm"
+                        style={{ 
+                          zIndex: 1000,
+                          minWidth: '180px',
+                          border: '1px solid #eee'
+                        }}
                       >
-                        Pessoal
+                        <div 
+                          className="px-3 py-2 cursor-pointer hover-bg-light"
+                          onClick={() => handleStatusChange('all')}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          Todos os Status
+                        </div>
+                        <div 
+                          className="px-3 py-2 cursor-pointer hover-bg-light"
+                          onClick={() => handleStatusChange('active')}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          Ativos
+                        </div>
+                        <div 
+                          className="px-3 py-2 cursor-pointer hover-bg-light"
+                          onClick={() => handleStatusChange('inactive')}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          Inativos
+                        </div>
                       </div>
-                      <div 
-                        className="px-3 py-2 cursor-pointer hover-bg-light"
-                        onClick={() => handleTypeChange('business')}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        Empresarial
-                      </div>
-                      <div 
-                        className="px-3 py-2 cursor-pointer hover-bg-light"
-                        onClick={() => handleTypeChange('collective')}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        Coletivo
-                      </div>
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </div>
               </form>
             </div>
           </div>
@@ -757,7 +901,7 @@ export default function AgentsPage() {
               {error}
               <br />
               <button 
-                onClick={() => fetchAgents()} 
+                onClick={() => fetchAgents(searchTerm, selectedType, selectedStatus)} 
                 style={{ 
                   background: '#7CFC00', 
                   border: 'none', 
@@ -824,8 +968,18 @@ export default function AgentsPage() {
                     <div style={{ fontWeight: 500, fontSize: 16 }}>
                       {agent.fullname || 'Unnamed Agent'}
                     </div>
-                    <div style={{ color: '#888', fontSize: 14 }}>
-                      Tipo: {getAgentType(agent)} 
+                    <div style={{ color: '#888', fontSize: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+                      Tipo: {getAgentType(agent)}
+                      <span style={{ 
+                        background: agent.status === 'active' ? '#e8f5e8' : '#ffe8e8', 
+                        color: agent.status === 'active' ? '#2ecc40' : '#ff6b6b', 
+                        padding: '1px 6px', 
+                        borderRadius: 8, 
+                        fontSize: 11, 
+                        fontWeight: 600
+                      }}>
+                        {agent.status === 'active' ? 'Ativo' : 'Inativo'}
+                      </span>
                     </div>
                   </div>
                   {/* <div style={{ color: '#666', fontSize: 12 }}>
