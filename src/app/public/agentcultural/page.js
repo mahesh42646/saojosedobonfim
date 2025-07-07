@@ -46,9 +46,10 @@ function AgentProfileContent() {
                     throw new Error('Agent not found');
                 }
 
-                // Now fetch the specific agent profile using the public API
-                const response = await fetch(buildApiUrl(`/public/agent/profile/${agentId}`), {
+                // Now fetch the specific agent profile using CPF
+                const response = await fetch(buildApiUrl(`/agent/profile/${targetAgent.cpf}`), {
                     headers: {
+                        'Authorization': 'dummy-token-for-testing',
                         'Content-Type': 'application/json'
                     }
                 });
@@ -103,10 +104,7 @@ function AgentProfileContent() {
 
     // Get agent description based on type
     const getAgentDescription = () => {
-        const agentType = searchParams.get('type');
-        const aboutText = agent.publicProfile?.[agentType]?.aboutText;
-        
-        if (aboutText) return aboutText;
+        if (agent.description) return agent.description;
         
         if (agent.typeStatus?.business?.isComplete) {
             return `${agent.businessData?.nomeFantasia || 'Empresa'} atua no cenário cultural com foco em ${agent.mainActivity || 'diversas atividades culturais'}. ${agent.otherActivity || ''}`;
@@ -119,12 +117,9 @@ function AgentProfileContent() {
 
     // Get agent's gallery images
     const getGalleryImages = () => {
-        const agentType = searchParams.get('type');
-        const galleryPhotos = agent.publicProfile?.[agentType]?.galleryPhotos || [];
-        
-        if (galleryPhotos.length > 0) {
-            return galleryPhotos.map((img, index) => ({
-                src: `${buildApiUrl('')}/public/uploads/${img}`,
+        if (agent.gallery && agent.gallery.length > 0) {
+            return agent.gallery.map((img, index) => ({
+                src: `${IMAGE_BASE_URL}/${img}`,
                 alt: `Gallery ${index + 1}`
             }));
         }
@@ -208,42 +203,36 @@ function AgentProfileContent() {
                         position: "relative",
                         flexShrink: 0
                     }}>
-                        {(() => {
-                            const agentType = searchParams.get('type');
-                            const profilePhotoUrl = `${buildApiUrl('')}/public/agent/profile/${agent._id}/photo/${agentType}`;
-                            const hasProfilePhoto = agent.profilePhotos && agent.profilePhotos[agentType];
-                            
-                            return hasProfilePhoto ? (
-                                <Image
-                                    src={profilePhotoUrl}
-                                    alt={getDisplayName()}
-                                    fill
-                                    style={{
-                                        borderRadius: "50%",
-                                        objectFit: "cover",
-                                        border: "4px solid #fff",
-                                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
-                                    }}
-                                />
-                            ) : (
-                                <div style={{
-                                    width: "100%",
-                                    height: "100%",
+                        {agent.avatar ? (
+                            <Image
+                                src={`${IMAGE_BASE_URL}/${agent.avatar}`}
+                                alt={getDisplayName()}
+                                fill
+                                style={{
                                     borderRadius: "50%",
-                                    background: "#2CB34A",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    color: "#fff",
-                                    fontSize: 64,
-                                    fontWeight: "bold",
+                                    objectFit: "cover",
                                     border: "4px solid #fff",
                                     boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
-                                }}>
-                                    {getDisplayName().charAt(0)}
-                                </div>
-                            );
-                        })()}
+                                }}
+                            />
+                        ) : (
+                            <div style={{
+                                width: "100%",
+                                height: "100%",
+                                borderRadius: "50%",
+                                background: "#2CB34A",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                color: "#fff",
+                                fontSize: 64,
+                                fontWeight: "bold",
+                                border: "4px solid #fff",
+                                boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+                            }}>
+                                {getDisplayName().charAt(0)}
+                            </div>
+                        )}
                     </div>
 
                     {/* Profile Info */}
@@ -270,30 +259,21 @@ function AgentProfileContent() {
 
                         {/* Social Links */}
                         <div style={{ display: "flex", gap: 16, marginTop: 20 }}>
-                            {(() => {
-                                const agentType = searchParams.get('type');
-                                const socialLinks = agent.publicProfile?.[agentType]?.socialLinks || {};
-                                
-                                return (
-                                    <>
-                                        {socialLinks.facebook && (
-                                            <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" style={{ color: "#444", fontSize: 24 }}>
-                                                <i className="bi bi-facebook"></i>
-                                            </a>
-                                        )}
-                                        {socialLinks.instagram && (
-                                            <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" style={{ color: "#444", fontSize: 24 }}>
-                                                <i className="bi bi-instagram"></i>
-                                            </a>
-                                        )}
-                                        {socialLinks.youtube && (
-                                            <a href={socialLinks.youtube} target="_blank" rel="noopener noreferrer" style={{ color: "#444", fontSize: 24 }}>
-                                                <i className="bi bi-youtube"></i>
-                                            </a>
-                                        )}
-                                    </>
-                                );
-                            })()}
+                            {agent.socialLinks?.facebook && (
+                                <a href={agent.socialLinks.facebook} target="_blank" rel="noopener noreferrer" style={{ color: "#444", fontSize: 24 }}>
+                                    <i className="bi bi-facebook"></i>
+                                </a>
+                            )}
+                            {agent.socialLinks?.instagram && (
+                                <a href={agent.socialLinks.instagram} target="_blank" rel="noopener noreferrer" style={{ color: "#444", fontSize: 24 }}>
+                                    <i className="bi bi-instagram"></i>
+                                </a>
+                            )}
+                            {agent.socialLinks?.youtube && (
+                                <a href={agent.socialLinks.youtube} target="_blank" rel="noopener noreferrer" style={{ color: "#444", fontSize: 24 }}>
+                                    <i className="bi bi-youtube"></i>
+                                </a>
+                            )}
                         </div>
                     </div>
                 </div>

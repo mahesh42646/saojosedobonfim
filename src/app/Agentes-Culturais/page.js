@@ -24,12 +24,10 @@ export default function CulturalAgentsPage() {
     return colors[index];
   };
 
-  // Get agent profile photo URL for specific type
-  const getAgentProfilePhotoUrl = (agent, profileType) => {
-    const type = profileType.toLowerCase();
-    const profilePhoto = agent.profilePhotos?.[type];
-    if (profilePhoto && profilePhoto.trim()) {
-      return `${process.env.NEXT_PUBLIC_API_BASE_URL}/public/agent/profile/${agent._id}/photo/${type}`;
+  // Get agent profile photo based on specific type
+  const getAgentProfilePhoto = (agent, type) => {
+    if (agent.profilePhotos?.[type]) {
+      return agent.profilePhotos[type];
     }
     return null;
   };
@@ -148,7 +146,7 @@ export default function CulturalAgentsPage() {
   }, [searchTerm]);
 
   const renderAgentCard = (agent) => {
-    const profilePhotoUrl = getAgentProfilePhotoUrl(agent, agent.profileType.type);
+    const profilePhoto = getAgentProfilePhoto(agent, agent.profileType.type.toLowerCase());
     
     if (viewMode === 'grid') {
       return (
@@ -163,9 +161,9 @@ export default function CulturalAgentsPage() {
           gap: 16,
           alignItems: 'center'
         }}>
-          {profilePhotoUrl ? (
+          {profilePhoto ? (
             <Image 
-              src={profilePhotoUrl}
+              src={`${process.env.NEXT_PUBLIC_API_BASE_URL.replace('/api', '')}/uploads/${profilePhoto}`}
               alt={agent.profileType.displayName}
               width={200}
               height={200}
@@ -241,9 +239,9 @@ export default function CulturalAgentsPage() {
           alignItems: 'flex-start',
           gap: 16
         }}>
-          {profilePhotoUrl ? (
+          {profilePhoto ? (
             <Image 
-              src={profilePhotoUrl}
+              src={`${process.env.NEXT_PUBLIC_API_BASE_URL.replace('/api', '')}/uploads/${profilePhoto}`}
               alt={agent.profileType.displayName}
               width={100}
               height={100}
@@ -318,9 +316,9 @@ export default function CulturalAgentsPage() {
         padding: 24, 
         boxShadow: '0 0 8px 0 #0001' 
       }}>
-        {profilePhotoUrl ? (
+        {profilePhoto ? (
           <Image 
-            src={profilePhotoUrl}
+            src={`${process.env.NEXT_PUBLIC_API_BASE_URL.replace('/api', '')}/uploads/${profilePhoto}`}
             alt={agent.profileType.displayName}
             width={150}
             height={150}
