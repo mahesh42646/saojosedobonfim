@@ -3,7 +3,42 @@ import React, { useState, useEffect } from "react";
 import Image from 'next/image';
 // import 'leaflet/dist/leaflet.css';
 import { buildApiUrl } from '../../config/api';
-import NewSpaceForm from '../../agent/painel/components/new-Space-form';
+import { useAuth as useAdminAuth } from '../authContex';
+
+// Import the agent's auth context components
+import { AuthProvider as AgentAuthProvider, useAuth as useAgentAuth } from '../../agent/painel/authcontex';
+import NewSpaceFormComponent from '../../agent/painel/components/new-Space-form';
+
+// Wrapper component that adapts admin auth to agent auth interface
+function NewSpaceFormWrapper({ onClose, onSuccess }) {
+  const adminAuth = useAdminAuth();
+  
+  // Store agent token in localStorage temporarily for the form
+  React.useEffect(() => {
+    if (adminAuth.token && adminAuth.user) {
+      // Create a mock user object that matches what the agent auth expects
+      const agentUser = {
+        cpf: 'admin', // Default value since admin doesn't have CPF
+        email: adminAuth.user.email || 'admin@system.com',
+        name: adminAuth.user.name || 'Admin'
+      };
+      
+      localStorage.setItem('agentToken', adminAuth.token);
+      localStorage.setItem('agentUser', JSON.stringify(agentUser));
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      // Don't remove agent tokens as they might be used by actual agent users
+    };
+  }, [adminAuth.token, adminAuth.user]);
+
+  return (
+    <AgentAuthProvider>
+      <NewSpaceFormComponent onClose={onClose} onSuccess={onSuccess} />
+    </AgentAuthProvider>
+  );
+}
 
 const spaces = [
 
@@ -550,7 +585,7 @@ export default function CspacePage() {
   return (
     <div className="ps-lg-5 pe-lg-2 px-2 py-lg-4 py-2" >
       {showCreate ? (
-        <NewSpaceForm onClose={() => setShowCreate(false)} onSuccess={handleSpaceCreated} />
+        <NewSpaceFormWrapper onClose={() => setShowCreate(false)} onSuccess={handleSpaceCreated} />
       ) : selectedSpace ? (
         <SpaceDetails space={selectedSpace} onBack={() => setSelectedSpace(null)} fetchSpaceDetails={fetchSpaceDetails} />
       ) : (

@@ -1609,6 +1609,39 @@ router.patch('/admin/project/:id/status', async (req, res) => {
   }
 });
 
+// Delete project for admin
+router.delete('/admin/project/:id', async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+    
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    // Delete associated files
+    if (project.coverPhoto) {
+      const coverPath = path.join('./uploads', project.coverPhoto);
+      if (fs.existsSync(coverPath)) {
+        fs.unlinkSync(coverPath);
+      }
+    }
+    
+    project.photos.forEach(photo => {
+      const photoPath = path.join('./uploads', photo);
+      if (fs.existsSync(photoPath)) {
+        fs.unlinkSync(photoPath);
+      }
+    });
+
+    await Project.findByIdAndDelete(req.params.id);
+    
+    res.json({ message: 'Project deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting project:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // ADMIN SPACE ROUTES (No auth required)
 // Get all spaces for admin
 router.get('/admin/spaces', async (req, res) => {

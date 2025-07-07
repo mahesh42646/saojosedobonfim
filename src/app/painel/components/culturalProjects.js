@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Image from 'next/image';
 import { buildApiUrl } from '../../config/api';
+import NewProjectForm from '../../agent/painel/components/new-project-form';
 // import 'leaflet/dist/leaflet.css';
 
 const spaces = [
@@ -16,13 +17,13 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
   const handleStatusUpdate = async (newStatus) => {
     // Show confirmation dialog
     const action = newStatus === 'inativar' ? 'inativar' :
-                  newStatus === 'rejected' ? 'rejeitar' :
-                  'aprovar';
-                  
-    const confirmed = window.confirm(`Tem certeza que deseja ${action === 'inativar' ? 'inativar' : 
-                                                         action === 'rejeitar' ? 'rejeitar' : 
-                                                         'aprovar'} este projeto?`);
-    
+      newStatus === 'rejected' ? 'rejeitar' :
+        'aprovar';
+
+    const confirmed = window.confirm(`Tem certeza que deseja ${action === 'inativar' ? 'inativar' :
+      action === 'rejeitar' ? 'rejeitar' :
+        'aprovar'} este projeto?`);
+
     if (!confirmed) return;
 
     try {
@@ -41,15 +42,15 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
       }
 
       const data = await statusResponse.json();
-      
+
       // Show success message
-      alert(data.message || `Projeto ${action === 'inativar' ? 'inativado' : 
-                                action === 'rejeitar' ? 'rejeitado' : 
-                                'aprovado'} com sucesso!`);
-      
+      alert(data.message || `Projeto ${action === 'inativar' ? 'inativado' :
+        action === 'rejeitar' ? 'rejeitado' :
+          'aprovado'} com sucesso!`);
+
       // Fetch updated project details
       await fetchProjectDetails(space._id);
-      
+
     } catch (error) {
       console.error('Error updating project status:', error);
       alert(error.message || 'Failed to update project status. Please try again.');
@@ -58,6 +59,40 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
 
   const handleViewPublic = () => {
     window.location.href = `/public/projetos?id=${space._id}`;
+  };
+
+  const handleDeleteProject = async () => {
+    // Show confirmation dialog
+    const confirmed = window.confirm('Tem certeza que deseja excluir este projeto? Esta ação não pode ser desfeita.');
+
+    if (!confirmed) return;
+
+    try {
+      const deleteResponse = await fetch(buildApiUrl(`/admin/project/${space._id}`), {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!deleteResponse.ok) {
+        const errorData = await deleteResponse.json();
+        throw new Error(errorData.error || 'Failed to delete project');
+      }
+
+      const data = await deleteResponse.json();
+
+      // Show success message
+      alert(data.message || 'Projeto excluído com sucesso!');
+
+      // Go back to project list
+      onBack();
+
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      alert(error.message || 'Failed to delete project. Please try again.');
+    }
   };
 
   return (
@@ -69,7 +104,11 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
 
       <div style={{ maxWidth: 874, margin: '0 auto', background: '#fff', borderRadius: 16, border: '2px solid #eee', padding: 0 }}>
         <div style={{ backgroundColor: '#f7f7f7', padding: 14, borderBottom: '1px solid #eee', borderTopLeftRadius: 16, borderTopRightRadius: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+
+
+<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+
+<div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <div style={{ width: 56, height: 56, borderRadius: '50%', background: space.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <span style={{ color: '#fff', fontSize: 32 }}><i className="bi bi-building"></i></span>
             </div>
@@ -77,24 +116,30 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
               <div style={{ fontWeight: 600, fontSize: 20 }}>{space.title}</div>
               <div style={{ color: '#222', fontSize: 15, fontWeight: 500 }}>TIPO: {space.type}</div>
               <div style={{ fontSize: 15, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
-                <span style={{ 
-                  color: space.status === 'approved' ? '#2F5711' : 
-                         space.status === 'rejected' ? '#ff4444' :
-                         space.status === 'inactive' ? '#888' : '#2F5711',
-                  fontSize: 18 
+                <span style={{
+                  color: space.status === 'approved' ? '#2F5711' :
+                    space.status === 'rejected' ? '#ff4444' :
+                      space.status === 'inactive' ? '#888' : '#2F5711',
+                  fontSize: 18
                 }}>
                   {space.status === 'approved' ? <i className="bi bi-check-circle-fill"></i> :
-                   space.status === 'rejected' ? <i className="bi bi-x-circle-fill"></i> :
-                   space.status === 'inactive' ? <i className="bi bi-dash-circle-fill"></i> :
-                   <i className="bi bi-clock"></i>}
-                </span> 
-                {space.status === 'approved' ? 'Projeto aprovado e publicado' : 
-                 space.status === 'pending' ? 'Projeto pendente de aprovação' :
-                 space.status === 'inactive' ? 'Projeto inativo' : 
-                 'Projeto rejeitado'}
+                    space.status === 'rejected' ? <i className="bi bi-x-circle-fill"></i> :
+                      space.status === 'inactive' ? <i className="bi bi-dash-circle-fill"></i> :
+                        <i className="bi bi-clock"></i>}
+                </span>
+                {space.status === 'approved' ? 'Projeto aprovado e publicado' :
+                  space.status === 'pending' ? 'Projeto pendente de aprovação' :
+                    space.status === 'inactive' ? 'Projeto inativo' :
+                      'Projeto rejeitado'}
               </div>
             </div>
           </div>
+          <button onClick={handleDeleteProject} style={{ background: '#ff4444', color: '#fff', border: 'none', borderRadius: 24, padding: '6px 48px', fontWeight: 600, fontSize: 16, cursor: 'pointer' }}           >             Excluir Projeto           </button>
+
+  </div>
+
+
+
         </div>
         {/* Tabs */}
         <div style={{ display: 'flex', borderBottom: '1px solid #eee', paddingLeft: 24, gap: 32, marginTop: 0 }}>
@@ -117,17 +162,17 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
                 </div>
                 {space.statusHistory?.map((history, index) => (
                   <div className="mt-1" key={index} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 41 }}>
-                    <span style={{ 
-                      color: history.status === 'approved' ? '#2ecc40' : 
-                             history.status === 'rejected' ? '#ff4444' :
-                             history.status === 'inactive' ? '#888' : '#2ecc40',
+                    <span style={{
+                      color: history.status === 'approved' ? '#2ecc40' :
+                        history.status === 'rejected' ? '#ff4444' :
+                          history.status === 'inactive' ? '#888' : '#2ecc40',
                       fontSize: 22,
-                      lineHeight: 1 
+                      lineHeight: 1
                     }}>
                       {history.status === 'approved' ? <i className="bi bi-check-circle-fill"></i> :
-                       history.status === 'rejected' ? <i className="bi bi-x-circle-fill"></i> :
-                       history.status === 'inactive' ? <i className="bi bi-dash-circle-fill"></i> :
-                       <i className="bi bi-clock"></i>}
+                        history.status === 'rejected' ? <i className="bi bi-x-circle-fill"></i> :
+                          history.status === 'inactive' ? <i className="bi bi-dash-circle-fill"></i> :
+                            <i className="bi bi-clock"></i>}
                     </span>
                   </div>
                 ))}
@@ -147,7 +192,7 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
                   <div style={{ color: '#222', fontSize: 15 }}>Projeto criado com sucesso</div>
                 </div>
                 {space.statusHistory?.map((history, index) => (
-                  <div key={index} style={{ 
+                  <div key={index} style={{
                     marginBottom: index < space.statusHistory.length - 1 ? 24 : 0,
                     minHeight: 24,
                     display: 'flex',
@@ -166,21 +211,21 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
                     </div>
                     <div style={{ color: '#222', fontWeight: 600, fontSize: 15 }}>
                       {history.status === 'approved' ? 'Projeto aprovado e publicado' :
-                       history.status === 'rejected' ? 'Projeto rejeitado' :
-                       history.status === 'inactive' ? 'Projeto definido como inativo' :
-                       'Status do projeto atualizado'}
+                        history.status === 'rejected' ? 'Projeto rejeitado' :
+                          history.status === 'inactive' ? 'Projeto definido como inativo' :
+                            'Status do projeto atualizado'}
                     </div>
                   </div>
                 ))}
               </div>
               <div style={{ minWidth: 400, display: 'flex', flexDirection: 'column', gap: 24 }}>
-                <input 
-                  value={space.status === 'approved' ? 'Projeto aprovado e publicado' : 
-                         space.status === 'rejected' ? 'Projeto rejeitado' :
-                         space.status === 'inactive' ? 'Projeto inativo' :
-                         'Projeto aguardando aprovação'} 
-                  readOnly 
-                  style={{ width: '100%', padding: 12, borderRadius: 24, border: '2px solid #eee', fontSize: 15 }} 
+                <input
+                  value={space.status === 'approved' ? 'Projeto aprovado e publicado' :
+                    space.status === 'rejected' ? 'Projeto rejeitado' :
+                      space.status === 'inactive' ? 'Projeto inativo' :
+                        'Projeto aguardando aprovação'}
+                  readOnly
+                  style={{ width: '100%', padding: 12, borderRadius: 24, border: '2px solid #eee', fontSize: 15 }}
                 />
               </div>
             </div>
@@ -191,7 +236,7 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
             {/* Project type */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <label style={{ fontWeight: 500 }}>Tipo de projeto *</label>
-              <select 
+              <select
                 style={{ width: '100%', padding: 12, borderRadius: 8, border: '1px solid #ccc', fontSize: 16 }}
                 value={space.type}
                 disabled
@@ -203,10 +248,10 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
             {/* Project name */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <label style={{ fontWeight: 500 }}>Título do projeto *</label>
-              <input 
+              <input
                 value={space.title || ''}
                 readOnly
-                style={{ width: '100%', padding: 12, borderRadius: 8, border: '1px solid #ccc', fontSize: 16 }} 
+                style={{ width: '100%', padding: 12, borderRadius: 8, border: '1px solid #ccc', fontSize: 16 }}
               />
             </div>
             {/* Description */}
@@ -215,14 +260,14 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
                 <span style={{ color: '#2F5711', fontSize: 20 }}><i className="bi bi-card-text"></i></span>
                 <span style={{ fontWeight: 500 }}>Descrição *</span>
               </div>
-              <div 
-                style={{ 
-                  width: '100%', 
-                  padding: 12, 
-                  borderRadius: 8, 
-                  border: '1px solid #ccc', 
-                  fontSize: 12, 
-                  minHeight: 80, 
+              <div
+                style={{
+                  width: '100%',
+                  padding: 12,
+                  borderRadius: 8,
+                  border: '1px solid #ccc',
+                  fontSize: 12,
+                  minHeight: 80,
                   background: '#F7F7F7',
                   fontFamily: 'monospace',
                   overflow: 'auto',
@@ -238,20 +283,20 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
               <div style={{ display: 'flex', gap: 12 }}>
                 <div style={{ flex: 1 }}>
                   <label style={{ fontSize: 14, marginBottom: 4, display: 'block' }}>Data de Início</label>
-                  <input 
+                  <input
                     type="text"
                     value={space.period?.start ? new Date(space.period.start).toLocaleDateString() : ''}
                     readOnly
-                    style={{ width: '100%', padding: 12, borderRadius: 8, border: '1px solid #ccc', fontSize: 16 }} 
+                    style={{ width: '100%', padding: 12, borderRadius: 8, border: '1px solid #ccc', fontSize: 16 }}
                   />
                 </div>
                 <div style={{ flex: 1 }}>
                   <label style={{ fontSize: 14, marginBottom: 4, display: 'block' }}>Data de Fim</label>
-                  <input 
+                  <input
                     type="text"
                     value={space.period?.end ? new Date(space.period.end).toLocaleDateString() : ''}
                     readOnly
-                    style={{ width: '100%', padding: 12, borderRadius: 8, border: '1px solid #ccc', fontSize: 16 }} 
+                    style={{ width: '100%', padding: 12, borderRadius: 8, border: '1px solid #ccc', fontSize: 16 }}
                   />
                 </div>
               </div>
@@ -262,28 +307,28 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
               {/* Facebook */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ color: '#2F5711', fontSize: 22 }}><i className="bi bi-facebook"></i></span>
-                <input 
+                <input
                   value={space.socialLinks?.facebook || ''}
                   readOnly
-                  style={{ flex: 1, padding: 10, borderRadius: 8, border: '1px solid #ccc', fontSize: 15, background: '#fff' }} 
+                  style={{ flex: 1, padding: 10, borderRadius: 8, border: '1px solid #ccc', fontSize: 15, background: '#fff' }}
                 />
               </div>
               {/* Instagram */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ color: '#2F5711', fontSize: 22 }}><i className="bi bi-instagram"></i></span>
-                <input 
+                <input
                   value={space.socialLinks?.instagram || ''}
                   readOnly
-                  style={{ flex: 1, padding: 10, borderRadius: 8, border: '1px solid #ccc', fontSize: 15, background: '#fff' }} 
+                  style={{ flex: 1, padding: 10, borderRadius: 8, border: '1px solid #ccc', fontSize: 15, background: '#fff' }}
                 />
               </div>
               {/* YouTube */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ color: '#2F5711', fontSize: 22 }}><i className="bi bi-youtube"></i></span>
-                <input 
+                <input
                   value={space.socialLinks?.youtube || ''}
                   readOnly
-                  style={{ flex: 1, padding: 10, borderRadius: 8, border: '1px solid #ccc', fontSize: 15, background: '#fff' }} 
+                  style={{ flex: 1, padding: 10, borderRadius: 8, border: '1px solid #ccc', fontSize: 15, background: '#fff' }}
                 />
               </div>
             </div>
@@ -294,7 +339,7 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
                 {/* Cover Photo */}
                 {space.coverPhoto && (
                   <div style={{ width: 160, height: 170, borderRadius: 12, overflow: 'hidden', position: 'relative' }}>
-                    <Image 
+                    <Image
                       src={`https://mapacultural.saojosedobonfim.pb.gov.br/uploads/${space.coverPhoto}`}
                       alt="Cover"
                       width={160}
@@ -309,7 +354,7 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
                 {/* Additional Photos */}
                 {space.photos?.map((photo, index) => (
                   <div key={index} style={{ width: 160, height: 170, borderRadius: 12, overflow: 'hidden' }}>
-                    <Image 
+                    <Image
                       src={`https://mapacultural.saojosedobonfim.pb.gov.br/uploads/${photo}`}
                       alt={`Photo ${index + 1}`}
                       width={160}
@@ -357,31 +402,31 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
         )}
         {/* Action Buttons */}
         <div className="me-5" style={{ display: 'flex', justifyContent: 'end', gap: 24, padding: 24, borderBottomLeftRadius: 16, borderBottomRightRadius: 16 }}>
-          <button 
+          <button
             onClick={handleViewPublic}
-            style={{ 
+            style={{
               background: '#F7f7f7',
-              color: '#000', 
-              border: 'none', 
-              borderRadius: 24, 
-              padding: '6px 48px', 
-              fontWeight: 600, 
-              fontSize: 16, 
+              color: '#000',
+              border: 'none',
+              borderRadius: 24,
+              padding: '6px 48px',
+              fontWeight: 600,
+              fontSize: 16,
               cursor: 'pointer'
             }}
           >
             Ver Página Pública
           </button>
-          <button 
+          <button
             onClick={() => handleStatusUpdate('inactive')}
-            style={{ 
+            style={{
               background: space.status === 'inactive' ? '#ddd' : '#F7f7f7',
-              color: '#000', 
-              border: 'none', 
-              borderRadius: 24, 
-              padding: '6px 48px', 
-              fontWeight: 600, 
-              fontSize: 16, 
+              color: '#000',
+              border: 'none',
+              borderRadius: 24,
+              padding: '6px 48px',
+              fontWeight: 600,
+              fontSize: 16,
               cursor: 'pointer',
               opacity: space.status === 'inactive' ? 0.7 : 1
             }}
@@ -389,16 +434,16 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
           >
             Inativo
           </button>
-          <button 
+          <button
             onClick={() => handleStatusUpdate('rejected')}
-            style={{ 
+            style={{
               background: space.status === 'rejected' ? '#ffdddd' : '#F7f7f7',
-              color: '#000', 
-              border: 'none', 
-              borderRadius: 24, 
-              padding: '6px 48px', 
-              fontWeight: 600, 
-              fontSize: 16, 
+              color: '#000',
+              border: 'none',
+              borderRadius: 24,
+              padding: '6px 48px',
+              fontWeight: 600,
+              fontSize: 16,
               cursor: 'pointer',
               opacity: space.status === 'rejected' ? 0.7 : 1
             }}
@@ -406,16 +451,16 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
           >
             Rejeitar
           </button>
-          <button 
+          <button
             onClick={() => handleStatusUpdate('approved')}
-            style={{ 
+            style={{
               background: space.status === 'approved' ? '#90EE90' : '#F7f7f7',
-              color: '#000', 
-              border: 'none', 
-              borderRadius: 24, 
-              padding: '6px 48px', 
-              fontWeight: 600, 
-              fontSize: 16, 
+              color: '#000',
+              border: 'none',
+              borderRadius: 24,
+              padding: '6px 48px',
+              fontWeight: 600,
+              fontSize: 16,
               cursor: 'pointer',
               opacity: space.status === 'approved' ? 0.7 : 1
             }}
@@ -423,6 +468,7 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
           >
             Aprovar
           </button>
+
         </div>
       </div>
     </div>
@@ -435,13 +481,14 @@ export default function CspacePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showNewProjectForm, setShowNewProjectForm] = useState(false);
 
   // Fetch projects from API
   const fetchProjects = async () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const projectsResponse = await fetch(buildApiUrl('/admin/projects'));
 
       if (!projectsResponse.ok) {
@@ -450,7 +497,7 @@ export default function CspacePage() {
       }
 
       const data = await projectsResponse.json();
-      setProjects(data || []); 
+      setProjects(data || []);
     } catch (err) {
       console.error('Error fetching projects:', err);
       setError(err.message || 'Failed to load projects. Please try again.');
@@ -464,7 +511,7 @@ export default function CspacePage() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const detailsResponse = await fetch(buildApiUrl(`/admin/project/${id}`));
 
       if (!detailsResponse.ok) {
@@ -486,11 +533,11 @@ export default function CspacePage() {
   const handleSearch = (e) => {
     const term = e.target.value;
     setSearchTerm(term);
-    
+
     if (!term.trim()) {
       fetchProjects();
     } else {
-      const filtered = projects.filter(project => 
+      const filtered = projects.filter(project =>
         project.name?.toLowerCase().includes(term.toLowerCase()) ||
         project.type?.toLowerCase().includes(term.toLowerCase())
       );
@@ -506,11 +553,38 @@ export default function CspacePage() {
   return (
     <div className="ps-lg-5 pe-lg-2 px-2 py-lg-4 py-2" >
       {selectedSpace ? (
-        <SpaceDetails 
-          space={selectedSpace} 
-          onBack={() => setSelectedSpace(null)} 
+        <SpaceDetails
+          space={selectedSpace}
+          onBack={() => setSelectedSpace(null)}
           fetchProjectDetails={fetchProjectDetails}
         />
+      ) : showNewProjectForm ? (
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', marginBottom: 24 }}>
+            <button
+              onClick={() => setShowNewProjectForm(false)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#222',
+                fontWeight: 600,
+                fontSize: 16,
+                cursor: 'pointer',
+                marginRight: 16
+              }}
+            >
+              ←
+            </button>
+            <h2 style={{ margin: 0, fontWeight: 600, fontSize: 22 }}>Novo Projeto Cultural</h2>
+          </div>
+          <NewProjectForm
+            onClose={() => setShowNewProjectForm(false)}
+            onSuccess={() => {
+              setShowNewProjectForm(false);
+              fetchProjects(); // Refresh the projects list
+            }}
+          />
+        </div>
       ) : (
         <>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
@@ -524,7 +598,12 @@ export default function CspacePage() {
                 style={{ border: '1px solid #ccc', borderRadius: 24, padding: '6px 24px', outline: 'none', width: 200 }}
               />
             </div>
-            <button className="btn btn-primary">  Adicionar Projeto</button>
+            <button
+              className="btn btn-primary"
+              onClick={() => setShowNewProjectForm(true)}
+            >
+              Adicionar Projeto
+            </button>
           </div>
 
           {loading ? (
@@ -535,15 +614,15 @@ export default function CspacePage() {
             <div style={{ textAlign: 'center', padding: '40px', color: '#ff4444' }}>
               {error}
               <br />
-              <button 
-                onClick={() => fetchProjects()} 
-                style={{ 
-                  background: '#7CFC00', 
-                  border: 'none', 
-                  borderRadius: 16, 
-                  padding: '8px 16px', 
-                  fontWeight: 600, 
-                  color: '#fff', 
+              <button
+                onClick={() => fetchProjects()}
+                style={{
+                  background: '#7CFC00',
+                  border: 'none',
+                  borderRadius: 16,
+                  padding: '8px 16px',
+                  fontWeight: 600,
+                  color: '#fff',
                   cursor: 'pointer',
                   marginTop: '10px'
                 }}
@@ -575,7 +654,7 @@ export default function CspacePage() {
                 >
                   <div style={{ width: 48, height: 48, borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {project.coverPhoto ? (
-                      <Image 
+                      <Image
                         src={`https://mapacultural.saojosedobonfim.pb.gov.br/uploads/${project.coverPhoto}`}
                         alt={project.title}
                         width={48}
