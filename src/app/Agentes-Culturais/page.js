@@ -24,18 +24,13 @@ export default function CulturalAgentsPage() {
     return colors[index];
   };
 
-  // Get agent profile photo based on completed type
-  const getAgentProfilePhoto = (agent) => {
-    if (agent.typeStatus?.personal?.isComplete && agent.profilePhotos?.personal) {
-      return agent.profilePhotos.personal;
-    }
-    if (agent.typeStatus?.business?.isComplete && agent.profilePhotos?.business) {
-      return agent.profilePhotos.business;
-    }
-    if (agent.typeStatus?.collective?.isComplete && agent.profilePhotos?.collective) {
-      return agent.profilePhotos.collective;
-    }
-    return null;
+  // Get agent profile photo based on specific profile type
+  const getAgentProfilePhoto = (agent, profileType) => {
+    if (!profileType || !agent.profilePhotos) return null;
+    
+    // Return the photo for the specific profile type
+    const typeKey = profileType.toLowerCase();
+    return agent.profilePhotos[typeKey] || null;
   };
 
   // Get agent type status - Updated to handle multiple types as separate profiles
@@ -97,10 +92,9 @@ export default function CulturalAgentsPage() {
       setLoading(true);
       setError(null);
       
-      const url = buildApiUrl('/agent/profiles');
+      const url = buildApiUrl('/public/agent/profiles');
       const response = await fetch(url, {
         headers: {
-          'Authorization': 'dummy-token-for-testing',
           'Content-Type': 'application/json'
         }
       });
@@ -152,7 +146,7 @@ export default function CulturalAgentsPage() {
   }, [searchTerm]);
 
   const renderAgentCard = (agent) => {
-    const profilePhoto = getAgentProfilePhoto(agent);
+    const profilePhoto = getAgentProfilePhoto(agent, agent.profileType.type);
     
     if (viewMode === 'grid') {
       return (

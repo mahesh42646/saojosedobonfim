@@ -599,7 +599,8 @@ export default function CspacePage() {
               />
             </div>
             <button
-              className="btn btn-primary"
+              className="btn "
+              style={{ background: '#7BFA02', border: 'none', borderRadius: 24, padding: '6px 48px', fontWeight: 600, fontSize: 16, cursor: 'pointer' }}
               onClick={() => setShowNewProjectForm(true)}
             >
               Adicionar Projeto

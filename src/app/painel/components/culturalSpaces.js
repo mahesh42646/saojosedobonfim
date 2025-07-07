@@ -602,7 +602,7 @@ export default function CspacePage() {
               />
                               <button
                 onClick={() => setShowCreate(true)}
-                style={{ background: '#7CFC00', border: 'none', borderRadius: 24, padding: '8px 24px', fontWeight: 600, color: '#fff', cursor: 'pointer' }}
+                style={{ background: '#7BFA02', border: 'none', borderRadius: 24, padding: '8px 24px', fontWeight: 600,  cursor: 'pointer' }}
               >
                 Nova Cultura
               </button>

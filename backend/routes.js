@@ -1726,6 +1726,69 @@ router.patch('/admin/space/:id/status', async (req, res) => {
 });
 
 // Public endpoints (no auth required)
+// Public agent profiles endpoint
+router.get('/public/agent/profiles', async (req, res) => {
+  try {
+    const { type, status, search } = req.query;
+    let query = { status: 'active' }; // Only show active profiles publicly
+
+    // Filter by search
+    if (search) {
+      query.$or = [
+        { fullname: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+        { cpf: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    let profiles = await AgentProfile.find(query)
+      .select('-password -agentId') // Remove sensitive data
+      .sort({ createdAt: -1 });
+
+    // Filter by type completion status if specified
+    if (type && type !== 'all') {
+      profiles = profiles.filter(profile => {
+        if (type === 'personal') return profile.typeStatus.personal.isComplete;
+        if (type === 'business') return profile.typeStatus.business.isComplete;
+        if (type === 'collective') return profile.typeStatus.collective.isComplete;
+        return true;
+      });
+    }
+
+    res.json({
+      profiles
+    });
+  } catch (error) {
+    console.error('Error fetching public agent profiles:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Public agent profile details endpoint
+router.get('/public/agent/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { type } = req.query; // personal, business, or collective
+    
+    const profile = await AgentProfile.findById(id)
+      .select('-password -agentId'); // Remove sensitive data
+    
+    if (!profile || profile.status !== 'active') {
+      return res.status(404).json({ error: 'Agent profile not found' });
+    }
+
+    // Check if the requested type is complete
+    if (type && profile.typeStatus[type] && !profile.typeStatus[type].isComplete) {
+      return res.status(404).json({ error: 'Profile type not available' });
+    }
+
+    res.json(profile);
+  } catch (error) {
+    console.error('Error fetching agent profile details:', error);
+    res.status(500).json({ error: 'Failed to fetch agent profile details' });
+  }
+});
+
 // Public space details endpoint
 router.get('/public/space/:id', async (req, res) => {
   try {
