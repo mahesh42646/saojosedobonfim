@@ -80,14 +80,25 @@ const Sidebar = () => {
               style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}
               onClick={() => setActiveTab("profile")}
             >
-              <Image
-                src="https://randomuser.me/api/portraits/men/32.jpg"
-                alt="Coat"
-                width={32}
-                height={32}
-                style={{ borderRadius: "50%" }}
-                priority
-              />
+              {adminData?.profilePhoto && adminData.profilePhoto.trim() ? (
+                <Image
+                  src={`${process.env.NEXT_PUBLIC_API_BASE_URL.replace('/api', '')}/uploads/${adminData.profilePhoto.trim()}`}
+                  alt="Perfil"
+                  width={32}
+                  height={32}
+                  style={{ borderRadius: "50%", objectFit: 'cover' }}
+                  priority
+                />
+              ) : (
+                <Image
+                  src="/images/placeholder-Avatar.png"
+                  alt="Perfil Padrão"
+                  width={32}
+                  height={32}
+                  style={{ borderRadius: "50%", objectFit: 'cover' }}
+                  priority
+                />
+              )}
               <span id="user-name" className="fw-semibold fs-16 text-dark">{adminData?.name || 'Loading...'}</span>
               <span className="ms-3" style={{ fontSize: 20, color: "#888" }}>&#8250;</span>
             </div>

@@ -152,7 +152,7 @@ const SpaceDetails = ({ space, onBack, onDelete }) => {
                     <div className="p-3">
                         <div><b>Nome:</b> {space.title}</div>
                         <div><b>Tipo:</b> {space.type}</div>
-                        <div><b>Descrição:</b> <div className="border rounded-3 p-2 my-2" style={{ background: "#f8f9fa" }}>{space.description}</div></div>
+                        <div><b>Descrição:</b> <div className="border rounded-3 p-2 my-2" style={{ background: "#f8f9fa" }} dangerouslySetInnerHTML={{ __html: space.description }}></div></div>
                         <div><b>Capacidade:</b> {space.capacity}</div>
                         <div><b>Horário:</b> {space.operatingHours}</div>
                         <div><b>Dias de funcionamento:</b> {space.operatingDays}</div>
