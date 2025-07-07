@@ -57,15 +57,16 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
     }
   };
 
-  const handleViewPublic = () => {
-    window.location.href = `/public/projetos?id=${space._id}`;
-  };
-
+  // Add function to handle project deletion
   const handleDeleteProject = async () => {
-    // Show confirmation dialog
-    const confirmed = window.confirm('Tem certeza que deseja excluir este projeto? Esta ação não pode ser desfeita.');
+    const confirmed = window.confirm('Tem certeza que deseja DELETAR este projeto? Esta ação não pode ser desfeita!');
 
     if (!confirmed) return;
+
+    // Second confirmation for safety
+    const doubleConfirmed = window.confirm('ATENÇÃO: Você está prestes a deletar permanentemente este projeto. Confirma?');
+
+    if (!doubleConfirmed) return;
 
     try {
       const deleteResponse = await fetch(buildApiUrl(`/admin/project/${space._id}`), {
@@ -84,15 +85,19 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
       const data = await deleteResponse.json();
 
       // Show success message
-      alert(data.message || 'Projeto excluído com sucesso!');
+      alert(data.message || 'Projeto deletado com sucesso!');
 
-      // Go back to project list
+      // Go back to projects list
       onBack();
 
     } catch (error) {
       console.error('Error deleting project:', error);
       alert(error.message || 'Failed to delete project. Please try again.');
     }
+  };
+
+  const handleViewPublic = () => {
+    window.location.href = `/public/projetos?id=${space._id}`;
   };
 
   return (
@@ -105,40 +110,35 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
       <div style={{ maxWidth: 874, margin: '0 auto', background: '#fff', borderRadius: 16, border: '2px solid #eee', padding: 0 }}>
         <div style={{ backgroundColor: '#f7f7f7', padding: 14, borderBottom: '1px solid #eee', borderTopLeftRadius: 16, borderTopRightRadius: 16 }}>
 
-
-<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-
-<div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <div style={{ width: 56, height: 56, borderRadius: '50%', background: space.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ color: '#fff', fontSize: 32 }}><i className="bi bi-building"></i></span>
-            </div>
-            <div >
-              <div style={{ fontWeight: 600, fontSize: 20 }}>{space.title}</div>
-              <div style={{ color: '#222', fontSize: 15, fontWeight: 500 }}>TIPO: {space.type}</div>
-              <div style={{ fontSize: 15, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
-                <span style={{
-                  color: space.status === 'approved' ? '#2F5711' :
-                    space.status === 'rejected' ? '#ff4444' :
-                      space.status === 'inactive' ? '#888' : '#2F5711',
-                  fontSize: 18
-                }}>
-                  {space.status === 'approved' ? <i className="bi bi-check-circle-fill"></i> :
-                    space.status === 'rejected' ? <i className="bi bi-x-circle-fill"></i> :
-                      space.status === 'inactive' ? <i className="bi bi-dash-circle-fill"></i> :
-                        <i className="bi bi-clock"></i>}
-                </span>
-                {space.status === 'approved' ? 'Projeto aprovado e publicado' :
-                  space.status === 'pending' ? 'Projeto pendente de aprovação' :
-                    space.status === 'inactive' ? 'Projeto inativo' :
-                      'Projeto rejeitado'}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <div style={{ width: 56, height: 56, borderRadius: '50%', background: space.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ color: '#fff', fontSize: 32 }}><i className="bi bi-building"></i></span>
+              </div>
+              <div >
+                <div style={{ fontWeight: 600, fontSize: 20 }}>{space.title}</div>
+                <div style={{ color: '#222', fontSize: 15, fontWeight: 500 }}>TIPO: {space.type}</div>
+                <div style={{ fontSize: 15, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+                  <span style={{
+                    color: space.status === 'approved' ? '#2F5711' :
+                      space.status === 'rejected' ? '#ff4444' :
+                        space.status === 'inactive' ? '#888' : '#2F5711',
+                    fontSize: 18
+                  }}>
+                    {space.status === 'approved' ? <i className="bi bi-check-circle-fill"></i> :
+                      space.status === 'rejected' ? <i className="bi bi-x-circle-fill"></i> :
+                        space.status === 'inactive' ? <i className="bi bi-dash-circle-fill"></i> :
+                          <i className="bi bi-clock"></i>}
+                  </span>
+                  {space.status === 'approved' ? 'Projeto aprovado e publicado' :
+                    space.status === 'pending' ? 'Projeto pendente de aprovação' :
+                      space.status === 'inactive' ? 'Projeto inativo' :
+                        'Projeto rejeitado'}
+                </div>
               </div>
             </div>
+            <button onClick={handleViewPublic} style={{ background: '#F7f7f7', color: '#000', border: 'none', borderRadius: 24, padding: '6px 48px', fontWeight: 600, fontSize: 16, cursor: 'pointer' }}           >             Ver Página Pública           </button>
           </div>
-          <button onClick={handleDeleteProject} style={{ background: '#ff4444', color: '#fff', border: 'none', borderRadius: 24, padding: '6px 48px', fontWeight: 600, fontSize: 16, cursor: 'pointer' }}           >             Excluir Projeto           </button>
-
-  </div>
-
-
 
         </div>
         {/* Tabs */}
@@ -402,21 +402,7 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
         )}
         {/* Action Buttons */}
         <div className="me-5" style={{ display: 'flex', justifyContent: 'end', gap: 24, padding: 24, borderBottomLeftRadius: 16, borderBottomRightRadius: 16 }}>
-          <button
-            onClick={handleViewPublic}
-            style={{
-              background: '#F7f7f7',
-              color: '#000',
-              border: 'none',
-              borderRadius: 24,
-              padding: '6px 48px',
-              fontWeight: 600,
-              fontSize: 16,
-              cursor: 'pointer'
-            }}
-          >
-            Ver Página Pública
-          </button>
+
           <button
             onClick={() => handleStatusUpdate('inactive')}
             style={{
@@ -467,6 +453,21 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
             disabled={space.status === 'approved'}
           >
             Aprovar
+          </button>
+          <button 
+            onClick={handleDeleteProject}
+            style={{ 
+              background: '#ff4444',
+              color: '#fff', 
+              border: 'none', 
+              borderRadius: 24, 
+              padding: '6px 48px', 
+              fontWeight: 600, 
+              fontSize: 16, 
+              cursor: 'pointer'
+            }}
+          >
+            Deletar
           </button>
 
         </div>
@@ -600,7 +601,7 @@ export default function CspacePage() {
             </div>
             <button
               className="btn "
-              style={{ background: '#7BFA02', border: 'none', borderRadius: 24, padding: '6px 48px', fontWeight: 600, fontSize: 16, cursor: 'pointer' }}
+              style={{ background: '#7bfa02',  border: 'none', borderRadius: 24, padding: '6px 48px', fontWeight: 600, fontSize: 16, cursor: 'pointer' }}
               onClick={() => setShowNewProjectForm(true)}
             >
               Adicionar Projeto

@@ -1609,7 +1609,7 @@ router.patch('/admin/project/:id/status', async (req, res) => {
   }
 });
 
-// Delete project for admin
+// Delete project for admin (no auth required)
 router.delete('/admin/project/:id', async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);
@@ -1622,23 +1622,35 @@ router.delete('/admin/project/:id', async (req, res) => {
     if (project.coverPhoto) {
       const coverPath = path.join('./uploads', project.coverPhoto);
       if (fs.existsSync(coverPath)) {
-        fs.unlinkSync(coverPath);
+        try {
+          fs.unlinkSync(coverPath);
+        } catch (err) {
+          console.log('Could not delete cover photo:', err.message);
+        }
       }
     }
     
-    project.photos.forEach(photo => {
-      const photoPath = path.join('./uploads', photo);
-      if (fs.existsSync(photoPath)) {
-        fs.unlinkSync(photoPath);
-      }
-    });
+    // Delete additional photos
+    if (project.photos && project.photos.length > 0) {
+      project.photos.forEach(photo => {
+        const photoPath = path.join('./uploads', photo);
+        if (fs.existsSync(photoPath)) {
+          try {
+            fs.unlinkSync(photoPath);
+          } catch (err) {
+            console.log('Could not delete photo:', err.message);
+          }
+        }
+      });
+    }
 
+    // Delete the project from database
     await Project.findByIdAndDelete(req.params.id);
     
     res.json({ message: 'Project deleted successfully' });
   } catch (error) {
     console.error('Error deleting project:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to delete project' });
   }
 });
 
