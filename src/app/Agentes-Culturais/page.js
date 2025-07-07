@@ -24,10 +24,16 @@ export default function CulturalAgentsPage() {
     return colors[index];
   };
 
-  // Get agent profile photo based on specific type
-  const getAgentProfilePhoto = (agent, type) => {
-    if (agent.profilePhotos?.[type]) {
-      return agent.profilePhotos[type];
+  // Get agent profile photo based on completed type
+  const getAgentProfilePhoto = (agent) => {
+    if (agent.typeStatus?.personal?.isComplete && agent.profilePhotos?.personal) {
+      return agent.profilePhotos.personal;
+    }
+    if (agent.typeStatus?.business?.isComplete && agent.profilePhotos?.business) {
+      return agent.profilePhotos.business;
+    }
+    if (agent.typeStatus?.collective?.isComplete && agent.profilePhotos?.collective) {
+      return agent.profilePhotos.collective;
     }
     return null;
   };
@@ -146,7 +152,7 @@ export default function CulturalAgentsPage() {
   }, [searchTerm]);
 
   const renderAgentCard = (agent) => {
-    const profilePhoto = getAgentProfilePhoto(agent, agent.profileType.type.toLowerCase());
+    const profilePhoto = getAgentProfilePhoto(agent);
     
     if (viewMode === 'grid') {
       return (
