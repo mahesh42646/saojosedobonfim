@@ -27,8 +27,27 @@ function AgentProfileContent() {
                     return;
                 }
 
-                // Fetch the specific agent profile using the public endpoint
-                const response = await fetch(buildApiUrl(`/public/agent/${agentId}?type=${agentType || ''}`), {
+                // First fetch the list of all agents to get the CPF
+                const agentsResponse = await fetch(buildApiUrl('/agent/profiles'), {
+                    headers: {
+                        'Authorization': 'dummy-token-for-testing',
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!agentsResponse.ok) {
+                    throw new Error('Failed to fetch agents list');
+                }
+
+                const agentsData = await agentsResponse.json();
+                const targetAgent = agentsData.profiles.find(agent => agent._id === agentId);
+
+                if (!targetAgent) {
+                    throw new Error('Agent not found');
+                }
+
+                // Now fetch the specific agent profile using the public API
+                const response = await fetch(buildApiUrl(`/public/agent/profile/${agentId}`), {
                     headers: {
                         'Content-Type': 'application/json'
                     }
@@ -39,8 +58,7 @@ function AgentProfileContent() {
                 }
 
                 const data = await response.json();
-                // Store both the agent data and the requested type
-                setAgent({ ...data, requestedType: agentType });
+                setAgent(data);
             } catch (err) {
                 console.error('Error fetching agent:', err);
                 setError('Failed to load agent profile');
@@ -64,93 +82,52 @@ function AgentProfileContent() {
         return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Agente não encontrado</div>;
     }
 
-    // Get display name based on requested profile type
+    // Get display name based on agent type
     const getDisplayName = () => {
-        const requestedType = agent.requestedType?.toLowerCase();
-        
-        if (requestedType === 'business' && agent.typeStatus?.business?.isComplete) {
+        if (agent.typeStatus?.business?.isComplete) {
             return agent.businessData?.nomeFantasia || agent.businessData?.razaoSocial || agent.fullname;
         }
-        if (requestedType === 'collective' && agent.typeStatus?.collective?.isComplete) {
+        if (agent.typeStatus?.collective?.isComplete) {
             return agent.collectiveData?.collectiveName || agent.fullname;
         }
-        // Default to personal or fallback to fullname
         return agent.fullname;
     };
 
-    // Get agent type for display based on requested type
+    // Get agent type for display
     const getAgentType = () => {
-        const requestedType = agent.requestedType?.toLowerCase();
-        
-        if (requestedType === 'personal' && agent.typeStatus?.personal?.isComplete) return 'INDIVIDUAL';
-        if (requestedType === 'business' && agent.typeStatus?.business?.isComplete) return 'PESSOA JURÍDICA';
-        if (requestedType === 'collective' && agent.typeStatus?.collective?.isComplete) return 'GRUPO COLETIVO';
-        
-        // Fallback to any completed type
         if (agent.typeStatus?.personal?.isComplete) return 'INDIVIDUAL';
         if (agent.typeStatus?.business?.isComplete) return 'PESSOA JURÍDICA';
         if (agent.typeStatus?.collective?.isComplete) return 'GRUPO COLETIVO';
         return 'TIPO NÃO DEFINIDO';
     };
 
-    // Get profile photo based on requested type
-    const getProfilePhoto = () => {
-        const requestedType = agent.requestedType?.toLowerCase();
-        
-        if (requestedType && agent.profilePhotos && agent.profilePhotos[requestedType]) {
-            return `${IMAGE_BASE_URL}/uploads/${agent.profilePhotos[requestedType]}`;
-        }
-        
-        // Fallback to any available profile photo
-        if (agent.profilePhotos) {
-            if (agent.profilePhotos.personal) return `${IMAGE_BASE_URL}/uploads/${agent.profilePhotos.personal}`;
-            if (agent.profilePhotos.business) return `${IMAGE_BASE_URL}/uploads/${agent.profilePhotos.business}`;
-            if (agent.profilePhotos.collective) return `${IMAGE_BASE_URL}/uploads/${agent.profilePhotos.collective}`;
-        }
-        
-        return null;
-    };
-
-    // Get agent description based on requested type
+    // Get agent description based on type
     const getAgentDescription = () => {
-        const requestedType = agent.requestedType?.toLowerCase();
+        const agentType = searchParams.get('type');
+        const aboutText = agent.publicProfile?.[agentType]?.aboutText;
         
-        // First, try to get profile-specific about text
-        if (requestedType && agent.publicProfile?.[requestedType]?.aboutText) {
-            return agent.publicProfile[requestedType].aboutText;
-        }
+        if (aboutText) return aboutText;
         
-        // Fallback to general description or generate based on type
-        if (agent.description) return agent.description;
-        
-        if (requestedType === 'business' && agent.typeStatus?.business?.isComplete) {
+        if (agent.typeStatus?.business?.isComplete) {
             return `${agent.businessData?.nomeFantasia || 'Empresa'} atua no cenário cultural com foco em ${agent.mainActivity || 'diversas atividades culturais'}. ${agent.otherActivity || ''}`;
         }
-        if (requestedType === 'collective' && agent.typeStatus?.collective?.isComplete) {
+        if (agent.typeStatus?.collective?.isComplete) {
             return `Coletivo cultural formado em ${agent.collectiveData?.monthCreated}/${agent.collectiveData?.yearCreated}, com ${agent.collectiveData?.participants || 'diversos'} participantes. Focado em ${agent.mainActivity || 'atividades culturais diversas'}. ${agent.otherActivity || ''}`;
         }
         return `Artista atuante em ${agent.mainActivity || 'diversas áreas culturais'}${agent.otherActivity ? `. ${agent.otherActivity}` : ''}.`;
     };
 
-    // Get agent's gallery images based on profile type
+    // Get agent's gallery images
     const getGalleryImages = () => {
-        const requestedType = agent.requestedType?.toLowerCase();
+        const agentType = searchParams.get('type');
+        const galleryPhotos = agent.publicProfile?.[agentType]?.galleryPhotos || [];
         
-        // Try to get gallery from profile-specific public profile data
-        let galleryPhotos = null;
-        if (requestedType && agent.publicProfile?.[requestedType]?.galleryPhotos) {
-            galleryPhotos = agent.publicProfile[requestedType].galleryPhotos;
-        } else if (agent.gallery) {
-            galleryPhotos = agent.gallery;
-        }
-        
-        if (galleryPhotos && galleryPhotos.length > 0) {
+        if (galleryPhotos.length > 0) {
             return galleryPhotos.map((img, index) => ({
-                src: `${IMAGE_BASE_URL}/uploads/${img}`,
+                src: `${buildApiUrl('')}/public/uploads/${img}`,
                 alt: `Gallery ${index + 1}`
             }));
         }
-        
         // Return default images if no gallery is provided
         return [
             { src: '/images/photo1.png', alt: 'Gallery 1' },
@@ -231,36 +208,42 @@ function AgentProfileContent() {
                         position: "relative",
                         flexShrink: 0
                     }}>
-                        {getProfilePhoto() ? (
-                            <Image
-                                src={getProfilePhoto()}
-                                alt={getDisplayName()}
-                                fill
-                                style={{
+                        {(() => {
+                            const agentType = searchParams.get('type');
+                            const profilePhotoUrl = `${buildApiUrl('')}/public/agent/profile/${agent._id}/photo/${agentType}`;
+                            const hasProfilePhoto = agent.profilePhotos && agent.profilePhotos[agentType];
+                            
+                            return hasProfilePhoto ? (
+                                <Image
+                                    src={profilePhotoUrl}
+                                    alt={getDisplayName()}
+                                    fill
+                                    style={{
+                                        borderRadius: "50%",
+                                        objectFit: "cover",
+                                        border: "4px solid #fff",
+                                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+                                    }}
+                                />
+                            ) : (
+                                <div style={{
+                                    width: "100%",
+                                    height: "100%",
                                     borderRadius: "50%",
-                                    objectFit: "cover",
+                                    background: "#2CB34A",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    color: "#fff",
+                                    fontSize: 64,
+                                    fontWeight: "bold",
                                     border: "4px solid #fff",
                                     boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
-                                }}
-                            />
-                        ) : (
-                            <div style={{
-                                width: "100%",
-                                height: "100%",
-                                borderRadius: "50%",
-                                background: "#2CB34A",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                color: "#fff",
-                                fontSize: 64,
-                                fontWeight: "bold",
-                                border: "4px solid #fff",
-                                boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
-                            }}>
-                                {getDisplayName().charAt(0)}
-                            </div>
-                        )}
+                                }}>
+                                    {getDisplayName().charAt(0)}
+                                </div>
+                            );
+                        })()}
                     </div>
 
                     {/* Profile Info */}
@@ -279,7 +262,7 @@ function AgentProfileContent() {
                         </div>
 
                         {/* Business-specific info */}
-                        {agent.requestedType?.toLowerCase() === 'business' && agent.typeStatus?.business?.isComplete && agent.businessData?.razaoSocial && (
+                        {agent.typeStatus?.business?.isComplete && agent.businessData?.razaoSocial && (
                             <div style={{ fontSize: 16, color: "#666", marginBottom: 16 }}>
                                 Razão Social: {agent.businessData.razaoSocial}
                             </div>
@@ -288,8 +271,8 @@ function AgentProfileContent() {
                         {/* Social Links */}
                         <div style={{ display: "flex", gap: 16, marginTop: 20 }}>
                             {(() => {
-                                const requestedType = agent.requestedType?.toLowerCase();
-                                const socialLinks = agent.publicProfile?.[requestedType]?.socialLinks || agent.socialLinks || {};
+                                const agentType = searchParams.get('type');
+                                const socialLinks = agent.publicProfile?.[agentType]?.socialLinks || {};
                                 
                                 return (
                                     <>

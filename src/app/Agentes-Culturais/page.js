@@ -24,13 +24,14 @@ export default function CulturalAgentsPage() {
     return colors[index];
   };
 
-  // Get agent profile photo based on specific profile type
-  const getAgentProfilePhoto = (agent, profileType) => {
-    if (!profileType || !agent.profilePhotos) return null;
-    
-    // Return the photo for the specific profile type
-    const typeKey = profileType.toLowerCase();
-    return agent.profilePhotos[typeKey] || null;
+  // Get agent profile photo URL for specific type
+  const getAgentProfilePhotoUrl = (agent, profileType) => {
+    const type = profileType.toLowerCase();
+    const profilePhoto = agent.profilePhotos?.[type];
+    if (profilePhoto && profilePhoto.trim()) {
+      return `${process.env.NEXT_PUBLIC_API_BASE_URL}/public/agent/profile/${agent._id}/photo/${type}`;
+    }
+    return null;
   };
 
   // Get agent type status - Updated to handle multiple types as separate profiles
@@ -92,9 +93,10 @@ export default function CulturalAgentsPage() {
       setLoading(true);
       setError(null);
       
-      const url = buildApiUrl('/public/agent/profiles');
+      const url = buildApiUrl('/agent/profiles');
       const response = await fetch(url, {
         headers: {
+          'Authorization': 'dummy-token-for-testing',
           'Content-Type': 'application/json'
         }
       });
@@ -146,7 +148,7 @@ export default function CulturalAgentsPage() {
   }, [searchTerm]);
 
   const renderAgentCard = (agent) => {
-    const profilePhoto = getAgentProfilePhoto(agent, agent.profileType.type);
+    const profilePhotoUrl = getAgentProfilePhotoUrl(agent, agent.profileType.type);
     
     if (viewMode === 'grid') {
       return (
@@ -161,9 +163,9 @@ export default function CulturalAgentsPage() {
           gap: 16,
           alignItems: 'center'
         }}>
-          {profilePhoto ? (
+          {profilePhotoUrl ? (
             <Image 
-              src={`${process.env.NEXT_PUBLIC_API_BASE_URL.replace('/api', '')}/uploads/${profilePhoto}`}
+              src={profilePhotoUrl}
               alt={agent.profileType.displayName}
               width={200}
               height={200}
@@ -239,9 +241,9 @@ export default function CulturalAgentsPage() {
           alignItems: 'flex-start',
           gap: 16
         }}>
-          {profilePhoto ? (
+          {profilePhotoUrl ? (
             <Image 
-              src={`${process.env.NEXT_PUBLIC_API_BASE_URL.replace('/api', '')}/uploads/${profilePhoto}`}
+              src={profilePhotoUrl}
               alt={agent.profileType.displayName}
               width={100}
               height={100}
@@ -316,9 +318,9 @@ export default function CulturalAgentsPage() {
         padding: 24, 
         boxShadow: '0 0 8px 0 #0001' 
       }}>
-        {profilePhoto ? (
+        {profilePhotoUrl ? (
           <Image 
-            src={`${process.env.NEXT_PUBLIC_API_BASE_URL.replace('/api', '')}/uploads/${profilePhoto}`}
+            src={profilePhotoUrl}
             alt={agent.profileType.displayName}
             width={150}
             height={150}

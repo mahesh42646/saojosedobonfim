@@ -1726,66 +1726,132 @@ router.patch('/admin/space/:id/status', async (req, res) => {
 });
 
 // Public endpoints (no auth required)
-// Public agent profiles endpoint
-router.get('/public/agent/profiles', async (req, res) => {
-  try {
-    const { type, status, search } = req.query;
-    let query = { status: 'active' }; // Only show active profiles publicly
-
-    // Filter by search
-    if (search) {
-      query.$or = [
-        { fullname: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } },
-        { cpf: { $regex: search, $options: 'i' } }
-      ];
-    }
-
-    let profiles = await AgentProfile.find(query)
-      .select('-password -agentId') // Remove sensitive data
-      .sort({ createdAt: -1 });
-
-    // Filter by type completion status if specified
-    if (type && type !== 'all') {
-      profiles = profiles.filter(profile => {
-        if (type === 'personal') return profile.typeStatus.personal.isComplete;
-        if (type === 'business') return profile.typeStatus.business.isComplete;
-        if (type === 'collective') return profile.typeStatus.collective.isComplete;
-        return true;
-      });
-    }
-
-    res.json({
-      profiles
-    });
-  } catch (error) {
-    console.error('Error fetching public agent profiles:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
 // Public agent profile details endpoint
-router.get('/public/agent/:id', async (req, res) => {
+router.get('/public/agent/profile/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { type } = req.query; // personal, business, or collective
     
-    const profile = await AgentProfile.findById(id)
-      .select('-password -agentId'); // Remove sensitive data
+    const profile = await AgentProfile.findById(id).select('-password -agentId');
     
-    if (!profile || profile.status !== 'active') {
+    if (!profile) {
       return res.status(404).json({ error: 'Agent profile not found' });
     }
 
     // Check if the requested type is complete
-    if (type && profile.typeStatus[type] && !profile.typeStatus[type].isComplete) {
-      return res.status(404).json({ error: 'Profile type not available' });
+    if (type && ['personal', 'business', 'collective'].includes(type)) {
+      if (!profile.typeStatus?.[type]?.isComplete) {
+        return res.status(404).json({ error: `${type} profile not found or incomplete` });
+      }
     }
 
-    res.json(profile);
+    // Remove sensitive information for public view
+    const publicProfile = {
+      _id: profile._id,
+      fullname: profile.fullname,
+      socialname: profile.socialname,
+      city: profile.city,
+      district: profile.district,
+      mainActivity: profile.mainActivity,
+      typeStatus: profile.typeStatus,
+      profilePhotos: profile.profilePhotos,
+      publicProfile: profile.publicProfile,
+      businessData: profile.businessData,
+      collectiveData: profile.collectiveData
+    };
+
+    res.json(publicProfile);
   } catch (error) {
-    console.error('Error fetching agent profile details:', error);
-    res.status(500).json({ error: 'Failed to fetch agent profile details' });
+    console.error('Error fetching agent profile:', error);
+    res.status(500).json({ error: 'Failed to fetch agent profile' });
+  }
+});
+
+// Public agent profile photo endpoint
+router.get('/public/agent/profile/:id/photo/:type', async (req, res) => {
+  try {
+    const { id, type } = req.params;
+    
+    if (!['personal', 'business', 'collective'].includes(type)) {
+      return res.status(400).json({ error: 'Invalid profile type' });
+    }
+
+    const profile = await AgentProfile.findById(id);
+    
+    if (!profile) {
+      return res.status(404).json({ error: 'Agent profile not found' });
+    }
+
+    // Check if the requested type is complete
+    if (!profile.typeStatus?.[type]?.isComplete) {
+      return res.status(404).json({ error: `${type} profile not found or incomplete` });
+    }
+
+    const profilePhoto = profile.profilePhotos?.[type];
+    
+    if (!profilePhoto) {
+      return res.status(404).json({ error: 'Profile photo not found' });
+    }
+
+    // Check if file exists
+    const photoPath = path.join('./uploads', profilePhoto);
+    if (!fs.existsSync(photoPath)) {
+      return res.status(404).json({ error: 'Photo file not found' });
+    }
+
+    // Return the photo file
+    res.sendFile(path.resolve(photoPath));
+  } catch (error) {
+    console.error('Error fetching profile photo:', error);
+    res.status(500).json({ error: 'Failed to fetch profile photo' });
+  }
+});
+
+// Public agent gallery photos endpoint
+router.get('/public/agent/profile/:id/gallery/:type', async (req, res) => {
+  try {
+    const { id, type } = req.params;
+    
+    if (!['personal', 'business', 'collective'].includes(type)) {
+      return res.status(400).json({ error: 'Invalid profile type' });
+    }
+
+    const profile = await AgentProfile.findById(id);
+    
+    if (!profile) {
+      return res.status(404).json({ error: 'Agent profile not found' });
+    }
+
+    // Check if the requested type is complete
+    if (!profile.typeStatus?.[type]?.isComplete) {
+      return res.status(404).json({ error: `${type} profile not found or incomplete` });
+    }
+
+    const galleryPhotos = profile.publicProfile?.[type]?.galleryPhotos || [];
+    
+    res.json({ galleryPhotos });
+  } catch (error) {
+    console.error('Error fetching gallery photos:', error);
+    res.status(500).json({ error: 'Failed to fetch gallery photos' });
+  }
+});
+
+// Public uploads endpoint (for serving uploaded files)
+router.get('/public/uploads/:filename', async (req, res) => {
+  try {
+    const { filename } = req.params;
+    
+    // Check if file exists
+    const filePath = path.join('./uploads', filename);
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: 'File not found' });
+    }
+
+    // Return the file
+    res.sendFile(path.resolve(filePath));
+  } catch (error) {
+    console.error('Error serving file:', error);
+    res.status(500).json({ error: 'Failed to serve file' });
   }
 });
 
