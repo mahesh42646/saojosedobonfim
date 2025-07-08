@@ -1476,8 +1476,24 @@ router.post('/project', [
 
     // Fetch agent profile information
     let agentInfo = {};
+    let actualAgentId = req.user.id; // Will be used for the project's agentId field
+    
     try {
-      const agentProfile = await AgentProfile.findOne({ agentId: req.user.id }).select('-password');
+      console.log('User from token:', req.user);
+      let agentProfile = null;
+      
+      // Try to find by agentId first (if token contains Agent ID)
+      agentProfile = await AgentProfile.findOne({ agentId: req.user.id }).select('-password');
+      
+      if (!agentProfile) {
+        // Try to find by AgentProfile ID (if token contains AgentProfile ID)
+        agentProfile = await AgentProfile.findById(req.user.id).select('-password');
+        if (agentProfile) {
+          actualAgentId = agentProfile.agentId; // Use the actual Agent ID for the project
+        }
+      }
+      
+      console.log('Agent profile found:', agentProfile ? 'Yes' : 'No');
       if (agentProfile) {
         agentInfo = {
           fullname: agentProfile.fullname,
@@ -1487,13 +1503,16 @@ router.post('/project', [
           mainActivity: agentProfile.mainActivity,
           city: agentProfile.city
         };
+        console.log('Agent info prepared:', agentInfo);
+      } else {
+        console.log('No agent profile found for user ID:', req.user.id);
       }
     } catch (profileError) {
       console.warn('Could not fetch agent profile:', profileError);
     }
 
     const project = new Project({
-      agentId: req.user.id,
+      agentId: actualAgentId,
       agentInfo,
       type,
       title,
