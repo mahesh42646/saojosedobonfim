@@ -847,24 +847,6 @@ router.get('/agent/profile/:id/public', async (req, res) => {
   }
 });
 
-// Get Agent Profile by Agent ID (for project creators)
-router.get('/agent/profile/:agentId', async (req, res) => {
-  try {
-    const { agentId } = req.params;
-    
-    const profile = await AgentProfile.findOne({ agentId: agentId }).select('-password');
-    
-    if (!profile) {
-      return res.status(404).json({ error: 'Agent profile not found' });
-    }
-    
-    res.json(profile);
-  } catch (error) {
-    console.error('Error fetching agent profile:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
 // Delete Agent Profile
 router.delete('/agent/profile/:cpf', authMiddleware, async (req, res) => {
   try {
@@ -1492,8 +1474,27 @@ router.post('/project', [
     const parsedPeriod = typeof period === 'string' ? JSON.parse(period) : period;
     const parsedSocialLinks = typeof socialLinks === 'string' ? JSON.parse(socialLinks) : socialLinks;
 
+    // Fetch agent profile information
+    let agentInfo = {};
+    try {
+      const agentProfile = await AgentProfile.findOne({ agentId: req.user.id }).select('-password');
+      if (agentProfile) {
+        agentInfo = {
+          fullname: agentProfile.fullname,
+          socialname: agentProfile.socialname,
+          email: agentProfile.email,
+          telephone: agentProfile.telephone,
+          mainActivity: agentProfile.mainActivity,
+          city: agentProfile.city
+        };
+      }
+    } catch (profileError) {
+      console.warn('Could not fetch agent profile:', profileError);
+    }
+
     const project = new Project({
       agentId: req.user.id,
+      agentInfo,
       type,
       title,
       description,

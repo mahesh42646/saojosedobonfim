@@ -359,6 +359,16 @@ const projectSchema = new mongoose.Schema({
     required: true 
   },
   
+  // Agent Information (stored directly for easy access)
+  agentInfo: {
+    fullname: { type: String },
+    socialname: { type: String },
+    email: { type: String },
+    telephone: { type: String },
+    mainActivity: { type: String },
+    city: { type: String }
+  },
+  
   // Basic Information
   type: { 
     type: String, 

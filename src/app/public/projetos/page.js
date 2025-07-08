@@ -13,7 +13,6 @@ function ProjectContent() {
     const [space, setSpace] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [creator, setCreator] = useState(null);
 
     useEffect(() => {
         const fetchProjectDetails = async () => {
@@ -23,22 +22,13 @@ function ProjectContent() {
             }
 
             try {
-                // First fetch project details
+                // Fetch project details
                 const projectResponse = await fetch(buildApiUrl(`/public/project/${spaceId}`));
                 if (!projectResponse.ok) {
                     throw new Error('Failed to fetch project details');
                 }
                 const projectData = await projectResponse.json();
                 setSpace(projectData);
-
-                // Then fetch agent profile using agentId from project data
-                if (projectData.agentId) {
-                    const agentResponse = await fetch(buildApiUrl(`/agent/profile/${projectData.agentId}`));
-                    if (agentResponse.ok) {
-                        const agentData = await agentResponse.json();
-                        setCreator(agentData);
-                    }
-                }
             } catch (err) {
                 console.error('Error fetching project:', err);
                 setError('Failed to load project details');
@@ -57,6 +47,9 @@ function ProjectContent() {
     if (error || !space) {
         return <div className="text-center p-5">Error loading space details</div>;
     }
+
+    // Use agent info stored in project data
+    const creator = space.agentInfo || {};
 
     return (
         <div className="min-vh-100 bg-white text-dark">
@@ -91,10 +84,10 @@ function ProjectContent() {
                         </div>
                         <div className="text-end">
                             <p className="fs-5 mb-1">
-                                {creator?.fullname || creator?.socialname || 'Nome não disponível'}
+                                {creator.fullname || creator.socialname || 'Nome não disponível'}
                             </p>
                             <p className="text-secondary">
-                                {creator?.mainActivity || 'Agente Cultural'}
+                                {creator.mainActivity || 'Agente Cultural'}
                             </p>
                         </div>
                     </div>
@@ -154,11 +147,11 @@ function ProjectContent() {
                     <div className="col-md-6">
                         <div className="mb-3">
                             <h6 className="fw-bold">Email:</h6>
-                            <p className="mb-0">{creator?.email || 'cinemacomunidade@gmail.com'}</p>
+                            <p className="mb-0">{creator.email || 'cinemacomunidade@gmail.com'}</p>
                         </div>
                         <div>
                             <h6 className="fw-bold">Phone:</h6>
-                            <p className="mb-0">{creator?.telephone || '(83) 9 9999-9999'}</p>
+                            <p className="mb-0">{creator.telephone || '(83) 9 9999-9999'}</p>
                         </div>
                     </div>
                 </div>
