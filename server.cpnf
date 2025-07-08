@@ -1,6 +1,5 @@
 
 
-ssh root@212.85.0.184
 
 
 # on local
@@ -22,47 +21,18 @@ systemctl reload nginx
 
 sudo nano /etc/nginx/sites-available/saojosedobonfim
 
-# Updated nginx configuration:
+
+
+  /etc/nginx/sites-available/saojosedobonfim                                                                         
 server {
     server_name mapacultural.saojosedobonfim.pb.gov.br;
 
-    # Handle uploads directly without authentication
-    location /uploads/ {
-        proxy_pass http://localhost:4001/uploads/;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        
-        # Cache settings for images
-        expires 1y;
-        add_header Cache-Control "public, immutable";
-    }
-
-    # Handle API routes
-    location /api/ {
-        proxy_pass http://localhost:4001/api/;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
-    }
-
-    # Handle all other routes (frontend)
     location / {
         proxy_pass http://localhost:3001;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
         proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
     }
 
@@ -71,16 +41,18 @@ server {
     ssl_certificate_key /etc/letsencrypt/live/mapacultural.saojosedobonfim.pb.gov.br/privkey.pem; # managed by Certbot
     include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
-}
 
+}
 server {
     if ($host = mapacultural.saojosedobonfim.pb.gov.br) {
         return 301 https://$host$request_uri;
     } # managed by Certbot
 
+
     listen 80;
     server_name mapacultural.saojosedobonfim.pb.gov.br;
     return 404; # managed by Certbot
+
 }
 
 
