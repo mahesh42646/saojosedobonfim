@@ -21,8 +21,8 @@ const menuItems = [
   { label: "Espaços Culturais", icon: "bi-building", key: "spaces" },
   { label: "Projetos Culturais", icon: "bi-folder", key: "projects" },
   { label: "Equipe", icon: "bi-people", key: "staff" },
-  { label: "Processo Seletivo", icon: "bi-file-earmark-text", key: "selection" },
-  { label: "Propostas", icon: "bi-calendar", key: "proposals" },
+  // { label: "Processo Seletivo", icon: "bi-file-earmark-text", key: "selection" },
+  // { label: "Propostas", icon: "bi-calendar", key: "proposals" },
 ];
 
 const Sidebar = () => {
