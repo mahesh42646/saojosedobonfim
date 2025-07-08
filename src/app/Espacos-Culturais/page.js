@@ -123,7 +123,10 @@ export default function CulturalSpacesPage() {
               {space.address}
             </div>
             <div style={{ fontSize: 15, color: '#222', marginBottom: 16 }}>
-              {description?.length > 100 ? `${description.substring(0, 100)}...` : description}
+              {description?.length > 100 
+                ? <div dangerouslySetInnerHTML={{ __html: `${description.substring(0, 100)}...` }} />
+                : <div dangerouslySetInnerHTML={{ __html: description }} />
+              }
             </div>
             <Link 
               href={`/public/espacos?id=${space._id}`}

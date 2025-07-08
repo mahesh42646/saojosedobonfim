@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import Link from "next/link";
 import Headerpb from "./Header-pb";
 import { buildApiUrl } from './config/api';
 import { useState, useEffect } from 'react';
@@ -18,13 +19,7 @@ export default function BrejoDoCruzPage() {
   const [projectsLoading, setProjectsLoading] = useState(true);
   const [projectsError, setProjectsError] = useState(null);
 
-  // Get agent type status
-  const getAgentType = (agent) => {
-    if (agent.typeStatus?.personal?.isComplete) return 'Personal';
-    if (agent.typeStatus?.business?.isComplete) return 'Business';
-    if (agent.typeStatus?.collective?.isComplete) return 'Collective';
-    return 'Incomplete';
-  };
+
 
   // Get agent profile photo based on completed type
   const getAgentProfilePhoto = (agent) => {
@@ -363,7 +358,7 @@ export default function BrejoDoCruzPage() {
       <div style={{ maxWidth: 1100, margin: '0 auto', marginBottom: 32, padding: '0 16px 0 32px' }}>
         <div className="d-flex flex-wrap" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
           <div className="section-title" style={{ fontWeight: 600, fontSize: 20, color: '#215C2D', textAlign: 'left' }}>Nossos agentes</div>
-          <a href="/Agentes-Culturais" style={{
+          <Link href="/Agentes-Culturais" style={{
             textDecoration: 'none',
             color: '#215C2D',
             fontSize: 15,
@@ -373,7 +368,7 @@ export default function BrejoDoCruzPage() {
             gap: 4
           }}>
             Ver todos <i className="bi bi-arrow-right"></i>
-          </a>
+          </Link>
         </div>
         {loading ? (
           <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
@@ -501,7 +496,7 @@ export default function BrejoDoCruzPage() {
                 <button style={{ width: 48, height: 48, borderRadius: '50%', border: '1px solid #000', background: '#f1f1f1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, cursor: 'pointer' }}><i className="bi bi-chevron-left"></i></button>
                 <button style={{ width: 48, height: 48, borderRadius: '50%', border: '1px solid #000', background: '#f1f1f1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, cursor: 'pointer' }}><i className="bi bi-chevron-right"></i></button>
               </div>
-              <a href="/Espacos-Culturais" style={{
+              <Link href="/Espacos-Culturais" style={{
                 textDecoration: 'none',
                 color: '#215C2D',
                 fontSize: 15,
@@ -512,7 +507,7 @@ export default function BrejoDoCruzPage() {
                 marginTop: 24
               }}>
                 Ver todos <i className="bi bi-arrow-right"></i>
-              </a>
+              </Link>
             </div>
 
             {spacesLoading ? (
@@ -549,7 +544,7 @@ export default function BrejoDoCruzPage() {
                     <div style={{ width: '100%', height: 159, position: 'relative', padding: '  10px 1px 1px 1px' }}>
                       {space.coverPhoto ? (
                         <Image
-                          src={`https://mapacultural.saojosedobonfim.pb.gov.br/uploads/${space.coverPhoto}`}
+                          src={`${process.env.NEXT_PUBLIC_API_BASE_URL.replace('/api', '')}/uploads/${space.coverPhoto}`}
                           alt={space.title}
                           width={100}
                           height={100}
@@ -579,8 +574,9 @@ export default function BrejoDoCruzPage() {
                     </div>
                     <div style={{ fontSize: 13, color: '#666', textAlign: 'start' }}>
                       {space.description?.length > 100
-                        ? `${space.description.substring(0, 100)}...`
-                        : space.description}
+                        ? <div dangerouslySetInnerHTML={{ __html: `${space.description.substring(0, 100)}...` }} />
+                        : <div dangerouslySetInnerHTML={{ __html: space.description }} />
+                      }
                     </div>
                   </div>
                 ))}
@@ -594,7 +590,7 @@ export default function BrejoDoCruzPage() {
       <div style={{ maxWidth: 1100, margin: '48px auto', padding: '0 16px 0 32px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div className="section-title" style={{ fontWeight: 600, fontSize: 32, color: '#215C2D' }}>Projetos Culturais</div>
-          <a href="/Projetos-Culturais" style={{
+          <Link href="/Projetos-Culturais" style={{
             textDecoration: 'none',
             color: '#215C2D',
             fontSize: 15,
@@ -604,7 +600,7 @@ export default function BrejoDoCruzPage() {
             gap: 4
           }}>
             Ver todos <i className="bi bi-arrow-right"></i>
-          </a>
+          </Link>
         </div>
 
         {projectsLoading ? (
@@ -675,7 +671,7 @@ export default function BrejoDoCruzPage() {
 
                </div>
 
-                <a className="d-block"
+                <Link className="d-flex gap-2"
                   href={`/brejodocruz-pb/projetos?id=${project._id}`}
                   style={{
                     background: '#2CB34A',
@@ -691,8 +687,10 @@ export default function BrejoDoCruzPage() {
                     textDecoration: 'none'
                   }}
                 >
-                  + Conhecer
-                </a>
+                 
+                  Conhecer
+                  <i className="bi bi-arrow-right fw-bold"></i>
+                </Link>
               </div>
 
             ))}

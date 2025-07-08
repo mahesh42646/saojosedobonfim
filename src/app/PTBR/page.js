@@ -444,8 +444,9 @@ export default function BrejoDoCruzPage() {
                     </div>
                     <div style={{ fontSize: 13, color: '#666', textAlign: 'start' }}>
                       {space.description?.length > 100
-                        ? `${space.description.substring(0, 100)}...`
-                        : space.description}
+                        ? <div dangerouslySetInnerHTML={{ __html: `${space.description.substring(0, 100)}...` }} />
+                        : <div dangerouslySetInnerHTML={{ __html: space.description }} />
+                      }
                     </div>
                   </div>
                 ))}

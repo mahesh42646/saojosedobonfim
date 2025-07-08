@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        header .customer-sub-navbar {
+            background-color: #E85E2C;
+            padding: 0px;
+            position: relative;
+        }
+
+        header .customer-sub-nav-items {
+            overflow-x: auto;
+            white-space: nowrap;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            scroll-behavior: smooth;
+            padding: 0 40px;
+        }
+
+        header .customer-sub-nav-items::-webkit-scrollbar {
+            display: none;
+        }
+
+        header .customer-sub-nav-items a {
+            display: inline-block;
+            color: white;
+            text-decoration: none;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        header .customer-sub-nav-items a:hover {
+            color: #d1d5db;
+        }
+
+        header .home-icon {
+            display: inline-flex;
+            align-items: center;
+            padding-left: 12px;
+            padding-right: 12px;
+        }
+
+        header .home-icon i {
+            margin-right: 6px;
+        }
+
+        /* Navigation arrows */
+        header .nav-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: background-color 0.3s;
+            z-index: 10;
+        }
+
+        header .nav-arrow:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        header .nav-arrow.left {
+            left: 5px;
+        }
+
+        header .nav-arrow.right {
+            right: 5px;
+        }
+
+        header .nav-arrow:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0;">
+    <header>
+        <div class="customer-sub-navbar">
+            <button class="nav-arrow left" onclick="scrollLeft()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="nav-arrow right" onclick="scrollRight()">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            <div class="customer-sub-nav-items" id="navItems">
+                <!-- Home Icon -->
+                <a href="https://menuimages.meditreediagnostics.in" class="home-icon">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                
+                <!-- Updated Menu Links -->
+                <a href="https://menuimages.meditreediagnostics.in/mocktail/">Mocktail</a>
+                <a href="https://menuimages.meditreediagnostics.in/maggi/">Maggi</a>
+                <a href="https://menuimages.meditreediagnostics.in/soups/">Soups</a>
+                <a href="https://menuimages.meditreediagnostics.in/sandwich/">Sandwich</a>
+                <a href="https://menuimages.meditreediagnostics.in/shake/">Shake</a>
+                <a href="https://menuimages.meditreediagnostics.in/momos/">Momos</a>
+                <a href="https://menuimages.meditreediagnostics.in/dosa/">Dosa</a>
+                <a href="https://menuimages.meditreediagnostics.in/north-indian/">North Indian</a>
+                <a href="https://menuimages.meditreediagnostics.in/burger/">Burger</a>
+                <a href="https://menuimages.meditreediagnostics.in/pizza/">Pizza</a>
+                <a href="https://menuimages.meditreediagnostics.in/fried-rice/">Fried Rice</a>
+                <a href="https://menuimages.meditreediagnostics.in/manchurian/">Manchurian</a>
+                <a href="https://menuimages.meditreediagnostics.in/chaumin/">Chaumin</a>
+                <a href="https://menuimages.meditreediagnostics.in/uttapam/">Uttapam</a>
+                <a href="https://menuimages.meditreediagnostics.in/idli-vada">Idli Vada</a>
+                <a href="https://menuimages.meditreediagnostics.in/pasta/">Pasta</a>
+                <a href="https://menuimages.meditreediagnostics.in/starter/">Starter</a>
+                <a href="https://menuimages.meditreediagnostics.in/kabab/">Kabab</a>
+                <a href="https://menuimages.meditreediagnostics.in/paneer/">Paneer</a>
+                <a href="https://menuimages.meditreediagnostics.in/dal">Dal</a>
+                <a href="https://menuimages.meditreediagnostics.in/rice/">Rice</a>
+                <a href="https://menuimages.meditreediagnostics.in/pulav/">Pulav</a>
+                <a href="https://menuimages.meditreediagnostics.in/biryani/">Biryani</a>
+                <a href="https://menuimages.meditreediagnostics.in/hariyali-vyanjan/">Hariyali Vyanjan</a>
+                <a href="https://menuimages.meditreediagnostics.in/kofta/">Kofta</a>
+                <a href="https://menuimages.meditreediagnostics.in/kaju-special/">Kaju Special</a>
+                <a href="https://menuimages.meditreediagnostics.in/dahi-raita/">Dahi/Raita</a>
+                <a href="https://menuimages.meditreediagnostics.in/breads/">Breads</a>
+                <a href="https://menuimages.meditreediagnostics.in/salad/">Salad</a>
+                <a href="https://menuimages.meditreediagnostics.in/papad/">Papad</a>
+                <a href="https://menuimages.meditreediagnostics.in/sweet/">Sweet</a>
+                <a href="https://menuimages.meditreediagnostics.in/beverages/">Beverages</a>
+                <a href="https://menuimages.meditreediagnostics.in/lassi/">Lassi</a>
+                <a href="https://menuimages.meditreediagnostics.in/rolls/">Rolls</a>
+                <a href="https://menuimages.meditreediagnostics.in/kombo/">Kombo</a>
+            </div>
+        </div>
+    </header>
+
+    <script>
+        const navItems = document.getElementById('navItems');
+        const leftArrow = document.querySelector('.nav-arrow.left');
+        const rightArrow = document.querySelector('.nav-arrow.right');
+
+        // Mouse wheel horizontal scroll
+        navItems.addEventListener('wheel', function(e) {
+            e.preventDefault();
+            navItems.scrollLeft += e.deltaY;
+            updateArrowVisibility();
+        });
+
+        // Arrow navigation functions
+        function scrollLeft() {
+            navItems.scrollBy({
+                left: -200,
+                behavior: 'smooth'
+            });
+            setTimeout(updateArrowVisibility, 300);
+        }
+
+        function scrollRight() {
+            navItems.scrollBy({
+                left: 200,
+                behavior: 'smooth'
+            });
+            setTimeout(updateArrowVisibility, 300);
+        }
+
+        function updateArrowVisibility() {
+            const scrollLeft = navItems.scrollLeft;
+            const scrollWidth = navItems.scrollWidth;
+            const clientWidth = navItems.clientWidth;
+
+            leftArrow.disabled = scrollLeft <= 0;
+            rightArrow.disabled = scrollLeft >= scrollWidth - clientWidth - 1;
+        }
+
+        // Initial arrow state
+        updateArrowVisibility();
+
+        // Update arrows on scroll
+        navItems.addEventListener('scroll', updateArrowVisibility);
+    </script>
+</body>
+</html>

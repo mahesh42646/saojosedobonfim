@@ -104,7 +104,10 @@ function AgentProfileContent() {
 
     // Get agent description based on type
     const getAgentDescription = () => {
-        if (agent.description) return agent.description;
+        // Check if there's a custom about text in publicProfile
+        if (agent.publicProfile?.personal?.aboutText) return agent.publicProfile.personal.aboutText;
+        if (agent.publicProfile?.business?.aboutText) return agent.publicProfile.business.aboutText;
+        if (agent.publicProfile?.collective?.aboutText) return agent.publicProfile.collective.aboutText;
         
         if (agent.typeStatus?.business?.isComplete) {
             return `${agent.businessData?.nomeFantasia || 'Empresa'} atua no cenário cultural com foco em ${agent.mainActivity || 'diversas atividades culturais'}. ${agent.otherActivity || ''}`;
@@ -115,24 +118,53 @@ function AgentProfileContent() {
         return `Artista atuante em ${agent.mainActivity || 'diversas áreas culturais'}${agent.otherActivity ? `. ${agent.otherActivity}` : ''}.`;
     };
 
-    // Get agent's gallery images
-    const getGalleryImages = () => {
-        if (agent.gallery && agent.gallery.length > 0) {
-            return agent.gallery.map((img, index) => ({
-                src: `${IMAGE_BASE_URL}/${img}`,
-                alt: `Gallery ${index + 1}`
-            }));
+    // Get agent's profile photo based on completed type
+    const getAgentProfilePhoto = () => {
+        if (agent.typeStatus?.personal?.isComplete && agent.profilePhotos?.personal) {
+            return agent.profilePhotos.personal;
         }
-        // Return default images if no gallery is provided
-        return [
-            { src: '/images/photo1.png', alt: 'Gallery 1' },
-            { src: '/images/photo2.png', alt: 'Gallery 2' },
-            { src: '/images/photo3.png', alt: 'Gallery 3' },
-            { src: '/images/photo4.png', alt: 'Gallery 4' }
-        ];
+        if (agent.typeStatus?.business?.isComplete && agent.profilePhotos?.business) {
+            return agent.profilePhotos.business;
+        }
+        if (agent.typeStatus?.collective?.isComplete && agent.profilePhotos?.collective) {
+            return agent.profilePhotos.collective;
+        }
+        return null;
     };
 
+    // Get agent's gallery images based on completed type
+    const getGalleryImages = () => {
+        let galleryPhotos = [];
+        if (agent.typeStatus?.personal?.isComplete && agent.publicProfile?.personal?.galleryPhotos) {
+            galleryPhotos = agent.publicProfile.personal.galleryPhotos;
+        } else if (agent.typeStatus?.business?.isComplete && agent.publicProfile?.business?.galleryPhotos) {
+            galleryPhotos = agent.publicProfile.business.galleryPhotos;
+        } else if (agent.typeStatus?.collective?.isComplete && agent.publicProfile?.collective?.galleryPhotos) {
+            galleryPhotos = agent.publicProfile.collective.galleryPhotos;
+        }
+        if (galleryPhotos && galleryPhotos.length > 0) {
+            return galleryPhotos.map((img) => `${IMAGE_BASE_URL}/uploads/${img}`);
+        }
+        return [];
+    };
+
+    // Get social links based on completed type
+    const getSocialLinks = () => {
+        if (agent.typeStatus?.personal?.isComplete && agent.publicProfile?.personal?.socialLinks) {
+            return agent.publicProfile.personal.socialLinks;
+        }
+        if (agent.typeStatus?.business?.isComplete && agent.publicProfile?.business?.socialLinks) {
+            return agent.publicProfile.business.socialLinks;
+        }
+        if (agent.typeStatus?.collective?.isComplete && agent.publicProfile?.collective?.socialLinks) {
+            return agent.publicProfile.collective.socialLinks;
+        }
+        return {};
+    };
+
+    const profilePhoto = getAgentProfilePhoto();
     const galleryImages = getGalleryImages();
+    const socialLinks = getSocialLinks();
 
     return (
         <div style={{ background: "#fff", minHeight: "100vh", color: "#111" }}>
@@ -146,27 +178,15 @@ function AgentProfileContent() {
                 position: "relative",
                 overflow: "hidden"
             }}>
-                {agent.coverImage ? (
-                    <Image
-                        src={`${IMAGE_BASE_URL}/${agent.coverImage}`}
-                        alt="Cover"
-                        fill
-                        style={{
-                            objectFit: "cover",
-                            objectPosition: "center"
-                        }}
-                    />
-                ) : (
-                    <Image
-                        src="/images/banner2.png"
-                        alt="Cover"
-                        fill
-                        style={{
-                            objectFit: "cover",
-                            objectPosition: "center"
-                        }}
-                    />
-                )}
+                <Image
+                    src="/images/banner2.png"
+                    alt="Cover"
+                    fill
+                    style={{
+                        objectFit: "cover",
+                        objectPosition: "center"
+                    }}
+                />
                 {/* Dark overlay */}
                 <div style={{
                     position: "absolute",
@@ -203,9 +223,9 @@ function AgentProfileContent() {
                         position: "relative",
                         flexShrink: 0
                     }}>
-                        {agent.avatar ? (
+                        {profilePhoto ? (
                             <Image
-                                src={`${IMAGE_BASE_URL}/${agent.avatar}`}
+                                src={`${IMAGE_BASE_URL}/uploads/${profilePhoto}`}
                                 alt={getDisplayName()}
                                 fill
                                 style={{
@@ -259,18 +279,18 @@ function AgentProfileContent() {
 
                         {/* Social Links */}
                         <div style={{ display: "flex", gap: 16, marginTop: 20 }}>
-                            {agent.socialLinks?.facebook && (
-                                <a href={agent.socialLinks.facebook} target="_blank" rel="noopener noreferrer" style={{ color: "#444", fontSize: 24 }}>
+                            {socialLinks.facebook && (
+                                <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" style={{ color: "#444", fontSize: 24 }}>
                                     <i className="bi bi-facebook"></i>
                                 </a>
                             )}
-                            {agent.socialLinks?.instagram && (
-                                <a href={agent.socialLinks.instagram} target="_blank" rel="noopener noreferrer" style={{ color: "#444", fontSize: 24 }}>
+                            {socialLinks.instagram && (
+                                <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" style={{ color: "#444", fontSize: 24 }}>
                                     <i className="bi bi-instagram"></i>
                                 </a>
                             )}
-                            {agent.socialLinks?.youtube && (
-                                <a href={agent.socialLinks.youtube} target="_blank" rel="noopener noreferrer" style={{ color: "#444", fontSize: 24 }}>
+                            {socialLinks.youtube && (
+                                <a href={socialLinks.youtube} target="_blank" rel="noopener noreferrer" style={{ color: "#444", fontSize: 24 }}>
                                     <i className="bi bi-youtube"></i>
                                 </a>
                             )}
@@ -293,36 +313,38 @@ function AgentProfileContent() {
                 </div>
 
                 {/* Gallery */}
-                <div style={{
-                    background: "#fff",
-                    borderRadius: 20,
-                    padding: 30,
-                    marginBottom: 40,
-                    boxShadow: "0 4px 20px rgba(0,0,0,0.1)"
-                }}>
-                    <h2 style={{ fontSize: 24, marginBottom: 20, fontWeight: 600 }}>Galeria</h2>
+                {galleryImages.length > 0 && (
                     <div style={{
-                        display: "grid",
-                        gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-                        gap: 20
+                        background: "#fff",
+                        borderRadius: 20,
+                        padding: 30,
+                        marginBottom: 40,
+                        boxShadow: "0 4px 20px rgba(0,0,0,0.1)"
                     }}>
-                        {galleryImages.map((img, index) => (
-                            <div key={index} style={{
-                                aspectRatio: "1",
-                                position: "relative",
-                                borderRadius: 12,
-                                overflow: "hidden"
-                            }}>
-                                <Image
-                                    src={img.src}
-                                    alt={img.alt}
-                                    fill
-                                    style={{ objectFit: "cover" }}
-                                />
-                            </div>
-                        ))}
+                        <h2 style={{ fontSize: 24, marginBottom: 20, fontWeight: 600 }}>Galeria</h2>
+                        <div style={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+                            gap: 20
+                        }}>
+                            {galleryImages.map((src, index) => (
+                                <div key={index} style={{
+                                    aspectRatio: "1",
+                                    position: "relative",
+                                    borderRadius: 12,
+                                    overflow: "hidden"
+                                }}>
+                                    <Image
+                                        src={src}
+                                        alt="Foto da galeria"
+                                        fill
+                                        style={{ objectFit: "cover" }}
+                                    />
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {/* Contact Info */}
                 <div style={{

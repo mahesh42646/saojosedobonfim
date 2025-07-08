@@ -24,72 +24,73 @@ export default function CulturalAgentsPage() {
     return colors[index];
   };
 
-  // Get agent profile photo based on completed type
-  const getAgentProfilePhoto = (agent) => {
-    if (agent.typeStatus?.personal?.isComplete && agent.profilePhotos?.personal) {
-      return agent.profilePhotos.personal;
-    }
-    if (agent.typeStatus?.business?.isComplete && agent.profilePhotos?.business) {
-      return agent.profilePhotos.business;
-    }
-    if (agent.typeStatus?.collective?.isComplete && agent.profilePhotos?.collective) {
-      return agent.profilePhotos.collective;
-    }
-    return null;
+  // Get agent type status - Updated to return primary type only
+  const getAgentType = (agent) => {
+    if (agent.typeStatus?.personal?.isComplete) return 'Personal';
+    if (agent.typeStatus?.business?.isComplete) return 'Business';
+    if (agent.typeStatus?.collective?.isComplete) return 'Collective';
+    return 'Incomplete';
   };
 
-  // Get agent type status - Updated to handle multiple types as separate profiles
-  const getAgentProfiles = (agents) => {
-    const profiles = [];
-    agents.forEach(agent => {
-      if (agent.typeStatus?.personal?.isComplete) {
-        profiles.push({
-          ...agent,
-          profileType: {
-            type: 'Personal',
-            title: 'Personal Account',
-            description: 'Individual cultural agent profile',
-            displayName: agent.fullname || 'Unnamed Agent'
-          }
-        });
-      }
-      if (agent.typeStatus?.business?.isComplete) {
-        profiles.push({
-          ...agent,
-          profileType: {
-            type: 'Business',
-            title: 'Business Account',
-            description: 'Business or organization cultural profile',
-            displayName: agent.businessData?.nomeFantasia || agent.businessData?.razaoSocial || agent.fullname || 'Unnamed Business'
-          }
-        });
-      }
-      if (agent.typeStatus?.collective?.isComplete) {
-        profiles.push({
-          ...agent,
-          profileType: {
-            type: 'Collective',
-            title: 'Collective Account',
-            description: 'Group or collective cultural initiative',
-            displayName: agent.collectiveData?.collectiveName || agent.fullname || 'Unnamed Collective'
-          }
-        });
-      }
-      if (!agent.typeStatus?.personal?.isComplete && 
-          !agent.typeStatus?.business?.isComplete && 
-          !agent.typeStatus?.collective?.isComplete) {
-        profiles.push({
-          ...agent,
-          profileType: {
-            type: 'Incomplete',
-            title: 'Incomplete Profile',
-            description: 'Profile setup not completed',
-            displayName: agent.fullname || 'Unnamed Agent'
-          }
-        });
-      }
-    });
-    return profiles;
+  // Get agent display name based on primary type
+  const getAgentDisplayName = (agent) => {
+    const type = getAgentType(agent);
+    switch (type) {
+      case 'Business':
+        return agent.businessData?.nomeFantasia || agent.businessData?.razaoSocial || agent.fullname || 'Unnamed Business';
+      case 'Collective':
+        return agent.collectiveData?.collectiveName || agent.fullname || 'Unnamed Collective';
+      case 'Personal':
+      case 'Incomplete':
+      default:
+        return agent.fullname || 'Unnamed Agent';
+    }
+  };
+
+  // Get agent profile photo based on primary type
+  const getAgentProfilePhoto = (agent) => {
+    const type = getAgentType(agent);
+    switch (type) {
+      case 'Personal':
+        return agent.profilePhotos?.personal;
+      case 'Business':
+        return agent.profilePhotos?.business;
+      case 'Collective':
+        return agent.profilePhotos?.collective;
+      default:
+        return null;
+    }
+  };
+
+  // Get profile type info for display
+  const getProfileTypeInfo = (agent) => {
+    const type = getAgentType(agent);
+    switch (type) {
+      case 'Personal':
+        return {
+          type: 'Personal',
+          title: 'Personal Account',
+          description: 'Individual cultural agent profile'
+        };
+      case 'Business':
+        return {
+          type: 'Business',
+          title: 'Business Account',
+          description: 'Business or organization cultural profile'
+        };
+      case 'Collective':
+        return {
+          type: 'Collective',
+          title: 'Collective Account',
+          description: 'Group or collective cultural initiative'
+        };
+      default:
+        return {
+          type: 'Incomplete',
+          title: 'Incomplete Profile',
+          description: 'Profile setup not completed'
+        };
+    }
   };
 
   const fetchAgents = useCallback(async () => {
@@ -110,8 +111,7 @@ export default function CulturalAgentsPage() {
       }
 
       const data = await response.json();
-      const allProfiles = getAgentProfiles(data.profiles || []);
-      setAgents(allProfiles);
+      setAgents(data.profiles || []);
     } catch (err) {
       console.error('Error fetching agents:', err);
       setError('Failed to load agents. Please try again.');
@@ -123,9 +123,9 @@ export default function CulturalAgentsPage() {
   // Filter and paginate agents
   const filteredAgents = agents.filter(agent => {
     const searchLower = searchTerm.toLowerCase();
-    const nameMatch = agent.fullname?.toLowerCase().includes(searchLower);
-    const typeMatch = agent.profileType.type.toLowerCase().includes(searchLower) ||
-                     agent.profileType.description.toLowerCase().includes(searchLower);
+    const nameMatch = getAgentDisplayName(agent).toLowerCase().includes(searchLower);
+    const typeMatch = getAgentType(agent).toLowerCase().includes(searchLower) ||
+                     getProfileTypeInfo(agent).description.toLowerCase().includes(searchLower);
     return nameMatch || typeMatch;
   });
 
@@ -153,10 +153,12 @@ export default function CulturalAgentsPage() {
 
   const renderAgentCard = (agent) => {
     const profilePhoto = getAgentProfilePhoto(agent);
+    const displayName = getAgentDisplayName(agent);
+    const profileType = getProfileTypeInfo(agent);
     
     if (viewMode === 'grid') {
       return (
-        <div key={`${agent._id}-${agent.profileType.type}`} style={{ 
+        <div key={agent._id} style={{ 
           background: '#fff', 
           borderRadius: 16, 
           padding: 20,
@@ -170,7 +172,7 @@ export default function CulturalAgentsPage() {
           {profilePhoto ? (
             <Image 
               src={`${process.env.NEXT_PUBLIC_API_BASE_URL.replace('/api', '')}/uploads/${profilePhoto}`}
-              alt={agent.profileType.displayName}
+              alt={displayName}
               width={200}
               height={200}
               style={{ borderRadius: '50%', objectFit: 'cover' }}
@@ -188,15 +190,15 @@ export default function CulturalAgentsPage() {
               fontWeight: 700,
               fontSize: 64
             }}>
-              {(agent.profileType.displayName || 'A').split(' ').length > 1 
-                ? (agent.profileType.displayName || 'A').split(' ').map(n => n[0]).join('') 
-                : (agent.profileType.displayName || 'A')[0]}
+              {(displayName || 'A').split(' ').length > 1 
+                ? (displayName || 'A').split(' ').map(n => n[0]).join('') 
+                : (displayName || 'A')[0]}
             </div>
           )}
           <div style={{ overflow: 'hidden', textAlign: 'center', width: '100%' }}>
             <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 8 }}>
-              {agent.profileType.displayName}
-              {agent.profileType.type === 'Business' && agent.businessData?.razaoSocial && (
+              {displayName}
+              {profileType.type === 'Business' && agent.businessData?.razaoSocial && (
                 <div style={{ fontSize: 14, color: '#666', marginTop: 4 }}>
                   {agent.businessData.razaoSocial}
                 </div>
@@ -204,15 +206,15 @@ export default function CulturalAgentsPage() {
             </div>
             <div style={{ marginBottom: 12 }}>
               <div style={{ fontSize: 14, color: '#2CB34A', fontWeight: 600 }}>
-                {agent.profileType.title}
+                {profileType.title}
               </div>
               <div style={{ fontSize: 12, color: '#666' }}>
-                {agent.profileType.description}
+                {profileType.description}
               </div>
             </div>
             <div style={{ color: '#F2994A', fontSize: 18, marginTop: 2 }}>★★★★★</div>
             <Link 
-              href={`/public/agentcultural?id=${agent._id}&type=${agent.profileType.type.toLowerCase()}`}
+              href={`/public/agentcultural?id=${agent._id}&type=${profileType.type.toLowerCase()}`}
               style={{ 
                 background: '#2CB34A',
                 color: '#fff',
@@ -236,7 +238,7 @@ export default function CulturalAgentsPage() {
 
     if (viewMode === 'map') {
       return (
-        <div key={`${agent._id}-${agent.profileType.type}`} style={{ 
+        <div key={agent._id} style={{ 
           background: '#fff', 
           borderRadius: 16, 
           padding: 16,
@@ -248,7 +250,7 @@ export default function CulturalAgentsPage() {
           {profilePhoto ? (
             <Image 
               src={`${process.env.NEXT_PUBLIC_API_BASE_URL.replace('/api', '')}/uploads/${profilePhoto}`}
-              alt={agent.profileType.displayName}
+              alt={displayName}
               width={100}
               height={100}
               style={{ borderRadius: '50%', objectFit: 'cover' }}
@@ -266,15 +268,15 @@ export default function CulturalAgentsPage() {
               fontWeight: 700,
               fontSize: 32
             }}>
-              {(agent.profileType.displayName || 'A').split(' ').length > 1 
-                ? (agent.profileType.displayName || 'A').split(' ').map(n => n[0]).join('') 
-                : (agent.profileType.displayName || 'A')[0]}
+              {(displayName || 'A').split(' ').length > 1 
+                ? (displayName || 'A').split(' ').map(n => n[0]).join('') 
+                : (displayName || 'A')[0]}
             </div>
           )}
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 600, fontSize: 16 }}>
-              {agent.profileType.displayName}
-              {agent.profileType.type === 'Business' && agent.businessData?.razaoSocial && (
+              {displayName}
+              {profileType.type === 'Business' && agent.businessData?.razaoSocial && (
                 <div style={{ fontSize: 14, color: '#666', marginTop: 4 }}>
                   {agent.businessData.razaoSocial}
                 </div>
@@ -282,16 +284,16 @@ export default function CulturalAgentsPage() {
             </div>
             <div style={{ marginTop: 8 }}>
               <div style={{ fontSize: 13, color: '#2CB34A', fontWeight: 600 }}>
-                {agent.profileType.title}
+                {profileType.title}
               </div>
               <div style={{ fontSize: 12, color: '#666' }}>
-                {agent.profileType.description}
+                {profileType.description}
               </div>
             </div>
             <div style={{ color: '#F2994A', fontSize: 18, marginTop: 2 }}>★★★★★</div>
           </div>
           <Link 
-            href={`/public/agentcultural?id=${agent._id}&type=${agent.profileType.type.toLowerCase()}`}
+            href={`/public/agentcultural?id=${agent._id}&type=${profileType.type.toLowerCase()}`}
             style={{ 
               background: '#2CB34A',
               color: '#fff',
@@ -313,7 +315,7 @@ export default function CulturalAgentsPage() {
 
     // List view (default)
     return (
-      <div key={`${agent._id}-${agent.profileType.type}`} style={{ 
+      <div key={agent._id} style={{ 
         display: 'flex', 
         alignItems: 'flex-start', 
         gap: 24, 
@@ -325,7 +327,7 @@ export default function CulturalAgentsPage() {
         {profilePhoto ? (
           <Image 
             src={`${process.env.NEXT_PUBLIC_API_BASE_URL.replace('/api', '')}/uploads/${profilePhoto}`}
-            alt={agent.profileType.displayName}
+            alt={displayName}
             width={150}
             height={150}
             style={{ borderRadius: '50%', objectFit: 'cover' }}
@@ -343,15 +345,15 @@ export default function CulturalAgentsPage() {
             fontWeight: 700,
             fontSize: 48
           }}>
-            {(agent.profileType.displayName || 'A').split(' ').length > 1 
-              ? (agent.profileType.displayName || 'A').split(' ').map(n => n[0]).join('') 
-              : (agent.profileType.displayName || 'A')[0]}
+            {(displayName || 'A').split(' ').length > 1 
+              ? (displayName || 'A').split(' ').map(n => n[0]).join('') 
+              : (displayName || 'A')[0]}
           </div>
         )}
         <div style={{ flex: 1 }}>
           <div style={{ fontWeight: 700, fontSize: 18 }}>
-            {agent.profileType.displayName}
-            {agent.profileType.type === 'Business' && agent.businessData?.razaoSocial && (
+            {displayName}
+            {profileType.type === 'Business' && agent.businessData?.razaoSocial && (
               <div style={{ fontSize: 14, color: '#666', marginTop: 4 }}>
                 {agent.businessData.razaoSocial}
               </div>
@@ -359,16 +361,16 @@ export default function CulturalAgentsPage() {
           </div>
           <div style={{ marginTop: 12 }}>
             <div style={{ fontSize: 14, color: '#2CB34A', fontWeight: 600 }}>
-              {agent.profileType.title}
+              {profileType.title}
             </div>
             <div style={{ fontSize: 13, color: '#666' }}>
-              {agent.profileType.description}
+              {profileType.description}
             </div>
           </div>
           <div style={{ color: '#F2994A', fontSize: 18, marginTop: 8 }}>★★★★★</div>
         </div>
         <Link 
-          href={`/public/agentcultural?id=${agent._id}&type=${agent.profileType.type.toLowerCase()}`}
+          href={`/public/agentcultural?id=${agent._id}&type=${profileType.type.toLowerCase()}`}
           style={{ 
             background: '#2CB34A',
             color: '#fff',
