@@ -2,8 +2,11 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Headerpb from "../Header-pb";
-import { buildApiUrl, buildStaticUrl, STATIC_BASE_URL } from '../config/api';
+import { buildApiUrl } from '../config/api';
 import Link from 'next/link';
+
+// Base URL for images (without /api)
+const IMAGE_BASE_URL = 'https://mapacultural.saojosedobonfim.pb.gov.br';
 
 export default function CulturalSpacesPage() {
   const [spaces, setSpaces] = useState([]);
@@ -95,7 +98,7 @@ export default function CulturalSpacesPage() {
         }}>
           {space.coverPhoto ? (
             <Image 
-              src={buildStaticUrl(`/uploads/${space.coverPhoto}`)}
+              src={`${IMAGE_BASE_URL}/uploads/${space.coverPhoto}`}
               alt={space.title}
               width={300}
               height={200}
@@ -161,7 +164,7 @@ export default function CulturalSpacesPage() {
           <div style={{ width: 100, height: 100, flexShrink: 0 }}>
             {space.coverPhoto ? (
               <Image 
-                src={buildStaticUrl(`/uploads/${space.coverPhoto}`)}
+                src={`${IMAGE_BASE_URL}/uploads/${space.coverPhoto}`}
                 alt={space.title}
                 width={100}
                 height={100}
@@ -212,7 +215,7 @@ export default function CulturalSpacesPage() {
       <div key={space._id} style={{ display: 'flex', alignItems: 'flex-start', background: '#fff', borderRadius: 16, padding: 24, gap: 24, boxShadow: '0 0 8px 0 #0001' }}>
         {space.coverPhoto ? (
           <Image 
-            src={buildStaticUrl(`/uploads/${space.coverPhoto}`)}
+            src={`${IMAGE_BASE_URL}/uploads/${space.coverPhoto}`}
             alt={space.title}
             width={150}
             height={150}

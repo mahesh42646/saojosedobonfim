@@ -214,7 +214,7 @@ export default function CulturalAgentsPage() {
             </div>
             <div style={{ color: '#F2994A', fontSize: 18, marginTop: 2 }}>★★★★★</div>
             <Link 
-              href={`/public/agentcultural?id=${agent._id}&type=${profileType.type.toLowerCase()}`}
+              href={`/Agentes-Culturais/${agent._id}?type=${getAgentType(agent).toLowerCase()}`}
               style={{ 
                 background: '#2CB34A',
                 color: '#fff',
@@ -293,7 +293,7 @@ export default function CulturalAgentsPage() {
             <div style={{ color: '#F2994A', fontSize: 18, marginTop: 2 }}>★★★★★</div>
           </div>
           <Link 
-            href={`/public/agentcultural?id=${agent._id}&type=${profileType.type.toLowerCase()}`}
+            href={`/Agentes-Culturais/${agent._id}?type=${getAgentType(agent).toLowerCase()}`}
             style={{ 
               background: '#2CB34A',
               color: '#fff',
@@ -370,7 +370,7 @@ export default function CulturalAgentsPage() {
           <div style={{ color: '#F2994A', fontSize: 18, marginTop: 8 }}>★★★★★</div>
         </div>
         <Link 
-          href={`/public/agentcultural?id=${agent._id}&type=${profileType.type.toLowerCase()}`}
+          href={`/Agentes-Culturais/${agent._id}?type=${getAgentType(agent).toLowerCase()}`}
           style={{ 
             background: '#2CB34A',
             color: '#fff',

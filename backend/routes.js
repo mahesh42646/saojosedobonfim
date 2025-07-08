@@ -800,7 +800,10 @@ router.get('/agent/profile/:id/public', async (req, res) => {
       return res.status(404).json({ error: 'This profile type is not available' });
     }
 
-    // Prepare response data based on type
+    // Get type-specific public profile data
+    const typePublicProfile = profile.publicProfile?.[type] || { aboutText: '', socialLinks: {}, galleryPhotos: [] };
+    
+    // Prepare response data based on type - flatten structure for frontend compatibility
     let responseData = {
       _id: profile._id,
       cpf: profile.cpf,
@@ -812,7 +815,12 @@ router.get('/agent/profile/:id/public', async (req, res) => {
       street: profile.street,
       typeStatus: profile.typeStatus,
       profilePhoto: profile.profilePhotos?.[type],
-      publicProfile: profile.publicProfile?.[type] || { aboutText: '', socialLinks: {}, galleryPhotos: [] }
+      // Flatten public profile data to top level for frontend compatibility
+      aboutText: typePublicProfile.aboutText || '',
+      socialLinks: typePublicProfile.socialLinks || {},
+      galleryPhotos: typePublicProfile.galleryPhotos || [],
+      // Keep nested structure for backward compatibility
+      publicProfile: typePublicProfile
     };
 
     // Add type-specific data
