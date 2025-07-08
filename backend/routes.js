@@ -779,6 +779,60 @@ router.put('/agent/profile/:cpf/public', [authMiddleware, upload.fields([
   }
 });
 
+// Get Agent Public Profile by ID and type (no auth required for public access)
+router.get('/agent/profile/:id/public', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { type } = req.query;
+
+    if (!type || !['personal', 'business', 'collective'].includes(type)) {
+      return res.status(400).json({ error: 'Valid type parameter (personal, business, collective) is required' });
+    }
+
+    const profile = await AgentProfile.findById(id).select('-password -agentId');
+    
+    if (!profile) {
+      return res.status(404).json({ error: 'Agent profile not found' });
+    }
+
+    // Check if the requested type is complete
+    if (!profile.typeStatus[type].isComplete) {
+      return res.status(404).json({ error: 'This profile type is not available' });
+    }
+
+    // Prepare response data based on type
+    let responseData = {
+      _id: profile._id,
+      cpf: profile.cpf,
+      fullname: profile.fullname,
+      email: profile.email,
+      telephone: profile.telephone,
+      city: profile.city,
+      district: profile.district,
+      street: profile.street,
+      typeStatus: profile.typeStatus,
+      profilePhoto: profile.profilePhotos?.[type],
+      publicProfile: profile.publicProfile?.[type] || { aboutText: '', socialLinks: {}, galleryPhotos: [] }
+    };
+
+    // Add type-specific data
+    if (type === 'business' && profile.businessData) {
+      responseData.businessData = profile.businessData;
+      responseData.displayName = profile.businessData.nomeFantasia || profile.businessData.razaoSocial || profile.fullname;
+    } else if (type === 'collective' && profile.collectiveData) {
+      responseData.collectiveData = profile.collectiveData;
+      responseData.displayName = profile.collectiveData.collectiveName || profile.fullname;
+    } else {
+      responseData.displayName = profile.fullname;
+    }
+
+    res.json(responseData);
+  } catch (error) {
+    console.error('Error fetching public profile:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Delete Agent Profile
 router.delete('/agent/profile/:cpf', authMiddleware, async (req, res) => {
   try {
@@ -1881,6 +1935,66 @@ router.delete('/staff/:id', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Delete staff error:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Utility route to clean up missing image references
+router.post('/admin/cleanup-images', authMiddleware, async (req, res) => {
+  try {
+    const profiles = await AgentProfile.find({});
+    let cleanedCount = 0;
+    
+    for (const profile of profiles) {
+      let updated = false;
+      
+      // Check profile photos
+      if (profile.profilePhotos) {
+        for (const type of ['personal', 'business', 'collective']) {
+          if (profile.profilePhotos[type]) {
+            const filePath = path.join('./uploads', profile.profilePhotos[type]);
+            if (!fs.existsSync(filePath)) {
+              console.log(`Removing missing profile photo: ${profile.profilePhotos[type]}`);
+              profile.profilePhotos[type] = null;
+              updated = true;
+            }
+          }
+        }
+      }
+      
+      // Check gallery photos
+      if (profile.publicProfile) {
+        for (const type of ['personal', 'business', 'collective']) {
+          if (profile.publicProfile[type]?.galleryPhotos) {
+            const validPhotos = profile.publicProfile[type].galleryPhotos.filter(photo => {
+              const filePath = path.join('./uploads', photo);
+              const exists = fs.existsSync(filePath);
+              if (!exists) {
+                console.log(`Removing missing gallery photo: ${photo}`);
+              }
+              return exists;
+            });
+            
+            if (validPhotos.length !== profile.publicProfile[type].galleryPhotos.length) {
+              profile.publicProfile[type].galleryPhotos = validPhotos;
+              updated = true;
+            }
+          }
+        }
+      }
+      
+      if (updated) {
+        await profile.save();
+        cleanedCount++;
+      }
+    }
+    
+    res.json({ 
+      message: `Cleaned up ${cleanedCount} profiles with missing images`,
+      cleanedCount 
+    });
+  } catch (error) {
+    console.error('Error cleaning up images:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
