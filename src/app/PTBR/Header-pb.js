@@ -51,7 +51,7 @@ export default function Header() {
                         {/* Logo */}
                         <div className="col-auto d-flex align-items-center">
                         <div onClick={() => window.location.href = '/'}>
-                              <Image src="/images/Logo-sjdb.png" alt="Logo" style={{ height: 70, cursor: 'pointer' }} width={200} height={100} />
+                              <Image src="/images/Logo-sjdb.png" alt="Logo" style={{ height: 70, cursor: 'pointer' }} width={200} height={"auto"} />
                             </div>
                         </div>
 

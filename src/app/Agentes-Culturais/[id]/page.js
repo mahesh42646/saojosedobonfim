@@ -4,9 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import Headerpb from "../../Header-pb";
-import { buildApiUrl } from '../../config/api';
-
-const IMAGE_BASE_URL = 'https://mapacultural.saojosedobonfim.pb.gov.br';
+import { buildApiUrl, buildStaticUrl } from '../../config/api';
 
 export default function AgentDetailPage() {
   const params = useParams();
@@ -96,13 +94,6 @@ export default function AgentDetailPage() {
   const aboutText = agent.aboutText || '';
   const socialLinks = agent.socialLinks || {};
   const galleryPhotos = agent.galleryPhotos || [];
-  
-  // Debug log to check data
-  console.log('Agent data:', agent);
-  console.log('Agent type:', agentType);
-  console.log('About text:', aboutText);
-  console.log('Social links:', socialLinks);
-  console.log('Gallery photos:', galleryPhotos);
 
   const getTypeInfo = () => {
     switch (agentType) {
@@ -134,39 +125,50 @@ export default function AgentDetailPage() {
       <Headerpb />
       
       {/* Hero Section */}
-      <div style={{ position: 'relative', background: 'linear-gradient(135deg, #2CB34A 0%, #1E88E5 100%)', padding: '60px 0', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0.1 }}>
-          <div style={{ position: 'absolute', top: '20%', left: '10%', width: 100, height: 100, borderRadius: '50%', background: '#fff' }}></div>
-          <div style={{ position: 'absolute', top: '60%', right: '15%', width: 60, height: 60, borderRadius: '50%', background: '#fff' }}></div>
-          <div style={{ position: 'absolute', bottom: '20%', left: '20%', width: 80, height: 80, borderRadius: '50%', background: '#fff' }}></div>
+      <div  >
+      <div style={{ position: 'relative', width: '100%', height: 334,zIndex: 1, overflow: 'visible', borderBottomLeftRadius: 2, borderBottomRightRadius: 32, marginBottom: 0 }}>
+        <Image src="/images/projectsBG.png" alt="Banner" width={100} height={100} style={{ objectFit: 'cover', width: '80%', height: '334px', objectPosition: 'end', marginLeft: '20%' }} />
+        {/* Green overlay gradient */}
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderBottomLeftRadius: 2, borderBottomRightRadius: 32,
+            background: 'linear-gradient(88.74deg, rgb(47, 127, 45) 20%, rgba(26, 139, 26, 0.15) 100%)', }} />
+        {/* Text */}
+        <div style={{ position: 'absolute', top: 120, left: '15%', color: '#fff', zIndex: 2 }}>
+          {/* <div style={{ fontSize: 20, fontWeight: 600, marginBottom: 8, letterSpacing: 0.5 }}>BEM VINDO AO</div> */}
+          <div style={{ fontSize: 48, fontWeight: 700, lineHeight: 1.1, textShadow: '0 2px 8px rgba(0,0,0,0.10)' }}>Perfil do Agente</div>
         </div>
+        {/* Bottom image border */}
+        <div style={{ position: 'absolute', left: 0, bottom: -24, width: '100%', height: 24, borderBottomLeftRadius: 32, borderBottomRightRadius: 32, overflow: 'hidden', zIndex: 3 }}>
+          <Image src="/images/banner_bottom.jpg" className="img-fluid" style={{ opacity: 0.9, background: 'rgba(187, 0, 0, 0)' }} alt="Banner Border" fill />
+        </div>
+      </div>
         
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 20px', position: 'relative', zIndex: 2 }}>
-          <Link 
+        <div className="container pt-4 " style={{  position: 'relative', zIndex: 2 }}>
+          {/* <Link 
             href="/Agentes-Culturais"
             style={{ 
-              color: '#fff',
+              color: '#000',
               textDecoration: 'none',
               fontSize: 14,
               display: 'inline-flex',
               alignItems: 'center',
               gap: 8,
-              marginBottom: 32
+              marginBottom: 0
             }}
           >
             ← Voltar para Agentes Culturais
-          </Link>
+          </Link> */}
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: 32, flexWrap: 'wrap' }}>
+          <div  style={{ display: 'flex', alignItems: 'center', gap: 32, flexWrap: 'wrap', zIndex: 2 }}>
             {profilePhoto ? (
               <Image 
-                src={`${IMAGE_BASE_URL}/uploads/${profilePhoto}`}
+                src={buildStaticUrl(`/uploads/${profilePhoto}`)}
                 alt={agent.displayName}
                 width={150}
                 height={150}
                 style={{ 
                   borderRadius: '50%', 
                   objectFit: 'cover',
+                  marginTop: '-77px',
                   border: '4px solid rgba(255,255,255,0.3)',
                   boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
                 }}
@@ -174,15 +176,17 @@ export default function AgentDetailPage() {
             ) : (
               <div style={{ 
                 width: 150,
+                overflow: 'hidden',
                 height: 150,
                 borderRadius: '50%',
                 background: getAgentColor(agent),
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#fff',
+                color: '',
                 fontWeight: 700,
-                fontSize: 48,
+                marginTop: '-77px',
+                fontSize: 38,
                 border: '4px solid rgba(255,255,255,0.3)',
                 boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
               }}>
@@ -192,59 +196,32 @@ export default function AgentDetailPage() {
               </div>
             )}
             
-            <div style={{ flex: 1, color: '#fff' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-                <span style={{ fontSize: 24 }}>{typeInfo.icon}</span>
-                <span style={{ 
-                  background: 'rgba(255,255,255,0.2)', 
-                  padding: '4px 12px', 
-                  borderRadius: 20, 
-                  fontSize: 14,
-                  fontWeight: 600
-                }}>
-                  {typeInfo.title}
-                </span>
-              </div>
+            <div style={{ flex: 1, color: '#000' }}>
               
-              <h1 style={{ fontSize: 48, fontWeight: 700, margin: '0 0 8px 0', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
+              
+              <h1 style={{ fontSize: 32, fontWeight: 700, marginTop: '1px ',  color: '#000' }}>
                 {agent.displayName}
               </h1>
+              <p style={{ fontSize: 14, fontWeight: 400, marginTop: '1px ',  color: '#000' }}> TIPO: {agentType === 'collective' ? 'Coletivo' : agentType === 'business' ? 'Empresa' : 'Agente'}</p>
               
-              {agentType === 'business' && agent.businessData?.razaoSocial && agent.businessData.razaoSocial !== agent.displayName && (
-                <div style={{ fontSize: 18, opacity: 0.9, marginBottom: 8 }}>
-                  {agent.businessData.razaoSocial}
-                </div>
-              )}
+             
               
-              {agentType === 'collective' && agent.collectiveData?.participants && (
-                <div style={{ fontSize: 16, opacity: 0.9 }}>
-                  {agent.collectiveData.participants} participantes
-                </div>
-              )}
               
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 16 }}>
-                <div style={{ fontSize: 20 }}>★★★★★</div>
-                <div style={{ fontSize: 14, opacity: 0.9 }}>
-                  {agent.city && `${agent.city}, PB`}
-                </div>
-              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 20px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 40, alignItems: 'start' }}>
+      <div className="container" >
+        <div className="py-4" >
           
           {/* Left Column - Main Info */}
           <div>
             {/* About Section */}
             {aboutText && (
               <div style={{ marginBottom: 40 }}>
-                <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 16, color: '#333' }}>
-                  Sobre {agentType === 'collective' ? 'o Coletivo' : agentType === 'business' ? 'a Empresa' : 'o Agente'}
-                </h2>
+                
                 <div style={{ 
                   fontSize: 16, 
                   lineHeight: 1.7, 
@@ -260,63 +237,9 @@ export default function AgentDetailPage() {
             )}
 
             {/* Business/Collective Specific Info */}
-            {agentType === 'business' && agent.businessData && (
-              <div style={{ marginBottom: 40 }}>
-                <h3 style={{ fontSize: 24, fontWeight: 600, marginBottom: 16, color: '#333' }}>
-                  Informações Empresariais
-                </h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 16 }}>
-                  {agent.businessData.cnpj && (
-                    <div style={{ background: '#f8f9fa', padding: 16, borderRadius: 8 }}>
-                      <div style={{ fontSize: 14, color: '#666', marginBottom: 4 }}>CNPJ</div>
-                      <div style={{ fontWeight: 600 }}>{agent.businessData.cnpj}</div>
-                    </div>
-                  )}
-                  {agent.businessData.razaoSocial && (
-                    <div style={{ background: '#f8f9fa', padding: 16, borderRadius: 8 }}>
-                      <div style={{ fontSize: 14, color: '#666', marginBottom: 4 }}>Razão Social</div>
-                      <div style={{ fontWeight: 600 }}>{agent.businessData.razaoSocial}</div>
-                    </div>
-                  )}
-                  {agent.businessData.nomeFantasia && (
-                    <div style={{ background: '#f8f9fa', padding: 16, borderRadius: 8 }}>
-                      <div style={{ fontSize: 14, color: '#666', marginBottom: 4 }}>Nome Fantasia</div>
-                      <div style={{ fontWeight: 600 }}>{agent.businessData.nomeFantasia}</div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+           
 
-            {agentType === 'collective' && agent.collectiveData && (
-              <div style={{ marginBottom: 40 }}>
-                <h3 style={{ fontSize: 24, fontWeight: 600, marginBottom: 16, color: '#333' }}>
-                  Informações do Coletivo
-                </h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 16 }}>
-                  {agent.collectiveData.collectiveName && (
-                    <div style={{ background: '#f8f9fa', padding: 16, borderRadius: 8 }}>
-                      <div style={{ fontSize: 14, color: '#666', marginBottom: 4 }}>Nome do Coletivo</div>
-                      <div style={{ fontWeight: 600 }}>{agent.collectiveData.collectiveName}</div>
-                    </div>
-                  )}
-                  {(agent.collectiveData.dayCreated || agent.collectiveData.monthCreated || agent.collectiveData.yearCreated) && (
-                    <div style={{ background: '#f8f9fa', padding: 16, borderRadius: 8 }}>
-                      <div style={{ fontSize: 14, color: '#666', marginBottom: 4 }}>Data de Criação</div>
-                      <div style={{ fontWeight: 600 }}>
-                        {[agent.collectiveData.dayCreated, agent.collectiveData.monthCreated, agent.collectiveData.yearCreated].filter(Boolean).join('/')}
-                      </div>
-                    </div>
-                  )}
-                  {agent.collectiveData.participants && (
-                    <div style={{ background: '#f8f9fa', padding: 16, borderRadius: 8 }}>
-                      <div style={{ fontSize: 14, color: '#666', marginBottom: 4 }}>Participantes</div>
-                      <div style={{ fontWeight: 600 }}>{agent.collectiveData.participants}</div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+           
 
             {/* Gallery Section */}
             {galleryPhotos.length > 0 && (
@@ -343,7 +266,7 @@ export default function AgentDetailPage() {
                       }}
                     >
                       <Image 
-                        src={`${IMAGE_BASE_URL}/uploads/${photo}`}
+                        src={buildStaticUrl(`/uploads/${photo}`)}
                         alt={`Galeria ${index + 1}`}
                         width={200}
                         height={200}
@@ -358,26 +281,28 @@ export default function AgentDetailPage() {
                 </div>
               </div>
             )}
+
+{galleryPhotos.length == 0 && (
+              <div style={{ marginBottom: 40 }}>
+                <h3 style={{ fontSize: 24, fontWeight: 600, marginBottom: 16, color: '#333' }}>
+                  Galeria de Fotos
+                </h3>
+                
+              </div>
+            )}
           </div>
 
           {/* Right Column - Contact & Social */}
-          <div style={{ position: 'sticky', top: 40 }}>
+         
+        </div>
+        <div className="py-4  d-flex" style={{ position: 'sticky', top: 4 }}>
             {/* Contact Info */}
-            <div style={{ 
-              background: '#fff', 
-              border: '1px solid #e9ecef', 
-              borderRadius: 16, 
-              padding: 24,
-              marginBottom: 24,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
-            }}>
-              <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 16, color: '#333' }}>
-                Informações de Contato
-              </h3>
+            <div className="w-100  d-flex justify-content-between">
+             
               
               {agent.email && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                  <span style={{ fontSize: 18 }}>📧</span>
+                
                   <div>
                     <div style={{ fontSize: 14, color: '#666' }}>Email</div>
                     <div style={{ fontWeight: 500 }}>{agent.email}</div>
@@ -387,7 +312,7 @@ export default function AgentDetailPage() {
               
               {agent.telephone && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                  <span style={{ fontSize: 18 }}>📱</span>
+                  
                   <div>
                     <div style={{ fontSize: 14, color: '#666' }}>Telefone</div>
                     <div style={{ fontWeight: 500 }}>{agent.telephone}</div>
@@ -397,7 +322,7 @@ export default function AgentDetailPage() {
               
               {(agent.street || agent.district || agent.city) && (
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-                  <span style={{ fontSize: 18 }}>📍</span>
+              
                   <div>
                     <div style={{ fontSize: 14, color: '#666' }}>Endereço</div>
                     <div style={{ fontWeight: 500, lineHeight: 1.4 }}>
@@ -491,8 +416,8 @@ export default function AgentDetailPage() {
               </div>
             )}
           </div>
-        </div>
       </div>
+      
 
       {/* Gallery Modal */}
       {selectedGalleryPhoto && (
@@ -512,9 +437,9 @@ export default function AgentDetailPage() {
             cursor: 'pointer'
           }}
         >
-          <div style={{ position: 'relative', maxWidth: '90%', maxHeight: '90%' }}>
+          <div style={{ position: 'relative', maxWidth: '100%', maxHeight: '90%' }}>
             <Image 
-              src={`${IMAGE_BASE_URL}/uploads/${selectedGalleryPhoto}`}
+              src={buildStaticUrl(`/uploads/${selectedGalleryPhoto}`)}
               alt="Foto ampliada"
               width={800}
               height={600}

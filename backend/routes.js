@@ -18,7 +18,13 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now();
-    cb(null, uniqueSuffix + '_' + file.originalname);
+    // Remove spaces and replace with underscores, also remove any special characters except dots and underscores
+    const sanitizedName = file.originalname
+      .replace(/\s+/g, '_')  // Replace spaces with underscores
+      .replace(/[^a-zA-Z0-9._-]/g, '_')  // Replace special chars with underscores
+      .replace(/_+/g, '_');  // Replace multiple underscores with single underscore
+    
+    cb(null, uniqueSuffix + '_' + sanitizedName);
   }
 });
 

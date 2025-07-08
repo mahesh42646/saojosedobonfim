@@ -69,26 +69,26 @@ export default function CulturalAgentsPage() {
       case 'Personal':
         return {
           type: 'Personal',
-          title: 'Personal Account',
-          description: 'Individual cultural agent profile'
+          title: 'Conta Pessoal',
+          description: 'Perfil de agente cultural individual'
         };
       case 'Business':
         return {
           type: 'Business',
-          title: 'Business Account',
-          description: 'Business or organization cultural profile'
+          title: 'Conta Empresarial',
+          description: 'Perfil cultural de empresa ou organização'
         };
       case 'Collective':
         return {
           type: 'Collective',
-          title: 'Collective Account',
-          description: 'Group or collective cultural initiative'
+          title: 'Conta Coletiva',
+          description: 'Iniciativa cultural de grupo ou coletivo'
         };
       default:
         return {
           type: 'Incomplete',
-          title: 'Incomplete Profile',
-          description: 'Profile setup not completed'
+          title: 'Perfil Incompleto',
+          description: 'Configuração de perfil não concluída'
         };
     }
   };
@@ -175,6 +175,7 @@ export default function CulturalAgentsPage() {
               alt={displayName}
               width={200}
               height={200}
+              unoptimized
               style={{ borderRadius: '50%', objectFit: 'cover' }}
             />
           ) : (
@@ -208,9 +209,9 @@ export default function CulturalAgentsPage() {
               <div style={{ fontSize: 14, color: '#2CB34A', fontWeight: 600 }}>
                 {profileType.title}
               </div>
-              <div style={{ fontSize: 12, color: '#666' }}>
+              {/* <div style={{ fontSize: 12, color: '#666' }}>
                 {profileType.description}
-              </div>
+              </div> */}
             </div>
             <div style={{ color: '#F2994A', fontSize: 18, marginTop: 2 }}>★★★★★</div>
             <Link 
@@ -229,7 +230,7 @@ export default function CulturalAgentsPage() {
                 marginTop: 16
               }}
             >
-              + Conhecer
+               Conhecer
             </Link>
           </div>
         </div>
@@ -286,9 +287,9 @@ export default function CulturalAgentsPage() {
               <div style={{ fontSize: 13, color: '#2CB34A', fontWeight: 600 }}>
                 {profileType.title}
               </div>
-              <div style={{ fontSize: 12, color: '#666' }}>
+              {/* <div style={{ fontSize: 12, color: '#666' }}>
                 {profileType.description}
-              </div>
+              </div> */}
             </div>
             <div style={{ color: '#F2994A', fontSize: 18, marginTop: 2 }}>★★★★★</div>
           </div>
@@ -307,7 +308,7 @@ export default function CulturalAgentsPage() {
               alignSelf: 'flex-start'
             }}
           >
-            + Conhecer
+             Conhecer
           </Link>
         </div>
       );
@@ -351,21 +352,21 @@ export default function CulturalAgentsPage() {
           </div>
         )}
         <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 700, fontSize: 18 }}>
+          <div className="pt-2" style={{ fontWeight: 700, fontSize: 22 }}>
             {displayName}
-            {profileType.type === 'Business' && agent.businessData?.razaoSocial && (
+            {/* {profileType.type === 'Business' && agent.businessData?.razaoSocial && (
               <div style={{ fontSize: 14, color: '#666', marginTop: 4 }}>
                 {agent.businessData.razaoSocial}
               </div>
-            )}
+            )} */}
           </div>
           <div style={{ marginTop: 12 }}>
             <div style={{ fontSize: 14, color: '#2CB34A', fontWeight: 600 }}>
               {profileType.title}
             </div>
-            <div style={{ fontSize: 13, color: '#666' }}>
+            {/* <div style={{ fontSize: 13, color: '#666' }}>
               {profileType.description}
-            </div>
+            </div> */}
           </div>
           <div style={{ color: '#F2994A', fontSize: 18, marginTop: 8 }}>★★★★★</div>
         </div>
@@ -385,7 +386,7 @@ export default function CulturalAgentsPage() {
             textDecoration: 'none'
           }}
         >
-          + Conhecer
+           Conhecer
         </Link>
       </div>
     );

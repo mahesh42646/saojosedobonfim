@@ -564,7 +564,7 @@ export default function BrejoDoCruzPage() {
                         </div>
                       )}
                     </div>
-                    <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div className="py-3" style={{ fontWeight: 600, fontSize: 16, marginBottom: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
                       {space.title}
                       {space.status === 'approved' && (
                         <span style={{ color: '#0000FF', fontSize: 16 }}>
@@ -572,12 +572,12 @@ export default function BrejoDoCruzPage() {
                         </span>
                       )}
                     </div>
-                    <div style={{ fontSize: 13, color: '#666', textAlign: 'start' }}>
+                    {/* <div style={{ fontSize: 13, color: '#666', textAlign: 'start' }}>
                       {space.description?.length > 100
                         ? <div dangerouslySetInnerHTML={{ __html: `${space.description.substring(0, 100)}...` }} />
                         : <div dangerouslySetInnerHTML={{ __html: space.description }} />
                       }
-                    </div>
+                    </div> */}
                   </div>
                 ))}
               </div>
