@@ -847,6 +847,24 @@ router.get('/agent/profile/:id/public', async (req, res) => {
   }
 });
 
+// Get Agent Profile by Agent ID (for project creators)
+router.get('/agent/profile/:agentId', async (req, res) => {
+  try {
+    const { agentId } = req.params;
+    
+    const profile = await AgentProfile.findOne({ agentId: agentId }).select('-password');
+    
+    if (!profile) {
+      return res.status(404).json({ error: 'Agent profile not found' });
+    }
+    
+    res.json(profile);
+  } catch (error) {
+    console.error('Error fetching agent profile:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Delete Agent Profile
 router.delete('/agent/profile/:cpf', authMiddleware, async (req, res) => {
   try {

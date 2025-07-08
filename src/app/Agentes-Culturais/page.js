@@ -12,7 +12,7 @@ export default function CulturalAgentsPage() {
   const [agents, setAgents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [viewMode, setViewMode] = useState('list'); // 'list', 'grid', or 'map'
+  const [viewMode, setViewMode] = useState('grid'); // 'list', 'grid', or 'map'
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const agentsPerPage = 10;
