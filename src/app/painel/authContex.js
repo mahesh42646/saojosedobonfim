@@ -37,9 +37,9 @@ export const AuthProvider = ({ children }) => {
     try {
       console.log('🔐 Starting login process...');
       console.log('📧 Email:', email);
-      console.log('🌐 API URL:', `${API_BASE_URL}/admin/login`);
+      console.log('🌐 API URL:', `${API_BASE_URL}/unified/login`);
       
-      const response = await fetch(`${API_BASE_URL}/admin/login`, {
+      const response = await fetch(`${API_BASE_URL}/unified/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -72,12 +72,14 @@ export const AuthProvider = ({ children }) => {
         };
       }
 
-      // Store user data
+      // Store user data from unified endpoint response
       const userData = { 
-        id: data.id || 'admin', 
+        id: data.id, 
         name: data.name || data.email || email,
-        email, 
-        role: 'admin' 
+        email: data.email || email, 
+        role: data.role || 'admin',
+        employeeType: data.employeeType, // for staff members
+        cpf: data.cpf // for staff members
       };
 
       localStorage.setItem('admin_token', data.token);

@@ -155,6 +155,57 @@ router.post('/admin/login', async (req, res) => {
   res.json({ token, id: admin._id });
 });
 
+// Unified login endpoint for both admin and staff
+router.post('/unified/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    // First, try to find admin
+    const admin = await Admin.findOne({ email, password });
+    if (admin) {
+      const token = jwt.sign({ id: admin._id, role: 'admin' }, process.env.TOKEN_KEY);
+      return res.json({ 
+        token, 
+        id: admin._id,
+        name: admin.name || admin.email,
+        email: admin.email,
+        role: 'admin'
+      });
+    }
+
+    // If not found in admin, try to find in staff
+    const staff = await Staff.findOne({ email, password });
+    if (staff) {
+      // Check if staff is active
+      if (staff.status !== 'active') {
+        return res.status(400).json({ error: 'Staff account is not active' });
+      }
+      
+      const token = jwt.sign({ id: staff._id, role: 'staff' }, process.env.TOKEN_KEY);
+      return res.json({ 
+        token, 
+        id: staff._id,
+        name: staff.fullName,
+        email: staff.email,
+        role: 'staff',
+        employeeType: staff.employeeType,
+        cpf: staff.cpf
+      });
+    }
+
+    // If not found in either, return error
+    return res.status(400).json({ error: 'Invalid credentials' });
+
+  } catch (error) {
+    console.error('Unified login error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Get current admin profile
 router.get('/admin/profile', authMiddleware, async (req, res) => {
   try {
@@ -165,6 +216,34 @@ router.get('/admin/profile', authMiddleware, async (req, res) => {
     res.json(admin);
   } catch (error) {
     console.error('Get profile error:', error);
+    res.status(500).json({ error: 'Failed to fetch profile' });
+  }
+});
+
+// Unified profile endpoint for both admin and staff
+router.get('/unified/profile', authMiddleware, async (req, res) => {
+  try {
+    const { role, id } = req.user;
+
+    if (role === 'admin') {
+      const admin = await Admin.findById(id).select('-password');
+      if (!admin) {
+        return res.status(404).json({ error: 'Admin not found' });
+      }
+      return res.json({ ...admin.toObject(), role: 'admin' });
+    }
+
+    if (role === 'staff') {
+      const staff = await Staff.findById(id).select('-password');
+      if (!staff) {
+        return res.status(404).json({ error: 'Staff not found' });
+      }
+      return res.json({ ...staff.toObject(), role: 'staff' });
+    }
+
+    return res.status(400).json({ error: 'Invalid user role' });
+  } catch (error) {
+    console.error('Get unified profile error:', error);
     res.status(500).json({ error: 'Failed to fetch profile' });
   }
 });

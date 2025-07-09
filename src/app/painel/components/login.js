@@ -35,7 +35,6 @@ const LoginPage = () => {
     // Additional form validation
     if (!formData.email || !formData.password) {
       setError('Por favor, preencha todos os campos');
-      alert('Por favor, preencha todos os campos'); // Debug alert
       return false;
     }
 
@@ -56,17 +55,11 @@ const LoginPage = () => {
         const errorMessage = result?.error || 'Email ou senha inválidos. Por favor, tente novamente.';
         console.log('❌ Setting error:', errorMessage);
         setError(errorMessage);
-        
-        // Show alert to confirm error is being set
-        alert('Falha no login: ' + errorMessage);
       }
     } catch (err) {
       console.error('💥 Login error:', err);
       const errorMessage = 'Email ou senha inválidos. Por favor, verifique suas credenciais e tente novamente.';
       setError(errorMessage);
-      
-      // Show alert for catch block too
-      alert('Erro: ' + errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -88,13 +81,6 @@ const LoginPage = () => {
         {/* Login Form */}
         <div style={{ width: 392, padding: 32, borderRadius: 12, background: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <h2 style={{ marginBottom: 24, fontWeight: 600 }}>Olá novamente!</h2>
-          
-          {/* Debug info */}
-          {error && (
-            <div style={{ padding: '8px', backgroundColor: 'yellow', margin: '10px 0', fontSize: '12px' }}>
-              {/* DEBUG: Estado do erro = &quot;{error}&quot; */}
-            </div>
-          )}
           
           <form onSubmit={handleSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 16 }} noValidate>
             {error && (
