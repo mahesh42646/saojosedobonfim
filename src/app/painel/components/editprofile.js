@@ -19,7 +19,7 @@ const EditProfile = ({ adminData, onBack }) => {
   useEffect(() => {
     if (adminData) {
       setFormData({
-        name: adminData.name || '',
+        name: adminData.role === 'staff' ? adminData.fullName : adminData.name || '',
         title: adminData.title || '',
         description: adminData.description || '',
         profilePhoto: null
@@ -46,14 +46,21 @@ const EditProfile = ({ adminData, onBack }) => {
 
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append('name', formData.name);
+      
+      // Send appropriate field names based on user role
+      if (adminData.role === 'staff') {
+        formDataToSend.append('fullName', formData.name);
+      } else {
+        formDataToSend.append('name', formData.name);
+      }
+      
       formDataToSend.append('title', formData.title);
       formDataToSend.append('description', formData.description);
       if (formData.profilePhoto) {
         formDataToSend.append('profilePhoto', formData.profilePhoto);
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/profile/${adminData._id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/unified/profile/${adminData._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': token

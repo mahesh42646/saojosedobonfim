@@ -248,6 +248,128 @@ router.get('/unified/profile', authMiddleware, async (req, res) => {
   }
 });
 
+// Unified profile update endpoint for both admin and staff
+router.put('/unified/profile/:id', [authMiddleware, upload.single('profilePhoto'), handleMulterError], async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { role } = req.user;
+    const { name, fullName, title, description, currentPassword, newPassword } = req.body;
+
+    // Verify user is updating their own profile
+    if (req.user.id !== id) {
+      return res.status(403).json({ error: 'Access denied - can only update your own profile' });
+    }
+
+    if (role === 'admin') {
+      // Handle admin profile update
+      const admin = await Admin.findById(id);
+      if (!admin) {
+        return res.status(404).json({ error: 'Admin not found' });
+      }
+
+      // Verify current password if trying to change password
+      if (newPassword) {
+        if (!currentPassword) {
+          return res.status(400).json({ error: 'Current password is required to change password' });
+        }
+        if (currentPassword !== admin.password) {
+          return res.status(400).json({ error: 'Current password is incorrect' });
+        }
+      }
+
+      // Update fields
+      const updates = {
+        name: name || admin.name,
+        title: title || admin.title,
+        description: description || admin.description,
+        password: newPassword || admin.password,
+        updatedAt: new Date()
+      };
+
+      // Update profile photo if provided
+      if (req.file) {
+        // Delete old photo if exists
+        if (admin.profilePhoto) {
+          const oldPhotoPath = path.join('./uploads', admin.profilePhoto);
+          if (fs.existsSync(oldPhotoPath)) {
+            fs.unlinkSync(oldPhotoPath);
+          }
+        }
+        updates.profilePhoto = req.file.filename;
+      }
+
+      // Update admin
+      const updatedAdmin = await Admin.findByIdAndUpdate(
+        id,
+        updates,
+        { new: true, runValidators: true }
+      ).select('-password');
+
+      return res.json({
+        message: 'Profile updated successfully',
+        user: { ...updatedAdmin.toObject(), role: 'admin' }
+      });
+
+    } else if (role === 'staff') {
+      // Handle staff profile update
+      const staff = await Staff.findById(id);
+      if (!staff) {
+        return res.status(404).json({ error: 'Staff not found' });
+      }
+
+      // Verify current password if trying to change password
+      if (newPassword) {
+        if (!currentPassword) {
+          return res.status(400).json({ error: 'Current password is required to change password' });
+        }
+        if (currentPassword !== staff.password) {
+          return res.status(400).json({ error: 'Current password is incorrect' });
+        }
+      }
+
+      // Update fields - for staff use fullName instead of name
+      const updates = {
+        fullName: fullName || name || staff.fullName,
+        title: title || staff.title,
+        description: description || staff.description,
+        password: newPassword || staff.password,
+        updatedAt: new Date()
+      };
+
+      // Update profile photo if provided
+      if (req.file) {
+        // Delete old photo if exists
+        if (staff.profilePhoto) {
+          const oldPhotoPath = path.join('./uploads', staff.profilePhoto);
+          if (fs.existsSync(oldPhotoPath)) {
+            fs.unlinkSync(oldPhotoPath);
+          }
+        }
+        updates.profilePhoto = req.file.filename;
+      }
+
+      // Update staff
+      const updatedStaff = await Staff.findByIdAndUpdate(
+        id,
+        updates,
+        { new: true, runValidators: true }
+      ).select('-password');
+
+      return res.json({
+        message: 'Profile updated successfully',
+        user: { ...updatedStaff.toObject(), role: 'staff' }
+      });
+
+    } else {
+      return res.status(400).json({ error: 'Invalid user role' });
+    }
+
+  } catch (error) {
+    console.error('Update unified profile error:', error);
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
+});
+
 // New route for updating admin profile
 router.put('/admin/profile/:id', [authMiddleware, upload.single('profilePhoto'), handleMulterError], async (req, res) => {
   try {

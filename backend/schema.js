@@ -226,6 +226,16 @@ const staffSchema = new mongoose.Schema({
     type: String, 
     required: true 
   },
+  // Profile fields (same as admin)
+  title: { 
+    type: String 
+  },
+  description: { 
+    type: String 
+  },
+  profilePhoto: { 
+    type: String 
+  },
   status: {
     type: String,
     enum: ['pending', 'active', 'inactive', 'deleted', 'rejected'],

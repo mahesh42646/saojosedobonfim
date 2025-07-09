@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 
 const Profile = () => {
   const [showEditProfile, setShowEditProfile] = useState(false);
-  const [adminData, setAdminData] = useState(null);
+  const [userData, setUserData] = useState(null);
   const { token, logout } = useAuth();
   const router = useRouter();
 
@@ -17,9 +17,9 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    const fetchAdminProfile = async () => {
+    const fetchUserProfile = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/profile`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/unified/profile`, {
           headers: {
             'Authorization': token
           }
@@ -27,9 +27,9 @@ const Profile = () => {
         
         if (response.ok) {
           const data = await response.json();
-          setAdminData(data);
+          setUserData(data);
         } else {
-          console.error('Failed to fetch admin profile');
+          console.error('Failed to fetch user profile');
         }
       } catch (error) {
         console.error('Error fetching profile:', error);
@@ -37,12 +37,12 @@ const Profile = () => {
     };
 
     if (token) {
-      fetchAdminProfile();
+      fetchUserProfile();
     }
   }, [token]);
 
   if (showEditProfile) {
-    return <EditProfile adminData={adminData} onBack={() => setShowEditProfile(false)} />;
+    return <EditProfile adminData={userData} onBack={() => setShowEditProfile(false)} />;
   }
 
   return (
@@ -53,9 +53,9 @@ const Profile = () => {
           <div className="bg-light rounded-4 my-1 p-4" style={{ background: '#F5FFF0', width:"404px", height:"303px" }}>
             <div className="text-center mb-4">
               <div className="position-relative d-inline-block">
-                {adminData?.profilePhoto && adminData.profilePhoto.trim() ? (
+                {userData?.profilePhoto && userData.profilePhoto.trim() ? (
                   <Image
-                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL.replace('/api', '')}/uploads/${adminData.profilePhoto.trim()}`}
+                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL.replace('/api', '')}/uploads/${userData.profilePhoto.trim()}`}
                     alt="Perfil"
                     width={100}
                     height={100}
@@ -74,13 +74,13 @@ const Profile = () => {
                 )}
               </div>
               <h2 className="py-4 my-2" style={{ fontSize: '24px', fontWeight: '600' }}>
-                {adminData?.name || 'Carregando...'}
+                {userData?.role === 'staff' ? userData?.fullName : userData?.name || 'Carregando...'}
               </h2>
-              {adminData?.title && (
-                <p className="text-muted mb-2">{adminData.title}</p>
+              {(userData?.title || userData?.employeeType) && (
+                <p className="text-muted mb-2">{userData?.role === 'staff' ? userData?.employeeType : userData?.title}</p>
               )}
-              {adminData?.description && (
-                <p className="text-muted small">{adminData.description}</p>
+              {userData?.description && (
+                <p className="text-muted small">{userData.description}</p>
               )}
             </div>
           </div>

@@ -27,13 +27,13 @@ const menuItems = [
 
 const Sidebar = () => {
   const [activeTab, setActiveTab] = useState("home");
-  const [adminData, setAdminData] = useState(null);
+  const [userData, setUserData] = useState(null);
   const { token } = useAuth();
 
   useEffect(() => {
-    const fetchAdminProfile = async () => {
+    const fetchUserProfile = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/profile`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/unified/profile`, {
           headers: {
             'Authorization': token
           }
@@ -41,9 +41,9 @@ const Sidebar = () => {
         
         if (response.ok) {
           const data = await response.json();
-          setAdminData(data);
+          setUserData(data);
         } else {
-          console.error('Failed to fetch admin profile');
+          console.error('Failed to fetch user profile');
         }
       } catch (error) {
         console.error('Error fetching profile:', error);
@@ -51,7 +51,7 @@ const Sidebar = () => {
     };
 
     if (token) {
-      fetchAdminProfile();
+      fetchUserProfile();
     }
   }, [token]);
 
@@ -80,9 +80,9 @@ const Sidebar = () => {
               style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}
               onClick={() => setActiveTab("profile")}
             >
-              {adminData?.profilePhoto && adminData.profilePhoto.trim() ? (
+              {userData?.profilePhoto && userData.profilePhoto.trim() ? (
                 <Image
-                  src={`${process.env.NEXT_PUBLIC_API_BASE_URL.replace('/api', '')}/uploads/${adminData.profilePhoto.trim()}`}
+                  src={`${process.env.NEXT_PUBLIC_API_BASE_URL.replace('/api', '')}/uploads/${userData.profilePhoto.trim()}`}
                   alt="Perfil"
                   width={32}
                   height={32}
@@ -99,7 +99,9 @@ const Sidebar = () => {
                   priority
                 />
               )}
-              <span id="user-name" className="fw-semibold fs-16 text-dark">{adminData?.name || 'Loading...'}</span>
+              <span id="user-name" className="fw-semibold fs-16 text-dark">
+                {userData?.role === 'staff' ? userData?.fullName : userData?.name || 'Loading...'}
+              </span>
               <span className="ms-3" style={{ fontSize: 20, color: "#888" }}>&#8250;</span>
             </div>
 
