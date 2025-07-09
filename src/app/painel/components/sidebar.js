@@ -73,9 +73,9 @@ const Sidebar = () => {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-            <div style={{ background: "#9FE870", color: "#222", borderRadius: 20, padding: "4px 16px", fontWeight: 600, fontSize: 16 }}>
-              15 mensagens
-            </div>
+            {/* <div style={{ background: "#9FE870", color: "#222", borderRadius: 20, padding: "4px 16px", fontWeight: 600, fontSize: 16 }}>
+              15 mensagen
+            </div> */}
             <div id="user-profile"
               style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}
               onClick={() => setActiveTab("profile")}

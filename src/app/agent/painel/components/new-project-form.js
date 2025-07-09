@@ -1,12 +1,12 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, Button, Container, Modal, ProgressBar } from 'react-bootstrap';
 import { FaCamera, FaRegCalendar, FaInstagram, FaYoutube, FaFacebook, FaTimes, FaRegListAlt } from 'react-icons/fa';
 import RichTextEditor from './RichTextEditor';
 import Image from 'next/image';
 import { buildApiUrl } from '../../../config/api';
 
-function NewProjectForm({ onClose, onSuccess }) {
+function NewProjectForm({ onClose, onSuccess, isEditing = false, projectData = null }) {
   const [formData, setFormData] = useState({
     type: '',
     title: '',
@@ -25,6 +25,8 @@ function NewProjectForm({ onClose, onSuccess }) {
 
   const [photos, setPhotos] = useState([]);
   const [coverPhoto, setCoverPhoto] = useState(null);
+  const [existingPhotos, setExistingPhotos] = useState([]);
+  const [existingCoverPhoto, setExistingCoverPhoto] = useState(null);
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [errors, setErrors] = useState({});
@@ -33,6 +35,51 @@ function NewProjectForm({ onClose, onSuccess }) {
 
   const [showDescriptionModal, setShowDescriptionModal] = useState(false);
   const [tempDescription, setTempDescription] = useState(formData.description);
+
+  // Populate form with existing data when editing
+  useEffect(() => {
+    if (isEditing && projectData) {
+      setFormData({
+        type: projectData.type || '',
+        title: projectData.title || '',
+        description: projectData.description || '',
+        period: {
+          start: projectData.period?.start ? new Date(projectData.period.start).toISOString().split('T')[0] : '',
+          end: projectData.period?.end ? new Date(projectData.period.end).toISOString().split('T')[0] : ''
+        }
+      });
+
+      // Set social links
+      if (projectData.socialLinks) {
+        setSocialLinks({
+          instagram: { 
+            enabled: !!projectData.socialLinks.instagram, 
+            url: projectData.socialLinks.instagram || '' 
+          },
+          youtube: { 
+            enabled: !!projectData.socialLinks.youtube, 
+            url: projectData.socialLinks.youtube || '' 
+          },
+          facebook: { 
+            enabled: !!projectData.socialLinks.facebook, 
+            url: projectData.socialLinks.facebook || '' 
+          }
+        });
+      }
+
+      // Set existing photos
+      if (projectData.photos) {
+        setExistingPhotos(projectData.photos);
+      }
+
+      // Set existing cover photo
+      if (projectData.coverPhoto) {
+        setExistingCoverPhoto(projectData.coverPhoto);
+      }
+
+      setTempDescription(projectData.description || '');
+    }
+  }, [isEditing, projectData]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -99,13 +146,25 @@ function NewProjectForm({ onClose, onSuccess }) {
     });
   };
 
+  const handleRemoveExistingPhoto = (index) => {
+    setExistingPhotos(prev => {
+      const newPhotos = [...prev];
+      newPhotos.splice(index, 1);
+      return newPhotos;
+    });
+  };
+
+  const handleRemoveExistingCoverPhoto = () => {
+    setExistingCoverPhoto(null);
+  };
+
   const validateForm = () => {
     const newErrors = {};
     if (!formData.type) newErrors.type = 'Tipo é obrigatório';
     if (!formData.title) newErrors.title = 'Nome é obrigatório';
     if (!formData.description) newErrors.description = 'Descrição é obrigatória';
     if (!formData.period.start) newErrors.startDate = 'Data de início é obrigatória';
-    if (!coverPhoto) newErrors.coverPhoto = 'Foto de capa é obrigatória';
+    if (!coverPhoto && !existingCoverPhoto) newErrors.coverPhoto = 'Foto de capa é obrigatória';
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -139,17 +198,25 @@ function NewProjectForm({ onClose, onSuccess }) {
       });
       formDataToSend.append('socialLinks', JSON.stringify(enabledSocialLinks));
 
-      // Add cover photo
+      // Add cover photo (only if new one selected)
       if (coverPhoto?.file) {
         formDataToSend.append('coverPhoto', coverPhoto.file);
       }
 
-      // Add gallery photos
+      // Add gallery photos (only new ones)
       photos.forEach(photo => {
         if (photo.file) {
           formDataToSend.append('photos', photo.file);
         }
       });
+
+      // For editing, include existing photos to keep
+      if (isEditing) {
+        formDataToSend.append('existingPhotos', JSON.stringify(existingPhotos));
+        if (existingCoverPhoto && !coverPhoto) {
+          formDataToSend.append('keepExistingCoverPhoto', 'true');
+        }
+      }
 
       // Create XMLHttpRequest for progress tracking
       const xhr = new XMLHttpRequest();
@@ -162,7 +229,8 @@ function NewProjectForm({ onClose, onSuccess }) {
       });
 
       xhr.addEventListener('load', () => {
-        if (xhr.status === 201) {
+        const expectedStatus = isEditing ? 200 : 201;
+        if (xhr.status === expectedStatus) {
           setUploadProgress(100);
           setTimeout(() => {
             setShowUploadModal(false);
@@ -171,7 +239,7 @@ function NewProjectForm({ onClose, onSuccess }) {
             onSuccess();
           }, 1000);
         } else {
-          let errorMessage = 'Falha ao criar projeto. Por favor, tente novamente.';
+          let errorMessage = isEditing ? 'Falha ao atualizar projeto. Por favor, tente novamente.' : 'Falha ao criar projeto. Por favor, tente novamente.';
           
           try {
             const response = JSON.parse(xhr.responseText);
@@ -206,33 +274,36 @@ function NewProjectForm({ onClose, onSuccess }) {
       });
 
       xhr.addEventListener('abort', () => {
-        setSubmitError('Upload cancelado.');
+        setSubmitError(isEditing ? 'Atualização cancelada.' : 'Upload cancelado.');
         setLoading(false);
         setUploadProgress(0);
       });
 
       xhr.addEventListener('timeout', () => {
-        setSubmitError('Upload demorou muito tempo. Tente novamente.');
+        setSubmitError(isEditing ? 'Atualização demorou muito tempo. Tente novamente.' : 'Upload demorou muito tempo. Tente novamente.');
         setLoading(false);
         setUploadProgress(0);
       });
 
-      xhr.open('POST', buildApiUrl('/project'));
+      const method = isEditing ? 'PATCH' : 'POST';
+      const endpoint = isEditing ? `/admin/project/${projectData._id}` : '/project';
+      
+      xhr.open(method, buildApiUrl(endpoint));
       xhr.setRequestHeader('Authorization', token);
       xhr.timeout = 300000; // 5 minutes timeout
       xhr.send(formDataToSend);
 
     } catch (error) {
-      console.error('Error creating project:', error);
-      setSubmitError('Falha ao criar projeto. Por favor, tente novamente.');
+      console.error(isEditing ? 'Error updating project:' : 'Error creating project:', error);
+      setSubmitError(isEditing ? 'Falha ao atualizar projeto. Por favor, tente novamente.' : 'Falha ao criar projeto. Por favor, tente novamente.');
       setLoading(false);
       setUploadProgress(0);
     }
   };
 
   return (
-    <Container className="col-lg-8">
-      <h2 className="fs-5 fw-bold mb-4">Novo Projeto</h2>
+    <Container className="col-lg-12">
+      <h2 className="fs-5 fw-bold mb-4">{isEditing ? 'Editar Projeto' : 'Novo Projeto'}</h2>
       
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3">
@@ -314,6 +385,27 @@ function NewProjectForm({ onClose, onSuccess }) {
                 >
                   <FaTimes />
                 </Button>
+              </div>
+            ) : existingCoverPhoto ? (
+              <div className="position-relative" style={{ width: "100%", height: "200px" }}>
+                <Image 
+                  src={`https://mapacultural.saojosedobonfim.pb.gov.br/uploads/${existingCoverPhoto}`} 
+                  alt="" 
+                  className="w-100 h-100 rounded-3 object-fit-cover" 
+                  width={300} 
+                  height={200} 
+                />
+                <Button
+                  variant="link"
+                  className="position-absolute top-0 end-0 p-1"
+                  onClick={handleRemoveExistingCoverPhoto}
+                  disabled={loading}
+                >
+                  <FaTimes />
+                </Button>
+                <div className="position-absolute bottom-0 start-0 bg-dark bg-opacity-75 text-white px-2 py-1 small rounded-end">
+                  Foto Atual
+                </div>
               </div>
             ) : (
               <label className="d-flex align-items-center w-100 justify-content-center rounded-3" 
@@ -407,8 +499,30 @@ function NewProjectForm({ onClose, onSuccess }) {
             <small className="text-muted ms-auto">(Máx: 150MB por arquivo)</small>
           </Form.Label>
           <div className="d-flex gap-2 flex-wrap">
+            {existingPhotos.map((photo, index) => (
+              <div key={`existing-${index}`} className="position-relative" style={{ width: 100, height: 100 }}>
+                <Image 
+                  src={`https://mapacultural.saojosedobonfim.pb.gov.br/uploads/${photo}`} 
+                  alt="" 
+                  className="w-100 h-100 rounded-3 object-fit-cover" 
+                  width={100} 
+                  height={100} 
+                />
+                <Button
+                  variant="link"
+                  className="position-absolute top-0 end-0 p-1"
+                  onClick={() => handleRemoveExistingPhoto(index)}
+                  disabled={loading}
+                >
+                  <FaTimes />
+                </Button>
+                <div className="position-absolute bottom-0 start-0 bg-dark bg-opacity-75 text-white px-1 small">
+                  Atual
+                </div>
+              </div>
+            ))}
             {photos.map((photo, index) => (
-              <div key={index} className="position-relative" style={{ width: 100, height: 100 }}>
+              <div key={`new-${index}`} className="position-relative" style={{ width: 100, height: 100 }}>
                 <Image 
                   src={photo.preview} 
                   alt="" 
@@ -424,6 +538,9 @@ function NewProjectForm({ onClose, onSuccess }) {
                 >
                   <FaTimes />
                 </Button>
+                <div className="position-absolute bottom-0 start-0 bg-success bg-opacity-75 text-white px-1 small">
+                  Nova
+                </div>
               </div>
             ))}
             <label className="bg-white d-flex align-items-center justify-content-center rounded-3" 
@@ -445,7 +562,7 @@ function NewProjectForm({ onClose, onSuccess }) {
           style={{ backgroundColor: '#8BC34A', borderColor: '#8BC34A' }}
           disabled={loading}
         >
-          {loading ? 'Salvando...' : 'Salvar'}
+          {loading ? (isEditing ? 'Atualizando...' : 'Salvando...') : (isEditing ? 'Atualizar' : 'Salvar')}
         </Button>
       </Form>
 
@@ -495,7 +612,9 @@ function NewProjectForm({ onClose, onSuccess }) {
               <FaCamera className="text-success" />
             </div>
             <Modal.Title as="h6">
-              {submitError ? 'Erro no Upload' : loading ? 'Enviando Projeto...' : 'Upload Concluído'}
+              {submitError ? (isEditing ? 'Erro na Atualização' : 'Erro no Upload') : 
+               loading ? (isEditing ? 'Atualizando Projeto...' : 'Enviando Projeto...') : 
+               (isEditing ? 'Atualização Concluída' : 'Upload Concluído')}
             </Modal.Title>
           </div>
         </Modal.Header>
@@ -507,7 +626,7 @@ function NewProjectForm({ onClose, onSuccess }) {
                   <FaTimes className="text-danger fs-4" />
                 </div>
               </div>
-              <h6 className="mb-3">Falha no Upload</h6>
+              <h6 className="mb-3">{isEditing ? 'Falha na Atualização' : 'Falha no Upload'}</h6>
               <p className="text-muted mb-0">{submitError}</p>
             </div>
           ) : loading ? (
@@ -517,7 +636,7 @@ function NewProjectForm({ onClose, onSuccess }) {
                   <span className="visually-hidden">Loading...</span>
                 </div>
               </div>
-              <h6 className="mb-3">Enviando arquivo{photos.length > 0 ? 's' : ''}...</h6>
+              <h6 className="mb-3">{isEditing ? 'Atualizando projeto...' : `Enviando arquivo${photos.length > 0 ? 's' : ''}...`}</h6>
               <ProgressBar 
                 now={uploadProgress} 
                 variant="success" 
@@ -526,7 +645,7 @@ function NewProjectForm({ onClose, onSuccess }) {
               />
               <p className="text-muted mb-0">{uploadProgress}% concluído</p>
               <small className="text-muted d-block mt-2">
-                Por favor, não feche esta janela durante o upload
+                {isEditing ? 'Por favor, não feche esta janela durante a atualização' : 'Por favor, não feche esta janela durante o upload'}
               </small>
             </div>
           ) : (
@@ -536,8 +655,8 @@ function NewProjectForm({ onClose, onSuccess }) {
                   <FaCamera className="text-success fs-4" />
                 </div>
               </div>
-              <h6 className="mb-3">Upload Concluído!</h6>
-              <p className="text-muted mb-0">Projeto criado com sucesso</p>
+              <h6 className="mb-3">{isEditing ? 'Atualização Concluída!' : 'Upload Concluído!'}</h6>
+              <p className="text-muted mb-0">{isEditing ? 'Projeto atualizado com sucesso' : 'Projeto criado com sucesso'}</p>
             </div>
           )}
         </Modal.Body>

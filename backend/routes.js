@@ -1877,6 +1877,119 @@ router.get('/admin/project/:id', async (req, res) => {
   }
 });
 
+// Update full project for admin
+router.patch('/admin/project/:id', [
+  upload.fields([
+    { name: 'coverPhoto', maxCount: 1 },
+    { name: 'photos', maxCount: 10 }
+  ]),
+  handleMulterError
+], async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+    
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    const {
+      type,
+      title,
+      description,
+      period,
+      socialLinks,
+      existingPhotos,
+      keepExistingCoverPhoto
+    } = req.body;
+
+    // Handle file uploads
+    let updatedCoverPhoto = project.coverPhoto;
+    let updatedPhotos = [...project.photos];
+
+    // Handle cover photo update
+    if (req.files && req.files.coverPhoto) {
+      // Delete old cover photo if exists
+      if (project.coverPhoto) {
+        const oldPath = path.join('./uploads', project.coverPhoto);
+        if (fs.existsSync(oldPath)) {
+          try {
+            fs.unlinkSync(oldPath);
+          } catch (err) {
+            console.log('Could not delete old cover photo:', err.message);
+          }
+        }
+      }
+      updatedCoverPhoto = req.files.coverPhoto[0].filename;
+    } else if (keepExistingCoverPhoto !== 'true' && !req.files?.coverPhoto) {
+      // If not keeping existing and no new photo, remove cover photo
+      if (project.coverPhoto) {
+        const oldPath = path.join('./uploads', project.coverPhoto);
+        if (fs.existsSync(oldPath)) {
+          try {
+            fs.unlinkSync(oldPath);
+          } catch (err) {
+            console.log('Could not delete old cover photo:', err.message);
+          }
+        }
+      }
+      updatedCoverPhoto = '';
+    }
+
+    // Handle additional photos
+    if (req.files && req.files.photos) {
+      // Delete old photos
+      project.photos.forEach(photo => {
+        const oldPath = path.join('./uploads', photo);
+        if (fs.existsSync(oldPath)) {
+          try {
+            fs.unlinkSync(oldPath);
+          } catch (err) {
+            console.log('Could not delete old photo:', err.message);
+          }
+        }
+      });
+      updatedPhotos = req.files.photos.map(file => file.filename);
+    } else if (existingPhotos) {
+      // Keep only existing photos that were specified
+      try {
+        const parsedExistingPhotos = typeof existingPhotos === 'string' ? JSON.parse(existingPhotos) : existingPhotos;
+        updatedPhotos = Array.isArray(parsedExistingPhotos) ? parsedExistingPhotos : [];
+      } catch (err) {
+        console.log('Error parsing existing photos:', err);
+        updatedPhotos = [];
+      }
+    }
+
+    // Parse JSON strings if they come as strings
+    const parsedPeriod = typeof period === 'string' ? JSON.parse(period) : period;
+    const parsedSocialLinks = typeof socialLinks === 'string' ? JSON.parse(socialLinks) : socialLinks;
+
+    // Update project
+    const updatedProject = await Project.findByIdAndUpdate(
+      req.params.id,
+      {
+        type: type || project.type,
+        title: title || project.title,
+        description: description || project.description,
+        period: parsedPeriod || project.period,
+        coverPhoto: updatedCoverPhoto,
+        photos: updatedPhotos,
+        socialLinks: parsedSocialLinks || project.socialLinks,
+        updatedAt: new Date()
+      },
+      { new: true, runValidators: true }
+    );
+
+    res.json({ 
+      message: 'Project updated successfully', 
+      project: updatedProject 
+    });
+  } catch (error) {
+    console.error('Error updating project:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Update project status (approve/reject) for admin
 router.patch('/admin/project/:id/status', async (req, res) => {
   try {

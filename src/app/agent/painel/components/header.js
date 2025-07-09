@@ -154,9 +154,9 @@ function Header() {
                 </Navbar.Brand>
 
                 <div className="d-flex align-items-center gap-3">
-                    <span className="bg-success-subtle text-dark d-none d-lg-block rounded-pill px-3 py-1">
-                        15 mensagens
-                    </span>
+                    {/* <span className="bg-success-subtle text-dark d-none d-lg-block rounded-pill px-3 py-1">
+                        15 mensagen
+                    </span> */}
 
                     <Dropdown align="end">
                         <Dropdown.Toggle
