@@ -98,7 +98,7 @@ export default function CulturalAgentsPage() {
       setLoading(true);
       setError(null);
       
-      const url = buildApiUrl('/agent/profiles');
+      const url = buildApiUrl('/agent/profiles?status=active');
       const response = await fetch(url, {
         headers: {
           'Authorization': 'dummy-token-for-testing',

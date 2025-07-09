@@ -112,8 +112,18 @@ function SpaceDetails({ space, onBack, fetchProjectDetails }) {
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <div style={{ width: 56, height: 56, borderRadius: '50%', background: space.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ color: '#fff', fontSize: 32 }}><i className="bi bi-building"></i></span>
+              <div style={{ width: 56, height: 56, borderRadius: '50%', background: space.color || '#3B5998', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                {space.coverPhoto ? (
+                  <Image
+                    src={`https://mapacultural.saojosedobonfim.pb.gov.br/uploads/${space.coverPhoto}`}
+                    alt={space.title}
+                    width={56}
+                    height={56}
+                    style={{ objectFit: 'cover' }}
+                  />
+                ) : (
+                  <span style={{ color: '#fff', fontSize: 28 }}><i className="bi bi-calendar-event"></i></span>
+                )}
               </div>
               <div >
                 <div style={{ fontWeight: 600, fontSize: 20 }}>{space.title}</div>
@@ -508,8 +518,8 @@ export default function CspacePage() {
                         style={{ objectFit: 'cover' }}
                       />
                     ) : (
-                      <span style={{ color: '#fff', fontSize: 22, background: '#3B5998', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <i className="bi bi-building"></i>
+                      <span style={{ color: '#fff', fontSize: 20, background: '#3B5998', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <i className="bi bi-calendar-event"></i>
                       </span>
                     )}
                   </div>
