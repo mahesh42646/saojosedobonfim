@@ -201,7 +201,7 @@ export default function CulturalAgentsPage() {
               {displayName}
               {profileType.type === 'Business' && agent.businessData?.razaoSocial && (
                 <div style={{ fontSize: 14, color: '#666', marginTop: 4 }}>
-                  {agent.businessData.razaoSocial}
+                  {/* {agent.businessData.razaoSocial} */}
                 </div>
               )}
             </div>

@@ -7,6 +7,24 @@ const path = require('path');
 const fs = require('fs');
 const { SuperAdmin, Admin, Agent, AgentProfile, Tenant, Space, Project, Staff } = require('./schema');
 
+// Health check endpoint
+router.get('/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    message: 'Server is running' 
+  });
+});
+
+// Test authentication endpoint
+router.get('/test-auth', authMiddleware, (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'Authentication working',
+    user: req.user 
+  });
+});
+
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -48,45 +66,55 @@ const upload = multer({
 
 // Error handling middleware for multer
 const handleMulterError = (error, req, res, next) => {
+  console.error('Multer error:', error);
+  
   if (error instanceof multer.MulterError) {
     if (error.code === 'LIMIT_UNEXPECTED_FILE') {
       return res.status(400).json({ 
-        error: 'Unexpected file field.' 
+        error: 'Campo de arquivo inesperado.' 
       });
     }
     if (error.code === 'LIMIT_FILE_SIZE') {
       return res.status(413).json({ 
-        error: 'File too large. Maximum file size is 256MB.' 
+        error: 'Arquivo muito grande. Tamanho máximo é 256MB.' 
       });
     }
     if (error.code === 'LIMIT_FILE_COUNT') {
       return res.status(400).json({ 
-        error: 'Too many files. Maximum 20 files allowed.' 
+        error: 'Muitos arquivos. Máximo 20 arquivos permitidos.' 
       });
     }
   }
   
   if (error.message === 'Only .png, .jpg and .jpeg format allowed!') {
     return res.status(400).json({ 
-      error: 'Invalid file type. Only .png, .jpg and .jpeg files are allowed.' 
+      error: 'Tipo de arquivo inválido. Apenas arquivos .png, .jpg e .jpeg são permitidos.' 
+    });
+  }
+  
+  // Handle other multer errors
+  if (error.message) {
+    return res.status(400).json({ 
+      error: `Erro no upload: ${error.message}` 
     });
   }
   
   next(error);
 };
 
-// middleware to check token - modified for testing
+// middleware to check token
 function authMiddleware(req, res, next) {
-  const token = req.headers.authorization;
+  const authHeader = req.headers.authorization;
   
-  // For testing purposes, allow dummy token
-  if (!token) {
-    return res.status(401).json({ error: 'Access Denied - No token provided' });
+  if (!authHeader) {
+    return res.status(401).json({ error: 'Acesso Negado - Token não fornecido' });
   }
 
-  // Skip JWT verification for testing with dummy token
+  // Handle both "Bearer token" and direct token formats
+  const token = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : authHeader;
+  
+  // For testing purposes, allow dummy token
   if (token === 'dummy-token-for-testing') {
-    // Generate a valid ObjectId for testing
     req.user = { id: new mongoose.Types.ObjectId(), role: 'superadmin' };
     return next();
   }
@@ -96,7 +124,8 @@ function authMiddleware(req, res, next) {
     req.user = verified;
     next();
   } catch (err) {
-    res.status(400).json({ error: 'Invalid Token' });
+    console.error('Token verification error:', err.message);
+    res.status(401).json({ error: 'Token Inválido' });
   }
 }
 
@@ -104,7 +133,7 @@ function authMiddleware(req, res, next) {
 router.post('/superadmin/login', async (req, res) => {
   const { email, password } = req.body;
   const superAdmin = await SuperAdmin.findOne({ email, password });
-  if (!superAdmin) return res.status(400).send('Invalid credentials');
+  if (!superAdmin) return res.status(400).send('Credenciais inválidas');
 
   const token = jwt.sign({ id: superAdmin._id, role: 'superadmin' }, process.env.TOKEN_KEY);
   res.json({ token });
@@ -118,7 +147,7 @@ router.post('/admin/signup', [upload.single('profilePhoto'), handleMulterError],
     // Check if admin with same email exists
     const existingAdmin = await Admin.findOne({ email });
     if (existingAdmin) {
-      return res.status(400).json({ error: 'Admin with this email already exists' });
+      return res.status(400).json({ error: 'Administrador com este email já existe' });
     }
 
     // Create new admin with profile details
@@ -138,19 +167,19 @@ router.post('/admin/signup', [upload.single('profilePhoto'), handleMulterError],
     delete adminData.password;
     
     res.status(201).json({
-      message: 'Admin account created successfully',
+      message: 'Conta de administrador criada com sucesso',
       admin: adminData
     });
   } catch (error) {
     console.error('Signup error:', error);
-    res.status(500).json({ error: 'Failed to create admin account' });
+    res.status(500).json({ error: 'Falha ao criar conta de administrador' });
   }
 });
 
 router.post('/admin/login', async (req, res) => {
   const { email, password } = req.body;
   const admin = await Admin.findOne({ email, password });
-  if (!admin) return res.status(400).send('Invalid credentials');
+  if (!admin) return res.status(400).send('Credenciais inválidas');
   const token = jwt.sign({ id: admin._id, role: 'admin' }, process.env.TOKEN_KEY);
   res.json({ token, id: admin._id });
 });
@@ -161,7 +190,7 @@ router.post('/unified/login', async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
+      return res.status(400).json({ error: 'Email e senha são obrigatórios' });
     }
 
     // First, try to find admin
@@ -182,7 +211,7 @@ router.post('/unified/login', async (req, res) => {
     if (staff) {
       // Check if staff is active
       if (staff.status !== 'active') {
-        return res.status(400).json({ error: 'Staff account is not active' });
+        return res.status(400).json({ error: 'Conta de funcionário não está ativa' });
       }
       
       const token = jwt.sign({ id: staff._id, role: 'staff' }, process.env.TOKEN_KEY);
@@ -198,11 +227,11 @@ router.post('/unified/login', async (req, res) => {
     }
 
     // If not found in either, return error
-    return res.status(400).json({ error: 'Invalid credentials' });
+    return res.status(400).json({ error: 'Credenciais inválidas' });
 
   } catch (error) {
     console.error('Unified login error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
 
@@ -270,10 +299,10 @@ router.put('/unified/profile/:id', [authMiddleware, upload.single('profilePhoto'
       // Verify current password if trying to change password
       if (newPassword) {
         if (!currentPassword) {
-          return res.status(400).json({ error: 'Current password is required to change password' });
+          return res.status(400).json({ error: 'Senha atual é obrigatória para alterar a senha' });
         }
         if (currentPassword !== admin.password) {
-          return res.status(400).json({ error: 'Current password is incorrect' });
+          return res.status(400).json({ error: 'Senha atual está incorreta' });
         }
       }
 
@@ -306,7 +335,7 @@ router.put('/unified/profile/:id', [authMiddleware, upload.single('profilePhoto'
       ).select('-password');
 
       return res.json({
-        message: 'Profile updated successfully',
+        message: 'Perfil atualizado com sucesso',
         user: { ...updatedAdmin.toObject(), role: 'admin' }
       });
 
@@ -320,10 +349,10 @@ router.put('/unified/profile/:id', [authMiddleware, upload.single('profilePhoto'
       // Verify current password if trying to change password
       if (newPassword) {
         if (!currentPassword) {
-          return res.status(400).json({ error: 'Current password is required to change password' });
+          return res.status(400).json({ error: 'Senha atual é obrigatória para alterar a senha' });
         }
         if (currentPassword !== staff.password) {
-          return res.status(400).json({ error: 'Current password is incorrect' });
+          return res.status(400).json({ error: 'Senha atual está incorreta' });
         }
       }
 
@@ -356,7 +385,7 @@ router.put('/unified/profile/:id', [authMiddleware, upload.single('profilePhoto'
       ).select('-password');
 
       return res.json({
-        message: 'Profile updated successfully',
+        message: 'Perfil atualizado com sucesso',
         user: { ...updatedStaff.toObject(), role: 'staff' }
       });
 
@@ -385,10 +414,10 @@ router.put('/admin/profile/:id', [authMiddleware, upload.single('profilePhoto'),
     // Verify current password if trying to change password
     if (newPassword) {
       if (!currentPassword) {
-        return res.status(400).json({ error: 'Current password is required to change password' });
+        return res.status(400).json({ error: 'Senha atual é obrigatória para alterar a senha' });
       }
       if (currentPassword !== admin.password) {
-        return res.status(400).json({ error: 'Current password is incorrect' });
+        return res.status(400).json({ error: 'Senha atual está incorreta' });
       }
     }
 
@@ -421,12 +450,12 @@ router.put('/admin/profile/:id', [authMiddleware, upload.single('profilePhoto'),
     ).select('-password');
 
     res.json({
-      message: 'Profile updated successfully',
+      message: 'Perfil atualizado com sucesso',
       admin: updatedAdmin
     });
   } catch (error) {
     console.error('Update profile error:', error);
-    res.status(500).json({ error: 'Failed to update profile' });
+    res.status(500).json({ error: 'Falha ao atualizar o perfil' });
   }
 });
 
@@ -435,13 +464,13 @@ router.post('/agent/signup', async (req, res) => {
   const { email, password } = req.body;
   const agent = new Agent({ email, password });
   await agent.save();
-  res.send('Agent account created');
+  res.send('Conta de agente criada');
 });
 
 router.post('/agent/login', async (req, res) => {
   const { email, password } = req.body;
   const agent = await Agent.findOne({ email, password });
-  if (!agent) return res.status(400).send('Invalid credentials');
+  if (!agent) return res.status(400).send('Credenciais inválidas');
   const token = jwt.sign({ id: agent._id, role: 'agent' }, process.env.TOKEN_KEY);
   res.json({ token });
 });
@@ -452,7 +481,7 @@ router.post('/agent/profile/login', async (req, res) => {
     const { emailOrCpf, password } = req.body;
 
     if (!emailOrCpf || !password) {
-      return res.status(400).json({ error: 'Email/CPF and password are required' });
+      return res.status(400).json({ error: 'Email/CPF e senha são obrigatórios' });
     }
 
     // Format CPF if it looks like a CPF (remove formatting)
@@ -474,7 +503,7 @@ router.post('/agent/profile/login', async (req, res) => {
     const agentProfile = await AgentProfile.findOne(query);
     
     if (!agentProfile) {
-      return res.status(400).json({ error: 'Invalid credentials' });
+      return res.status(400).json({ error: 'Credenciais inválidas' });
     }
 
     // Create JWT token
@@ -493,7 +522,7 @@ router.post('/agent/profile/login', async (req, res) => {
     // Return success response
     res.json({ 
       token,
-      message: 'Login successful',
+      message: 'Login realizado com sucesso',
       user: {
         id: agentProfile._id,
         cpf: agentProfile.cpf,
@@ -529,7 +558,7 @@ router.post('/agent/profile', authMiddleware, async (req, res) => {
     } = req.body;
 
     if (!cpf || !selectedType) {
-      return res.status(400).json({ error: 'CPF and selectedType are required' });
+      return res.status(400).json({ error: 'CPF e tipo selecionado são obrigatórios' });
     }
 
     // Check if profile already exists
@@ -855,7 +884,7 @@ router.put('/agent/profile/:cpf/photo', [authMiddleware, upload.single('profileP
     const { accountType } = req.body;
     
     if (!accountType || !['personal', 'business', 'collective'].includes(accountType)) {
-      return res.status(400).json({ error: 'Valid accountType is required' });
+      return res.status(400).json({ error: 'Tipo de conta válido é obrigatório' });
     }
 
     // Initialize profilePhotos if they don't exist
@@ -904,7 +933,7 @@ router.put('/agent/profile/:cpf/public', [authMiddleware, upload.fields([
     const { accountType, aboutText, socialLinks } = req.body;
     
     if (!accountType || !['personal', 'business', 'collective'].includes(accountType)) {
-      return res.status(400).json({ error: 'Valid accountType is required' });
+      return res.status(400).json({ error: 'Tipo de conta válido é obrigatório' });
     }
 
     // Initialize publicProfile and profilePhotos if they don't exist
@@ -1658,6 +1687,11 @@ router.post('/project', [
       socialLinks
     } = req.body;
 
+    // Validate required fields
+    if (!type || !title || !description) {
+      return res.status(400).json({ error: 'Tipo, título e descrição são obrigatórios' });
+    }
+
     // Handle file uploads
     let coverPhotoPath = '';
     let photosPaths = [];
@@ -1683,19 +1717,12 @@ router.post('/project', [
       console.log('User from token:', req.user);
       let agentProfile = null;
       
-      // Try to find by agentId first (if token contains Agent ID)
-      agentProfile = await AgentProfile.findOne({ agentId: req.user.id }).select('-password');
+      // Since the token contains AgentProfile ID, find the profile directly
+      agentProfile = await AgentProfile.findById(req.user.id).select('-password');
       
-      if (!agentProfile) {
-        // Try to find by AgentProfile ID (if token contains AgentProfile ID)
-        agentProfile = await AgentProfile.findById(req.user.id).select('-password');
-        if (agentProfile) {
-          actualAgentId = agentProfile.agentId; // Use the actual Agent ID for the project
-        }
-      }
-      
-      console.log('Agent profile found:', agentProfile ? 'Yes' : 'No');
       if (agentProfile) {
+        // Use the agentId from the profile for the project
+        actualAgentId = agentProfile.agentId;
         agentInfo = {
           fullname: agentProfile.fullname,
           socialname: agentProfile.socialname,
@@ -1704,12 +1731,17 @@ router.post('/project', [
           mainActivity: agentProfile.mainActivity,
           city: agentProfile.city
         };
+        console.log('Agent profile found:', agentProfile.fullname);
         console.log('Agent info prepared:', agentInfo);
       } else {
         console.log('No agent profile found for user ID:', req.user.id);
+        // If no profile found, try to use the token ID directly
+        actualAgentId = req.user.id;
       }
     } catch (profileError) {
       console.warn('Could not fetch agent profile:', profileError);
+      // Fallback to using token ID directly
+      actualAgentId = req.user.id;
     }
 
     const project = new Project({
@@ -1733,7 +1765,10 @@ router.post('/project', [
     });
   } catch (error) {
     console.error('Error creating project:', error);
-    res.status(500).json({ error: error.message });
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ error: 'Dados inválidos. Verifique as informações e tente novamente.' });
+    }
+    res.status(500).json({ error: 'Erro interno do servidor. Tente novamente mais tarde.' });
   }
 });
 
@@ -1879,6 +1914,7 @@ router.get('/admin/project/:id', async (req, res) => {
 
 // Update full project for admin
 router.patch('/admin/project/:id', [
+  authMiddleware,
   upload.fields([
     { name: 'coverPhoto', maxCount: 1 },
     { name: 'photos', maxCount: 10 }
@@ -1986,7 +2022,13 @@ router.patch('/admin/project/:id', [
     });
   } catch (error) {
     console.error('Error updating project:', error);
-    res.status(500).json({ error: error.message });
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ error: 'Dados inválidos. Verifique as informações e tente novamente.' });
+    }
+    if (error.name === 'CastError') {
+      return res.status(400).json({ error: 'ID do projeto inválido.' });
+    }
+    res.status(500).json({ error: 'Erro interno do servidor. Tente novamente mais tarde.' });
   }
 });
 

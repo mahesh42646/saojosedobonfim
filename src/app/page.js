@@ -672,7 +672,7 @@ export default function BrejoDoCruzPage() {
                </div>
 
                 <Link className="d-flex gap-2"
-                  href={`/brejodocruz-pb/projetos?id=${project._id}`}
+                  href={`/public/projetos?id=${project._id}`}
                   style={{
                     background: '#2CB34A',
                     color: '#fff',

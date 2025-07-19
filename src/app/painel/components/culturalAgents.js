@@ -8,6 +8,7 @@ import jsPDF from 'jspdf';
 function AgentDetails({ agent, onBack, user }) {
   const [tab, setTab] = React.useState("individual");
   const [statusLoading, setStatusLoading] = React.useState(false);
+  const [deleteLoading, setDeleteLoading] = React.useState(false);
   const [currentAgent, setCurrentAgent] = React.useState(agent);
   const { token } = useAuth();
   
@@ -27,7 +28,7 @@ function AgentDetails({ agent, onBack, user }) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update agent status');
+        throw new Error(errorData.error || 'Falha ao atualizar status do agente');
       }
 
       const data = await response.json();
@@ -42,10 +43,53 @@ function AgentDetails({ agent, onBack, user }) {
       alert(data.message);
       
     } catch (error) {
-      console.error('Error updating agent status:', error);
-      alert(`Error: ${error.message}`);
+      console.error('Erro ao atualizar status do agente:', error);
+      alert(`Erro: ${error.message}`);
     } finally {
       setStatusLoading(false);
+    }
+  };
+
+  // Handle agent deletion with confirmation
+  const handleDeleteAgent = async () => {
+    // Show confirmation dialog
+    const isConfirmed = window.confirm(
+      `Tem certeza que deseja excluir o agente "${agent.fullname || 'Agente Sem Nome'}"?\n\nEsta ação não pode ser desfeita.`
+    );
+    
+    if (!isConfirmed) {
+      return;
+    }
+    
+    try {
+      setDeleteLoading(true);
+      
+      const response = await fetch(buildApiUrl(`/agent/profile/${currentAgent.cpf}`), {
+        method: 'DELETE',
+        headers: {
+          'Authorization': token,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Falha ao excluir agente');
+      }
+
+      const data = await response.json();
+      
+      // Show success message
+      alert(data.message || 'Agente excluído com sucesso!');
+      
+      // Go back to the agents list
+      onBack();
+      
+    } catch (error) {
+      console.error('Erro ao excluir agente:', error);
+      alert(`Erro ao excluir agente: ${error.message}`);
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -70,18 +114,18 @@ function AgentDetails({ agent, onBack, user }) {
 
   // Format date for display in PDF
   const formatDateForPDF = (dateString) => {
-    if (!dateString) return 'Not provided';
+    if (!dateString) return 'Não fornecido';
     try {
       const date = new Date(dateString);
-      if (isNaN(date.getTime())) return 'Invalid date';
+      if (isNaN(date.getTime())) return 'Data inválida';
       
-      return date.toLocaleDateString('en-US', {
+      return date.toLocaleDateString('pt-BR', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
       });
     } catch (error) {
-      return 'Invalid date';
+      return 'Data inválida';
     }
   };
 
@@ -95,7 +139,7 @@ function AgentDetails({ agent, onBack, user }) {
     // Header with admin info and date
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
-    doc.text(`Gerado por: ${user?.name || 'Admin'} • Data: ${new Date().toLocaleDateString()}`, 15, 10);
+    doc.text(`Gerado por: ${user?.name || 'Administrador'} • Data: ${new Date().toLocaleDateString('pt-BR')}`, 15, 10);
     
     // Main title
     doc.setFontSize(18);
@@ -107,7 +151,7 @@ function AgentDetails({ agent, onBack, user }) {
     // Agent name and type
     doc.setFontSize(14);
     doc.setFont(undefined, 'bold');
-    doc.text(agent.fullname || 'Unnamed Agent', 15, yPosition);
+    doc.text(agent.fullname || 'Agente Sem Nome', 15, yPosition);
     yPosition += 7;
     
     doc.setFontSize(10);
@@ -530,15 +574,38 @@ function AgentDetails({ agent, onBack, user }) {
           <button onClick={onBack} style={{ background: 'none', border: 'none', color: '#222', fontWeight: 600, fontSize: 16, cursor: 'pointer', marginRight: 36 }}>←</button>
           <h2 style={{ margin: 0, fontWeight: 600, fontSize: 22 }}> Detalhes do Agente Cultural</h2>
         </div>
-        <div className="d-flex me-2 gap-2">
+
+        <div className="d-flex gap-3">
+          <button 
+            className="rounded-5 text-white" 
+            onClick={handleDeleteAgent}
+            disabled={deleteLoading}
+            style={{ 
+              background:  'rgb(238, 4, 0)', 
+              color: '#222', 
+              border: '1px solid rgb(143, 0, 0)', 
+              borderRadius: 16, 
+              padding: '6px 26px', 
+              fontWeight: 500, 
+              fontSize: 15, 
+              cursor: deleteLoading ? 'not-allowed' : 'pointer', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 6 
+            }}
+          >
+            {deleteLoading ? 'Excluindo...' : 'Excluir'}
+          </button>
+        {/* </div>
+        <div className="d-flex me-2 gap-2"> */}
           {(currentAgent.status || 'active') === 'active' ? (
             <button 
               className="rounded-5" 
               onClick={() => handleStatusUpdate('inactive')}
               disabled={statusLoading}
               style={{ 
-                background: statusLoading ? '#ccc' : '#ff6b6b', 
-                color: '#fff', 
+                background: statusLoading ? '#ccc' : 'rgba(249, 217, 217, 0.64)', 
+                color: 'black', 
                 border: 'none', 
                 borderRadius: 16, 
                 padding: '6px 36px', 
@@ -578,7 +645,7 @@ function AgentDetails({ agent, onBack, user }) {
               {getAgentProfilePhoto(agent) ? (
                 <Image 
                   src={getAgentProfilePhoto(agent)} 
-                  alt={agent.fullname || 'Agent'} 
+                  alt={agent.fullname || 'Agente'} 
                   width={56}
                   height={56}
                   style={{ borderRadius: '50%', objectFit: 'cover', background: '#eee' }}
@@ -589,7 +656,7 @@ function AgentDetails({ agent, onBack, user }) {
                 </div>
               )}
               <div>
-                <div style={{ fontWeight: 600, fontSize: 20 }}>{agent.fullname || 'Unnamed Agent'}</div>
+                <div style={{ fontWeight: 600, fontSize: 20 }}>{agent.fullname || 'Agente Sem Nome'}</div>
                 <div style={{ color: '#222', fontSize: 15, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ color: (currentAgent.status || 'active') === 'active' ? '#2ecc40' : '#ff6b6b', fontSize: 18 }}>●</span> 
                   {currentAgent.typeStatus?.personal?.isComplete ? 'Conta Pessoal' : currentAgent.typeStatus?.business?.isComplete ? 'Conta Empresarial' : currentAgent.typeStatus?.collective?.isComplete ? 'Conta Coletiva' : 'Incompleto'}
@@ -666,7 +733,7 @@ export default function AgentsPage() {
       
       // Check if user is authenticated
       if (!isAuthenticated() || !token) {
-        setError('Authentication required. Please log in.');
+        setError('Autenticação necessária. Por favor, faça login.');
         setAgents([]);
         setFilteredAgents([]);
         return;
@@ -700,13 +767,13 @@ export default function AgentsPage() {
       
       if (!response.ok) {
         if (response.status === 401) {
-          throw new Error('Authentication failed. Please log in again.');
+          throw new Error('Falha na autenticação. Por favor, faça login novamente.');
         }
-        throw new Error('Failed to fetch agents');
+        throw new Error('Falha ao buscar agentes');
       }
 
       const data = await response.json();
-      console.log('API Response:', data); // Debug log
+      console.log('Resposta da API:', data); // Debug log
       
       // Handle the response structure from backend
       let agentsArray = [];
@@ -720,11 +787,11 @@ export default function AgentsPage() {
         }
       }
       
-      console.log('Processed agents array:', agentsArray); // Debug log
+      console.log('Array de agentes processado:', agentsArray); // Debug log
       setAgents(agentsArray);
       setFilteredAgents(agentsArray);
     } catch (err) {
-      console.error('Error fetching agents:', err);
+      console.error('Erro ao buscar agentes:', err);
       setError(err.message);
       // Reset to empty arrays on error
       setAgents([]);
@@ -971,7 +1038,7 @@ export default function AgentsPage() {
                   {getAgentProfilePhoto(agent) ? (
                     <Image 
                       src={getAgentProfilePhoto(agent)} 
-                      alt={agent.fullname || 'Agent'} 
+                      alt={agent.fullname || 'Agente'} 
                       width={36}
                       height={36}
                       style={{ borderRadius: '50%', objectFit: 'cover' }}
@@ -996,7 +1063,7 @@ export default function AgentsPage() {
                   )}
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 500, fontSize: 16 }}>
-                      {agent.fullname || 'Unnamed Agent'}
+                      {agent.fullname || 'Agente Sem Nome'}
                     </div>
                     <div style={{ color: '#888', fontSize: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                       Tipo: {getAgentType(agent)}

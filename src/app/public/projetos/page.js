@@ -94,7 +94,7 @@ function ProjectContent() {
                 </div>
 
                 {/* Project Period */}
-                {space.period && (
+                {/* {space.period && (
                     <div className="mt-4">
                         <div className="p-4 bg-light rounded-4 border">
                             <h6 className="fw-bold">Período do Projeto:</h6>
@@ -104,7 +104,7 @@ function ProjectContent() {
                             </p>
                         </div>
                     </div>
-                )}
+                )} */}
 
                 {/* Description */}
                 <div className="mt-4">
@@ -133,7 +133,7 @@ function ProjectContent() {
                 </div>
 
                 {/* Capacity and Hours */}
-                <div className="mt-4 row">
+                {/* <div className="mt-4 row">
                     <div className="col-md-6">
                         <div className="mb-3">
                             <h6 className="fw-bold">Capacity:</h6>
@@ -154,14 +154,14 @@ function ProjectContent() {
                             <p className="mb-0">{creator.telephone || '(83) 9 9999-9999'}</p>
                         </div>
                     </div>
-                </div>
+                </div> */}
 
                 {/* Photo Gallery */}
                 {space.photos && space.photos.length > 0 && (
                     <div className="mt-4">
                         <h3 className="h5 mb-3">
-                            <i className="bi bi-camera"></i> Photo gallery
-                        </h3>
+                            <i className="bi bi-camera"></i> Galeria de fotos
+                            </h3>
                         <div className="row g-3">
                             {space.photos.map((photo, index) => (
                                 <div key={index} className="col-md-3">

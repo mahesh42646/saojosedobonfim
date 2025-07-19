@@ -40,8 +40,23 @@ app.use((error, req, res, next) => {
     });
   }
   
+  // Handle mongoose validation errors
+  if (error.name === 'ValidationError') {
+    const messages = Object.values(error.errors).map(err => err.message);
+    return res.status(400).json({ 
+      error: messages.join(', ') 
+    });
+  }
+  
+  // Handle mongoose cast errors
+  if (error.name === 'CastError') {
+    return res.status(400).json({ 
+      error: 'ID inválido' 
+    });
+  }
+  
   res.status(500).json({ 
-    error: 'Internal server error' 
+    error: 'Erro interno do servidor. Tente novamente mais tarde.' 
   });
 });
 

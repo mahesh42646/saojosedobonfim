@@ -163,7 +163,7 @@ function NewProjectForm({ onClose, onSuccess, isEditing = false, projectData = n
     if (!formData.type) newErrors.type = 'Tipo é obrigatório';
     if (!formData.title) newErrors.title = 'Nome é obrigatório';
     if (!formData.description) newErrors.description = 'Descrição é obrigatória';
-    if (!formData.period.start) newErrors.startDate = 'Data de início é obrigatória';
+    // if (!formData.period.start) newErrors.startDate = 'Data de início é obrigatória';
     if (!coverPhoto && !existingCoverPhoto) newErrors.coverPhoto = 'Foto de capa é obrigatória';
     
     setErrors(newErrors);
@@ -230,6 +230,7 @@ function NewProjectForm({ onClose, onSuccess, isEditing = false, projectData = n
 
       xhr.addEventListener('load', () => {
         const expectedStatus = isEditing ? 200 : 201;
+        
         if (xhr.status === expectedStatus) {
           setUploadProgress(100);
           setTimeout(() => {
@@ -460,7 +461,7 @@ function NewProjectForm({ onClose, onSuccess, isEditing = false, projectData = n
           ))}
         </div>
 
-        <div className="bg-light rounded-3 p-3 mb-3">
+        {/* <div className="bg-light rounded-3 p-3 mb-3">
           <Form.Label className="d-flex align-items-center gap-2 mb-3">
             <FaRegCalendar className="text-secondary" />
             <span>Período de execução do projeto *</span>
@@ -490,7 +491,7 @@ function NewProjectForm({ onClose, onSuccess, isEditing = false, projectData = n
               />
             </Form.Group>
           </div>
-        </div>
+        </div> */}
 
         <div className="rounded-3 p-3 mb-4" style={{ backgroundColor: 'rgba(22, 51, 0, 0.08)' }}>
           <Form.Label className="d-flex align-items-center gap-2 mb-3">
