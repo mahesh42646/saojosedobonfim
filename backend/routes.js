@@ -2163,6 +2163,37 @@ router.get('/admin/space/:id', async (req, res) => {
   }
 });
 
+// Update space for admin
+router.patch('/admin/space/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    const space = await Space.findById(id);
+    if (!space) {
+      return res.status(404).json({ error: 'Space not found' });
+    }
+
+    // Update fields
+    Object.keys(updateData).forEach(key => {
+      if (updateData[key] !== undefined) {
+        space[key] = updateData[key];
+      }
+    });
+
+    space.updatedAt = new Date();
+    await space.save();
+
+    res.json({ 
+      message: 'Space updated successfully',
+      space 
+    });
+  } catch (error) {
+    console.error('Error updating space:', error);
+    res.status(500).json({ error: 'Failed to update space' });
+  }
+});
+
 // Update space status for admin
 router.patch('/admin/space/:id/status', async (req, res) => {
   try {

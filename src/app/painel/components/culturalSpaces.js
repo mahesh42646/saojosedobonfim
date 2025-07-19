@@ -8,6 +8,7 @@ import { useAuth as useAdminAuth } from '../authContex';
 // Import the agent's auth context components
 import { AuthProvider as AgentAuthProvider, useAuth as useAgentAuth } from '../../agent/painel/authcontex';
 import NewSpaceFormComponent from '../../agent/painel/components/new-Space-form';
+import RichTextEditor from '../../agent/painel/components/RichTextEditor';
 
 // Wrapper component that adapts admin auth to agent auth interface
 function NewSpaceFormWrapper({ onClose, onSuccess }) {
@@ -47,9 +48,100 @@ const spaces = [
 
 function SpaceDetails({ space, onBack, fetchSpaceDetails }) {
   const [tab, setTab] = useState("update");
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState({
+    type: space.type || '',
+    title: space.title || '',
+    description: space.description || '',
+    capacity: space.capacity || '',
+    operatingHours: space.operatingHours || '',
+    operatingDays: space.operatingDays || '',
+    socialLinks: {
+      facebook: space.socialLinks?.facebook || '',
+      instagram: space.socialLinks?.instagram || '',
+      youtube: space.socialLinks?.youtube || ''
+    },
+    accessibility: {
+      adaptedToilets: space.accessibility?.adaptedToilets || false,
+      accessRamp: space.accessibility?.accessRamp || false,
+      elevator: space.accessibility?.elevator || false,
+      tactileSignaling: space.accessibility?.tactileSignaling || false,
+      adaptedDrinkingFountain: space.accessibility?.adaptedDrinkingFountain || false,
+      handrail: space.accessibility?.handrail || false,
+      adaptedElevator: space.accessibility?.adaptedElevator || false,
+    }
+  });
+  const [showDescriptionModal, setShowDescriptionModal] = useState(false);
+  const [tempDescription, setTempDescription] = useState(editData.description);
+  const [loading, setLoading] = useState(false);
 
   const handleViewPublic = () => {
     window.location.href = `/public/espacos?id=${space._id}`;
+  };
+
+  // Handle input changes for editing
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Handle social links changes
+  const handleSocialLinkChange = (platform, value) => {
+    setEditData(prev => ({
+      ...prev,
+      socialLinks: {
+        ...prev.socialLinks,
+        [platform]: value
+      }
+    }));
+  };
+
+  // Handle accessibility changes
+  const handleAccessibilityChange = (e) => {
+    const { name, checked } = e.target;
+    setEditData(prev => ({
+      ...prev,
+      accessibility: {
+        ...prev.accessibility,
+        [name]: checked
+      }
+    }));
+  };
+
+  // Handle save changes
+  const handleSaveChanges = async () => {
+    try {
+      setLoading(true);
+      
+      // Get auth token from localStorage
+      const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+      
+      const response = await fetch(buildApiUrl(`/admin/space/${space._id}`), {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
+        },
+        body: JSON.stringify(editData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update space');
+      }
+
+      const data = await response.json();
+      alert('Espaço atualizado com sucesso!');
+      setIsEditing(false);
+      await fetchSpaceDetails(space._id);
+      
+    } catch (error) {
+      console.error('Error updating space:', error);
+      alert(error.message || 'Falha ao atualizar espaço. Tente novamente.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Add function to handle status updates
@@ -64,11 +156,15 @@ function SpaceDetails({ space, onBack, fetchSpaceDetails }) {
     if (!confirmed) return;
 
     try {
+      // Get auth token from localStorage
+      const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+
       const statusResponse = await fetch(buildApiUrl(`/admin/space/${space._id}/status`), {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          'Accept': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
         },
         body: JSON.stringify({ status: newStatus })
       });
@@ -242,13 +338,98 @@ function SpaceDetails({ space, onBack, fetchSpaceDetails }) {
 
         {tab === 'details' && (
           <form style={{ padding: 32, display: 'flex', flexDirection: 'column', gap: 24, background: '#fff' }}>
+            {/* Edit/Save buttons */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h5 style={{ margin: 0, fontWeight: 600 }}>Detalhes do Espaço</h5>
+              <div style={{ display: 'flex', gap: 12 }}>
+                {!isEditing ? (
+                  <button
+                    type="button"
+                    onClick={() => setIsEditing(true)}
+                    style={{
+                      background: '#2F5711',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: 8,
+                      padding: '8px 16px',
+                      fontWeight: 500,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Editar
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsEditing(false);
+                        setEditData({
+                          type: space.type || '',
+                          title: space.title || '',
+                          description: space.description || '',
+                          capacity: space.capacity || '',
+                          operatingHours: space.operatingHours || '',
+                          operatingDays: space.operatingDays || '',
+                          socialLinks: {
+                            facebook: space.socialLinks?.facebook || '',
+                            instagram: space.socialLinks?.instagram || '',
+                            youtube: space.socialLinks?.youtube || ''
+                          },
+                          accessibility: {
+                            adaptedToilets: space.accessibility?.adaptedToilets || false,
+                            accessRamp: space.accessibility?.accessRamp || false,
+                            elevator: space.accessibility?.elevator || false,
+                            tactileSignaling: space.accessibility?.tactileSignaling || false,
+                            adaptedDrinkingFountain: space.accessibility?.adaptedDrinkingFountain || false,
+                            handrail: space.accessibility?.handrail || false,
+                            adaptedElevator: space.accessibility?.adaptedElevator || false,
+                          }
+                        });
+                      }}
+                      style={{
+                        background: '#6c757d',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: 8,
+                        padding: '8px 16px',
+                        fontWeight: 500,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSaveChanges}
+                      disabled={loading}
+                      style={{
+                        background: '#28a745',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: 8,
+                        padding: '8px 16px',
+                        fontWeight: 500,
+                        cursor: loading ? 'not-allowed' : 'pointer',
+                        opacity: loading ? 0.7 : 1
+                      }}
+                    >
+                      {loading ? 'Salvando...' : 'Salvar'}
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+
             {/* Space type */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <label style={{ fontWeight: 500 }}>Tipo de espaço *</label>
               <select
                 style={{ width: '100%', padding: 12, borderRadius: 8, border: '1px solid #ccc', fontSize: 16 }}
-                value={space.type}
-                disabled
+                value={isEditing ? editData.type : space.type}
+                disabled={!isEditing}
+                name="type"
+                onChange={handleInputChange}
               >
                 <option value="MOSTRA">MOSTRA</option>
                 <option value="FESTIVAL">FESTIVAL</option>
@@ -265,8 +446,10 @@ function SpaceDetails({ space, onBack, fetchSpaceDetails }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <label style={{ fontWeight: 500 }}>Título do espaço *</label>
               <input
-                value={space.title || ''}
-                readOnly
+                value={isEditing ? editData.title : (space.title || '')}
+                readOnly={!isEditing}
+                name="title"
+                onChange={handleInputChange}
                 style={{ width: '100%', padding: 12, borderRadius: 8, border: '1px solid #ccc', fontSize: 16 }}
               />
             </div>
@@ -277,19 +460,38 @@ function SpaceDetails({ space, onBack, fetchSpaceDetails }) {
                 <span style={{ color: '#2F5711', fontSize: 20 }}><i className="bi bi-card-text"></i></span>
                 <span style={{ fontWeight: 500 }}>Descrição *</span>
               </div>
-              <textarea
-                value={space.description || ''}
-                readOnly
-                style={{ width: '100%', padding: 12, borderRadius: 8, border: '1px solid #ccc', fontSize: 16, minHeight: 80, background: '#F7F7F7' }}
-              />
+              {isEditing ? (
+                <div style={{ border: '1px solid #ccc', borderRadius: 8, overflow: 'hidden' }}>
+                  <RichTextEditor 
+                    content={editData.description}
+                    onChange={(html) => setEditData(prev => ({ ...prev, description: html }))}
+                  />
+                </div>
+              ) : (
+                <div
+                  dangerouslySetInnerHTML={{ __html: space.description || '' }}
+                  style={{ 
+                    width: '100%', 
+                    padding: 12, 
+                    borderRadius: 8, 
+                    border: '1px solid #ccc', 
+                    fontSize: 16, 
+                    minHeight: 80, 
+                    background: '#F7F7F7',
+                    lineHeight: 1.5
+                  }}
+                />
+              )}
             </div>
 
             {/* Capacity */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <label style={{ fontWeight: 500 }}>Capacidade *</label>
               <input
-                value={space.capacity || ''}
-                readOnly
+                value={isEditing ? editData.capacity : (space.capacity || '')}
+                readOnly={!isEditing}
+                name="capacity"
+                onChange={handleInputChange}
                 style={{ width: '100%', padding: 12, borderRadius: 8, border: '1px solid #ccc', fontSize: 16 }}
               />
             </div>
@@ -298,18 +500,22 @@ function SpaceDetails({ space, onBack, fetchSpaceDetails }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <label style={{ fontWeight: 500 }}>Horário de funcionamento *</label>
               <input
-                value={space.operatingHours || ''}
-                readOnly
+                value={isEditing ? editData.operatingHours : (space.operatingHours || '')}
+                readOnly={!isEditing}
+                name="operatingHours"
+                onChange={handleInputChange}
                 style={{ width: '100%', padding: 12, borderRadius: 8, border: '1px solid #ccc', fontSize: 16 }}
               />
             </div>
 
             {/* Operating Days */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <label style={{ fontWeight: 500 }}>Operating Days *</label>
+              <label style={{ fontWeight: 500 }}>Dias de funcionamento *</label>
               <input
-                value={space.operatingDays || ''}
-                readOnly
+                value={isEditing ? editData.operatingDays : (space.operatingDays || '')}
+                readOnly={!isEditing}
+                name="operatingDays"
+                onChange={handleInputChange}
                 style={{ width: '100%', padding: 12, borderRadius: 8, border: '1px solid #ccc', fontSize: 16 }}
               />
             </div>
@@ -321,8 +527,9 @@ function SpaceDetails({ space, onBack, fetchSpaceDetails }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ color: '#2F5711', fontSize: 22 }}><i className="bi bi-facebook"></i></span>
                 <input
-                  value={space.socialLinks?.facebook || ''}
-                  readOnly
+                  value={isEditing ? editData.socialLinks.facebook : (space.socialLinks?.facebook || '')}
+                  readOnly={!isEditing}
+                  onChange={(e) => handleSocialLinkChange('facebook', e.target.value)}
                   style={{ flex: 1, padding: 10, borderRadius: 8, border: '1px solid #ccc', fontSize: 15, background: '#fff' }}
                 />
               </div>
@@ -330,8 +537,9 @@ function SpaceDetails({ space, onBack, fetchSpaceDetails }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ color: '#2F5711', fontSize: 22 }}><i className="bi bi-instagram"></i></span>
                 <input
-                  value={space.socialLinks?.instagram || ''}
-                  readOnly
+                  value={isEditing ? editData.socialLinks.instagram : (space.socialLinks?.instagram || '')}
+                  readOnly={!isEditing}
+                  onChange={(e) => handleSocialLinkChange('instagram', e.target.value)}
                   style={{ flex: 1, padding: 10, borderRadius: 8, border: '1px solid #ccc', fontSize: 15, background: '#fff' }}
                 />
               </div>
@@ -339,8 +547,9 @@ function SpaceDetails({ space, onBack, fetchSpaceDetails }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ color: '#2F5711', fontSize: 22 }}><i className="bi bi-youtube"></i></span>
                 <input
-                  value={space.socialLinks?.youtube || ''}
-                  readOnly
+                  value={isEditing ? editData.socialLinks.youtube : (space.socialLinks?.youtube || '')}
+                  readOnly={!isEditing}
+                  onChange={(e) => handleSocialLinkChange('youtube', e.target.value)}
                   style={{ flex: 1, padding: 10, borderRadius: 8, border: '1px solid #ccc', fontSize: 15, background: '#fff' }}
                 />
               </div>
@@ -353,25 +562,67 @@ function SpaceDetails({ space, onBack, fetchSpaceDetails }) {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 8 }}>
                 <label>
-                  <input type="checkbox" checked={space.accessibility?.adaptedToilets} disabled /> Banheiros adaptados
+                  <input 
+                    type="checkbox" 
+                    name="adaptedToilets"
+                    checked={isEditing ? editData.accessibility.adaptedToilets : space.accessibility?.adaptedToilets} 
+                    disabled={!isEditing}
+                    onChange={handleAccessibilityChange}
+                  /> Banheiros adaptados
                 </label>
                 <label>
-                  <input type="checkbox" checked={space.accessibility?.accessRamp} disabled /> Rampa de acesso
+                  <input 
+                    type="checkbox" 
+                    name="accessRamp"
+                    checked={isEditing ? editData.accessibility.accessRamp : space.accessibility?.accessRamp} 
+                    disabled={!isEditing}
+                    onChange={handleAccessibilityChange}
+                  /> Rampa de acesso
                 </label>
                 <label>
-                  <input type="checkbox" checked={space.accessibility?.elevator} disabled /> Elevador
+                  <input 
+                    type="checkbox" 
+                    name="elevator"
+                    checked={isEditing ? editData.accessibility.elevator : space.accessibility?.elevator} 
+                    disabled={!isEditing}
+                    onChange={handleAccessibilityChange}
+                  /> Elevador
                 </label>
                 <label>
-                  <input type="checkbox" checked={space.accessibility?.tactileSignaling} disabled /> Sinalização tátil
+                  <input 
+                    type="checkbox" 
+                    name="tactileSignaling"
+                    checked={isEditing ? editData.accessibility.tactileSignaling : space.accessibility?.tactileSignaling} 
+                    disabled={!isEditing}
+                    onChange={handleAccessibilityChange}
+                  /> Sinalização tátil
                 </label>
                 <label>
-                  <input type="checkbox" checked={space.accessibility?.adaptedDrinkingFountain} disabled /> Bebedouro adaptado
+                  <input 
+                    type="checkbox" 
+                    name="adaptedDrinkingFountain"
+                    checked={isEditing ? editData.accessibility.adaptedDrinkingFountain : space.accessibility?.adaptedDrinkingFountain} 
+                    disabled={!isEditing}
+                    onChange={handleAccessibilityChange}
+                  /> Bebedouro adaptado
                 </label>
                 <label>
-                  <input type="checkbox" checked={space.accessibility?.handrail} disabled /> Corrimão nas escadas e rampas
+                  <input 
+                    type="checkbox" 
+                    name="handrail"
+                    checked={isEditing ? editData.accessibility.handrail : space.accessibility?.handrail} 
+                    disabled={!isEditing}
+                    onChange={handleAccessibilityChange}
+                  /> Corrimão nas escadas e rampas
                 </label>
                 <label>
-                  <input type="checkbox" checked={space.accessibility?.adaptedElevator} disabled /> Elevador adaptado
+                  <input 
+                    type="checkbox" 
+                    name="adaptedElevator"
+                    checked={isEditing ? editData.accessibility.adaptedElevator : space.accessibility?.adaptedElevator} 
+                    disabled={!isEditing}
+                    onChange={handleAccessibilityChange}
+                  /> Elevador adaptado
                 </label>
               </div>
             </div>
@@ -508,9 +759,13 @@ export default function CspacePage() {
       setLoading(true);
       setError(null);
 
+      // Get auth token from localStorage
+      const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+
       const response = await fetch(buildApiUrl('/admin/spaces'), {
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
         }
       });
 
@@ -534,9 +789,13 @@ export default function CspacePage() {
       setLoading(true);
       setError(null);
 
+      // Get auth token from localStorage
+      const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+
       const response = await fetch(buildApiUrl(`/admin/space/${id}`), {
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
         }
       });
 
