@@ -49,7 +49,7 @@ export default function AgentDetailPage() {
     if (agentId) {
       fetchAgentDetails();
     }
-  }, [agentId, agentType, fetchAgentDetails]);
+  }, [agentId, agentType]);
 
   if (loading) {
     return (

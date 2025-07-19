@@ -12,6 +12,7 @@ export default function BrejoDoCruzPage() {
   const [agents, setAgents] = useState([]);
   const [spaces, setSpaces] = useState([]);
   const [projects, setProjects] = useState([]);
+  const [adminProfile, setAdminProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [spacesLoading, setSpacesLoading] = useState(true);
@@ -122,11 +123,33 @@ export default function BrejoDoCruzPage() {
     }
   };
 
+  // Fetch admin profile for banner
+  const fetchAdminProfile = async () => {
+    try {
+      const response = await fetch(buildApiUrl('/public/admin-profile'), {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setAdminProfile(data);
+    } catch (err) {
+      console.error('Error fetching admin profile:', err);
+      // Don't set error state for admin profile as it's not critical
+    }
+  };
+
   // Fetch all data on component mount
   useEffect(() => {
     fetchAgents();
     fetchSpaces();
     fetchProjects();
+    fetchAdminProfile();
   }, []);
 
   return (
@@ -250,7 +273,17 @@ export default function BrejoDoCruzPage() {
 
       {/* Banner */}
       <div className="banner-height" style={{ position: 'relative', width: '100%', height: 334, overflow: 'visible', borderBottomLeftRadius: 2, borderBottomRightRadius: 32, marginBottom: 0 }}>
-        <Image className="img-fluid" src="/images/banner-home.jpeg" alt="Banner" fill style={{ objectFit: 'cover' ,}} />
+        {adminProfile?.profilePhoto ? (
+          <Image 
+            className="img-fluid" 
+            src={`${process.env.NEXT_PUBLIC_API_BASE_URL.replace('/api', '')}/uploads/${adminProfile.profilePhoto}`} 
+            alt="Banner" 
+            fill 
+            style={{ objectFit: 'cover' }} 
+          />
+        ) : (
+          <Image className="img-fluid" src="/images/banner-home.jpeg" alt="Banner" fill style={{ objectFit: 'cover' }} />
+        )}
         {/* Green overlay gradient */}
         <div style={{
           position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderBottomLeftRadius: 2, borderBottomRightRadius: 32,

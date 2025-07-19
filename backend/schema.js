@@ -285,15 +285,15 @@ const spaceSchema = new mongoose.Schema({
   },
   capacity: { 
     type: String, 
-    required: true 
+    required: false 
   },
   operatingHours: { 
     type: String, 
-    required: true 
+    required: false 
   },
   operatingDays: { 
     type: String, 
-    required: true 
+    required: false 
   },
 
   // Media

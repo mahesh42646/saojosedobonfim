@@ -2377,6 +2377,30 @@ router.delete('/staff/:id', authMiddleware, async (req, res) => {
   }
 });
 
+// Public endpoint to get admin profile for banner (no authentication required)
+router.get('/public/admin-profile', async (req, res) => {
+  try {
+    // Get the first active admin (you can modify this logic as needed)
+    const admin = await Admin.findOne({}).select('-password');
+    
+    if (!admin) {
+      return res.status(404).json({ error: 'No admin found' });
+    }
+
+    // Return only necessary fields for banner
+    const publicAdmin = {
+      name: admin.name,
+      title: admin.title,
+      profilePhoto: admin.profilePhoto
+    };
+
+    res.json(publicAdmin);
+  } catch (error) {
+    console.error('Error fetching admin profile for banner:', error);
+    res.status(500).json({ error: 'Failed to fetch admin profile' });
+  }
+});
+
 // Utility route to clean up missing image references
 router.post('/admin/cleanup-images', authMiddleware, async (req, res) => {
   try {

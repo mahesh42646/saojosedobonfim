@@ -33,7 +33,7 @@ function NewSpaceForm({ onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const [description, setDescription] = useState("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry&apos;s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.");
+  const [description, setDescription] = useState(" ");
   const [tempDescription, setTempDescription] = useState(description);
   const [showDescriptionModal, setShowDescriptionModal] = useState(false);
 
@@ -141,9 +141,6 @@ function NewSpaceForm({ onClose, onSuccess }) {
     if (!formData.type) newErrors.type = 'Type is required';
     if (!formData.title) newErrors.title = 'Name is required';
     if (!description) newErrors.description = 'Description is required';
-    if (!formData.capacity) newErrors.capacity = 'Capacity is required';
-    if (!formData.operatingHours) newErrors.operatingHours = 'Operating hours are required';
-    if (!formData.operatingDays) newErrors.operatingDays = 'Operating days are required';
     if (!coverPhotoFile) newErrors.coverPhoto = 'Cover photo is required';
 
     setErrors(newErrors);
@@ -283,8 +280,8 @@ function NewSpaceForm({ onClose, onSuccess }) {
           </Button>
         </div>
 
-        <Form.Group className="mb-3">
-          <Form.Label className="fs-6">Capacidade de pessoas no espaço *</Form.Label>
+        <Form.Group className="mb-3 d-none">
+          <Form.Label className="fs-6">Capacidade de pessoas no espaço</Form.Label>
           <Form.Control 
             type="text" 
             name="capacity"
@@ -295,8 +292,8 @@ function NewSpaceForm({ onClose, onSuccess }) {
           {errors.capacity && <div className="invalid-feedback">{errors.capacity}</div>}
         </Form.Group>
 
-        <Form.Group className="mb-3">
-          <Form.Label className="fs-6">Horário de funcionamento *</Form.Label>
+        <Form.Group className="mb-3 d-none">
+          <Form.Label className="fs-6">Horário de funcionamento</Form.Label>
           <Form.Control 
             type="text" 
             name="operatingHours"
@@ -307,8 +304,8 @@ function NewSpaceForm({ onClose, onSuccess }) {
           {errors.operatingHours && <div className="invalid-feedback">{errors.operatingHours}</div>}
         </Form.Group>
 
-        <Form.Group className="mb-3">
-          <Form.Label className="fs-6">Dias de funcionamento *</Form.Label>
+        <Form.Group className="mb-3 d-none">
+          <Form.Label className="fs-6">Dias de funcionamento</Form.Label>
           <Form.Control 
             type="text" 
             name="operatingDays"
@@ -322,12 +319,12 @@ function NewSpaceForm({ onClose, onSuccess }) {
         <div className={`rounded-3 p-2 my-3 ${errors.coverPhoto ? 'border border-danger' : ''}`} style={{ backgroundColor: 'rgba(22, 51, 0, 0.08)' }}>
           <Form.Label className="d-flex align-items-center gap-2 mb-3">
             <FaCamera className="text-secondary" />
-            <span>Cover *</span>
+            <span>Capa *</span>
           </Form.Label>
           <div className="d-flex gap-2 p-3 flex-wrap rounded-3">
             {coverPhotoPreview ? (
               <div className="position-relative" style={{ width: "100%", height: 200 }}>
-                <Image src={coverPhotoPreview} alt="Cover" className="w-100 h-100 rounded-3 object-fit-cover" width={500} height={200} />
+                <Image src={coverPhotoPreview} alt="Capa" className="w-100 h-100 rounded-3 object-fit-cover" width={500} height={200} />
                 <Button
                   variant="link"
                   className="position-absolute top-0 end-0 p-1 text-dark"
@@ -356,7 +353,7 @@ function NewSpaceForm({ onClose, onSuccess }) {
         </div>
 
         <div className="rounded-3 p-3 mb-3" >
-          <h6 className="mb-3">Project links</h6>
+          <h6 className="mb-3">Links do projeto</h6>
           {Object.entries(socialLinks).map(([platform, { enabled, url }]) => (
             <div key={platform} className="mb-2">
               <div className="d-flex border-dark  justify-content-between align-items-center p-2 rounded-3" style={{ backgroundColor: 'rgba(22, 51, 0, 0.08)' }}>
@@ -413,7 +410,7 @@ function NewSpaceForm({ onClose, onSuccess }) {
         <div className=" rounded-3 p-3 mb-4" style={{ backgroundColor: 'rgba(22, 51, 0, 0.08)' }}>
           <Form.Label className="d-flex align-items-center gap-2 mb-3">
             <FaCamera className="text-secondary" />
-            <span>Photo gallery</span>
+            <span>Galeria de fotos</span>
           </Form.Label>
           <div className="d-flex gap-2 flex-wrap">
             {photosPreviews.map((photo, index) => (
