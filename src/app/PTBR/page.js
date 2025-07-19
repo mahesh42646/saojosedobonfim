@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import Link from "next/link";
 import Headerpb from "./Header-pb";
 import { buildApiUrl } from '../config/api';
 import { useState, useEffect } from 'react';
@@ -236,7 +237,7 @@ export default function BrejoDoCruzPage() {
       <div style={{ maxWidth: 1100, margin: '0 auto', marginBottom: 32, padding: '0 32px' }}>
         <div className="d-flex flex-wrap" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
           <div style={{ fontWeight: 600, fontSize: 20, color: '#215C2D', textAlign: 'left' }}>Nossos agentes</div>
-          <a href="/Agentes-Culturais" style={{
+          <Link href="/Agentes-Culturais" style={{
             textDecoration: 'none',
             color: '#215C2D',
             fontSize: 15,
@@ -246,7 +247,7 @@ export default function BrejoDoCruzPage() {
             gap: 4
           }}>
             Ver todos <i className="bi bi-arrow-right"></i>
-          </a>
+          </Link>
         </div>
         {loading ? (
           <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
@@ -366,7 +367,7 @@ export default function BrejoDoCruzPage() {
                 <button style={{ width: 48, height: 48, borderRadius: '50%', border: '1px solid #000', background: '#f1f1f1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, cursor: 'pointer' }}><i className="bi bi-chevron-left"></i></button>
                 <button style={{ width: 48, height: 48, borderRadius: '50%', border: '1px solid #000', background: '#f1f1f1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, cursor: 'pointer' }}><i className="bi bi-chevron-right"></i></button>
               </div>
-              <a href="/Espacos-Culturais" style={{
+              <Link href="/Espacos-Culturais" style={{
                 textDecoration: 'none',
                 color: '#215C2D',
                 fontSize: 15,
@@ -377,7 +378,7 @@ export default function BrejoDoCruzPage() {
                 marginTop: 24
               }}>
                 Ver todos <i className="bi bi-arrow-right"></i>
-              </a>
+              </Link>
             </div>
 
             {spacesLoading ? (

@@ -336,11 +336,11 @@ function AgentDetails({ agent, onBack, user }) {
   const availableTabs = getAvailableTabs();
 
   // Set default tab to first available tab
-  React.useEffect(() => {
+  React.  useEffect(() => {
     if (availableTabs.length > 0) {
       setTab(availableTabs[0].key);
     }
-  }, []);
+  }, [availableTabs]);
 
   const renderIndividualContent = () => (
     <>

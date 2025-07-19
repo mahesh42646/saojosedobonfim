@@ -404,7 +404,7 @@ const Profile = () => {
     if (token) {
       fetchUserProfile();
     }
-  }, [token]);
+  }, [token, fetchUserProfile]);
 
   const handleBackAndRefresh = (setterFunction) => {
     setterFunction(false);

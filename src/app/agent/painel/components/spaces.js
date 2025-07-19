@@ -235,7 +235,7 @@ function Spaces() {
 
     useEffect(() => {
         fetchSpaces();
-    }, [user]);
+    }, [user, fetchSpaces]);
 
     const handleSpaceDeleted = () => {
         setSelectedSpace(null);
